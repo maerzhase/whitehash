@@ -52,6 +52,11 @@ Live/network tests are opt-in: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/c
   exploration / re-seeding (extraction map in PLAN §4.5). Not required for viewing.
 - **M7** `apps/archive-cli` — download a wallet's artworks to an offline folder (PLAN §4.6).
 - **M8** deploy docs — GitHub Pages / IPFS guide, Vercel proxy button, snapshot-refresh cron.
+- **M9** client-side onchfs via a service worker — resolve `onchfs://` in-browser so onchfs
+  artworks (many Ethereum/Base pieces) render with zero server setup, removing the need to
+  run/point at `apps/onchfs-proxy`. Keep the HTTP proxy as fallback + for archive-cli. See
+  PLAN §5 M9 for the approach and acceptance. Optional; the proxy + actionable in-app hint
+  ("Stored on onchfs — set a proxy in Settings") is the current answer.
 
 ## Known follow-ups
 

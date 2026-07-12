@@ -490,6 +490,21 @@ Do them in order; M3 and M4 can run in parallel after M2.
 - **M8 — deploy docs & release hygiene**: viewer deploy guide (GitHub Pages + IPFS),
   proxy deploy guide (Vercel button), snapshot-refresh CI cron, `changeset version`
   release flow documented. npm publishing is explicitly deferred — do not publish.
+- **M9 — client-side onchfs (service worker)**: resolve `onchfs://` entirely in the
+  browser so onchfs artworks render with zero server setup — removing the one piece of
+  friction that currently requires running/pointing at `apps/onchfs-proxy`. Approach: a
+  service worker intercepts requests to a virtual path (e.g. `/onchfs/{network}/{cid}/…`),
+  runs the `onchfs` resolver (viem + fetch, browser-compatible) against the user's
+  configured RPCs, and responds with the resolved bytes + headers — the same contract the
+  Hono proxy fulfills, but in-page. The iframe then loads that same-origin virtual URL.
+  Notes for the executor: (1) keep the HTTP proxy as the fallback for browsers without SW
+  support and for the archive-cli; (2) the SW must be served same-origin and registered
+  with a scope covering the virtual path; (3) `@whitehash/resolve` gains an onchfs mode
+  that points at the SW virtual path instead of a proxy base; (4) verify content-encoding
+  (onchfs serves gzip) and CORS/CSP interplay with the artwork iframe's sandbox;
+  (5) cache resolved inodes/chunks in the SW (Cache API / IndexedDB) since content is
+  immutable. Acceptance: with no onchfs proxy configured, a known onchfs piece (e.g.
+  "Genomes", ETH mainnet, `0xBb47…78E`) renders live. Optional (not required for viewing).
 
 ## 6. Open items the executor must resolve (and record in code/docs)
 
