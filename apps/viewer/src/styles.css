@@ -44,12 +44,22 @@ button {
   z-index: 10;
 }
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: none;
   border: none;
   color: var(--fg);
   font-weight: 700;
   font-size: 18px;
   letter-spacing: -0.02em;
+}
+.brand-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  object-fit: cover;
+  display: block;
 }
 .topbar nav {
   display: flex;

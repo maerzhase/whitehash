@@ -81,6 +81,7 @@ export function App() {
     <div className="app">
       <header className="topbar">
         <button className="brand" onClick={() => navigate("/")}>
+          <img className="brand-logo" src="./logo.png" alt="" />
           whitehash
         </button>
         <nav>
