@@ -1,0 +1,30 @@
+{
+  "name": "@whitehash/onchfs-proxy",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Self-hostable HTTP proxy that serves onchfs:// artworks by resolving them from Tezos, Ethereum, and Base. Runs on Node, Vercel, or Cloudflare Workers.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/app.ts"
+  },
+  "scripts": {
+    "build": "tsup src/app.ts --format esm --dts --clean",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "tsx watch src/node.ts",
+    "start": "tsx src/node.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "2.0.8",
+    "hono": "4.12.29",
+    "onchfs": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.0",
+    "tsup": "8.5.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@whitehash/chain-reader",
+  "version": "0.0.0",
+  "description": "Read fxhash generative tokens owned by a wallet address directly from Tezos, Ethereum, and Base — no indexer required.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "snapshots"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "snapshot:update": "tsx scripts/update-snapshot.ts"
+  },
+  "dependencies": {
+    "@whitehash/resolve": "workspace:*",
+    "viem": "2.45.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.0",
+    "tsup": "8.5.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@whitehash/viewer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Static, self-hostable web viewer for fxhash generative art owned by any wallet, read directly from chain.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@whitehash/chain-reader": "workspace:*",
+    "@whitehash/resolve": "workspace:*",
+    "idb-keyval": "6.2.2",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.1",
+    "@vitejs/plugin-react": "5.0.4",
+    "typescript": "5.9.3",
+    "vite": "7.1.12",
+    "vitest": "3.2.4"
+  }
+}
