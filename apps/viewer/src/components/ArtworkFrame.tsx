@@ -1,7 +1,8 @@
 import { useState } from "react"
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import type { ResolverConfig } from "@whitehash/resolve"
-import { artworkUrl, imageUrl, liveViewStatus } from "../render.js"
+import { artworkUrl, imageSourceUri, liveViewStatus } from "../render.js"
+import { GatewayImage } from "./GatewayImage.js"
 
 // Sandbox + allow values match fxhash's ArtworkIframe so generative pieces that
 // use motion sensors / audio behave the same.
@@ -18,7 +19,7 @@ export function ArtworkFrame({
 }) {
   const [playing, setPlaying] = useState(false)
   const live = artworkUrl(token, resolver)
-  const still = imageUrl(token, resolver, "display")
+  const stillUri = imageSourceUri(token, "display")
   const status = liveViewStatus(token, resolver)
 
   if (playing && live) {
@@ -40,7 +41,12 @@ export function ArtworkFrame({
 
   return (
     <div className="artwork">
-      {still ? <img src={still} alt={token.name ?? ""} /> : <div className="noimg" />}
+      <GatewayImage
+        uri={stillUri}
+        chain={token.chain}
+        resolver={resolver}
+        alt={token.name ?? ""}
+      />
       {status.kind === "ok" ? (
         <button className="overlay-btn play" onClick={() => setPlaying(true)}>
           ▶ Run live

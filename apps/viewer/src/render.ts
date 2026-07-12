@@ -32,14 +32,22 @@ export function artworkUrl(
   return resolveUri(uri, resolver, { chain: token.chain })
 }
 
+/** The raw (protocol-native) image URI to display, thumbnail preferred. */
+export function imageSourceUri(
+  token: WhitehashToken,
+  prefer: "display" | "thumbnail" = "thumbnail",
+): string | null {
+  const first = prefer === "thumbnail" ? token.thumbnailUri : token.displayUri
+  const second = prefer === "thumbnail" ? token.displayUri : token.thumbnailUri
+  return first ?? second ?? null
+}
+
 export function imageUrl(
   token: WhitehashToken,
   resolver: ResolverConfig,
   prefer: "display" | "thumbnail" = "thumbnail",
 ): string | null {
-  const first = prefer === "thumbnail" ? token.thumbnailUri : token.displayUri
-  const second = prefer === "thumbnail" ? token.displayUri : token.thumbnailUri
-  const uri = first ?? second
+  const uri = imageSourceUri(token, prefer)
   if (!uri) return null
   return resolveUri(uri, resolver, { chain: token.chain })
 }

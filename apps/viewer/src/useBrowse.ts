@@ -113,7 +113,8 @@ export function useProject(
             description: null,
             displayUri: page.tokens[0]?.displayUri ?? null,
             thumbnailUri: page.tokens[0]?.thumbnailUri ?? null,
-            supply: info.supply ?? null,
+            editions: null, // EVM cap isn't exposed via standard ERC-721
+            minted: info.minted ?? null,
             raw: info,
           })
           setTokens(page.tokens)
@@ -155,13 +156,17 @@ export function useEvmProjectCard(
 ) {
   const [name, setName] = useState<string | null>(null)
   const [thumb, setThumb] = useState<string | null>(null)
+  const [minted, setMinted] = useState<number | null>(null)
   useEffect(() => {
     if (!isEvmChain(chain)) return
     let alive = true
     const config = chainReaderConfigFrom(settings)
     void (async () => {
       const info = await getEvmProjectInfo(chain, contract, config)
-      if (alive && info.name) setName(info.name)
+      if (alive) {
+        if (info.name) setName(info.name)
+        if (info.minted !== undefined) setMinted(info.minted ?? null)
+      }
       const preview = await getEvmProjectPreview(chain, contract, config)
       if (alive) setThumb(preview)
     })()
@@ -169,5 +174,5 @@ export function useEvmProjectCard(
       alive = false
     }
   }, [chain, contract, settings])
-  return { name, thumb }
+  return { name, thumb, minted }
 }

@@ -8,9 +8,17 @@ import {
   type ListOrder,
   type WhitehashProject,
 } from "@whitehash/chain-reader"
-import { resolveUri } from "@whitehash/resolve"
 import { resolverConfigFrom, type Settings } from "../settings.js"
 import { useEvmProjectCard, useProjects } from "../useBrowse.js"
+import { GatewayImage } from "./GatewayImage.js"
+
+/** "5 / 500", "5 minted", or "" when nothing is known. */
+export function editionsLabel(minted: number | null, editions: number | null): string {
+  if (minted !== null && editions !== null) return `${minted} / ${editions}`
+  if (minted !== null) return `${minted} minted`
+  if (editions !== null) return `${editions} eds`
+  return ""
+}
 
 const ISSUER_VERSIONS = ["v3", "v2", "v1", "v0"]
 
@@ -33,20 +41,20 @@ function ProjectCard({
 }) {
   const resolver = resolverConfigFrom(settings)
   const isEvm = isEvmChain(project.chain)
-  // EVM projects carry no name/preview in the factory log — fetch lazily.
+  // EVM projects carry no name/preview/count in the factory log — fetch lazily.
   const lazy = useEvmProjectCard(project.chain, isEvm ? project.ref : "", settings)
   const name = project.name ?? lazy.name ?? (isEvm ? shortAddr(project.ref) : project.ref)
   const thumbUri = project.thumbnailUri ?? project.displayUri ?? lazy.thumb
-  const img = thumbUri ? resolveUri(thumbUri, resolver, { chain: project.chain }) : null
+  const label = editionsLabel(project.minted ?? lazy.minted, project.editions)
 
   return (
     <button className="card" onClick={onOpen}>
       <div className="card-img">
-        {img ? <img src={img} alt={name ?? ""} loading="lazy" /> : <div className="noimg" />}
+        <GatewayImage uri={thumbUri} chain={project.chain} resolver={resolver} alt={name ?? ""} lazy />
       </div>
       <div className="card-meta">
         <span className="card-name">{name}</span>
-        {project.supply !== null ? <span className="chip">{project.supply} eds</span> : null}
+        {label ? <span className="chip">{label}</span> : null}
       </div>
     </button>
   )

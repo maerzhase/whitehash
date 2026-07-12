@@ -1,6 +1,7 @@
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import type { ResolverConfig } from "@whitehash/resolve"
-import { imageUrl, tokenKey } from "../render.js"
+import { imageSourceUri, tokenKey } from "../render.js"
+import { GatewayImage } from "./GatewayImage.js"
 
 function chainLabel(chain: string): string {
   if (chain.startsWith("tezos")) return chain.includes("ghost") ? "Ghostnet" : "Tezos"
@@ -24,7 +25,6 @@ export function TokenGrid({
   return (
     <div className="grid">
       {tokens.map(token => {
-        const img = imageUrl(token, resolver, "thumbnail")
         return (
           <button
             key={tokenKey(token)}
@@ -32,11 +32,13 @@ export function TokenGrid({
             onClick={() => onOpen(token)}
           >
             <div className="card-img">
-              {img ? (
-                <img src={img} alt={token.name ?? ""} loading="lazy" />
-              ) : (
-                <div className="noimg" />
-              )}
+              <GatewayImage
+                uri={imageSourceUri(token, "thumbnail")}
+                chain={token.chain}
+                resolver={resolver}
+                alt={token.name ?? ""}
+                lazy
+              />
               {!token.assigned ? <span className="chip warn">unrevealed</span> : null}
             </div>
             <div className="card-meta">

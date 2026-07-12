@@ -42,8 +42,10 @@ export interface WhitehashProject {
   description: string | null
   displayUri: string | null
   thumbnailUri: string | null
-  /** Number of minted/mintable editions when known. */
-  supply: number | null
+  /** Max editions the project can mint (the cap), when known. */
+  editions: number | null
+  /** Iterations actually minted so far, when known. */
+  minted: number | null
   raw: unknown
 }
 
@@ -70,7 +72,31 @@ function tzktBase(chain: TezosChain, config: ChainReaderConfig): string {
 interface TzktLedgerKey {
   key: string
   active?: boolean
-  value?: { metadata?: string; supply?: string; original_supply?: string }
+  value?: {
+    metadata?: string
+    supply?: string
+    original_supply?: string
+    balance?: string
+    iterations_count?: string
+  }
+}
+
+/** Interpret a Tezos issuer ledger entry's edition counts. */
+function tezosEditionCounts(v: TzktLedgerKey["value"]): {
+  editions: number | null
+  minted: number | null
+} {
+  if (!v) return { editions: null, minted: null }
+  const cap = v.supply ?? v.original_supply
+  const editions = cap !== undefined ? Number(cap) : null
+  // iterations_count (issuer v3) is the reliable minted count; older issuers
+  // lack it, so fall back to cap − remaining balance.
+  let minted: number | null = null
+  if (v.iterations_count !== undefined) minted = Number(v.iterations_count)
+  else if (cap !== undefined && v.balance !== undefined) {
+    minted = Math.max(0, Number(cap) - Number(v.balance))
+  }
+  return { editions, minted }
 }
 
 async function fetchProjectMetadata(
@@ -113,7 +139,7 @@ export async function listTezosProjects(
 
   const url =
     `${tzktBase(chain, config)}/v1/contracts/${issuer.address}/bigmaps/ledger/keys` +
-    `?limit=${limit}&offset=${offset}&${sort}=id&select=key,active,value`
+    `?limit=${limit}&offset=${offset}&${sort}=id`
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`TzKT HTTP ${res.status} for ${url}`)
   const keys = (await res.json()) as TzktLedgerKey[]
@@ -127,7 +153,7 @@ export async function listTezosProjects(
         const i = next++
         const k = keys[i]!
         const meta = await fetchProjectMetadata(k.value?.metadata, config, fetchImpl)
-        const supplyRaw = k.value?.supply ?? k.value?.original_supply
+        const counts = tezosEditionCounts(k.value)
         projects[i] = {
           chain,
           ref: `${version}:${k.key}`,
@@ -142,7 +168,8 @@ export async function listTezosProjects(
             typeof meta?.["thumbnailUri"] === "string"
               ? (meta["thumbnailUri"] as string)
               : null,
-          supply: supplyRaw !== undefined ? Number(supplyRaw) : null,
+          editions: counts.editions,
+          minted: counts.minted,
           raw: meta,
         }
       }
@@ -171,7 +198,7 @@ export async function getTezosProject(
   if (!res.ok) return null
   const key = (await res.json()) as TzktLedgerKey
   const meta = await fetchProjectMetadata(key.value?.metadata, config, fetchImpl)
-  const supplyRaw = key.value?.supply ?? key.value?.original_supply
+  const counts = tezosEditionCounts(key.value)
   return {
     chain,
     ref,
@@ -182,7 +209,8 @@ export async function getTezosProject(
       typeof meta?.["displayUri"] === "string" ? (meta["displayUri"] as string) : null,
     thumbnailUri:
       typeof meta?.["thumbnailUri"] === "string" ? (meta["thumbnailUri"] as string) : null,
-    supply: supplyRaw !== undefined ? Number(supplyRaw) : null,
+    editions: counts.editions,
+    minted: counts.minted,
     raw: meta,
   }
 }
@@ -281,7 +309,8 @@ export async function listEvmProjects(
       description: null,
       displayUri: null,
       thumbnailUri: null,
-      supply: null,
+      editions: null, // EVM cap isn't exposed via standard ERC-721
+      minted: null, // filled lazily via getEvmProjectInfo
       raw: c,
     })),
     cursor: offset + limit < ordered.length ? String(offset + limit) : null,
@@ -307,9 +336,11 @@ export async function getEvmProjectInfo(
     const info = (await res.json()) as BsTokenInfo
     return {
       name: info.name ?? null,
-      supply: info.total_supply !== null && info.total_supply !== undefined
-        ? Number(info.total_supply)
-        : null,
+      // ERC-721 totalSupply is the count of tokens in existence = minted.
+      minted:
+        info.total_supply !== null && info.total_supply !== undefined
+          ? Number(info.total_supply)
+          : null,
     }
   } catch {
     return {}

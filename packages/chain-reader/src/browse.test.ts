@@ -15,7 +15,15 @@ describe("listTezosProjects", () => {
       if (u.includes("/bigmaps/ledger/keys"))
         return new Response(
           JSON.stringify([
-            { key: "31804", value: { metadata: META_HEX, supply: "500" } },
+            {
+              key: "31804",
+              value: {
+                metadata: META_HEX,
+                supply: "500",
+                balance: "494",
+                iterations_count: "5",
+              },
+            },
           ]),
         )
       if (u.includes("/ipfs/QmProjectMeta"))
@@ -35,7 +43,8 @@ describe("listTezosProjects", () => {
     const p = page.projects[0]!
     expect(p.ref).toBe("v3:31804")
     expect(p.name).toBe("Scale")
-    expect(p.supply).toBe(500)
+    expect(p.editions).toBe(500) // cap
+    expect(p.minted).toBe(5) // iterations_count wins over supply-balance
     expect(p.thumbnailUri).toBe("ipfs://QmThumb")
     expect(page.cursor).toBeNull() // fewer than limit → no next page
 
