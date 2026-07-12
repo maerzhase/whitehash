@@ -46,8 +46,33 @@ export function imageUrl(
 
 /** True when the artwork can be shown live (revealed + resolvable). */
 export function canRenderLive(token: WhitehashToken, resolver: ResolverConfig): boolean {
-  if (!token.assigned) return false
-  return artworkUrl(token, resolver) !== null
+  return liveViewStatus(token, resolver).kind === "ok"
+}
+
+export type LiveViewStatus =
+  | { kind: "ok"; url: string }
+  | { kind: "unrevealed" }
+  | { kind: "needs-onchfs-proxy" }
+  | { kind: "unavailable" }
+
+/**
+ * Why (or whether) a token can be shown live. Distinguishes the common
+ * "artwork is on onchfs but no proxy is configured" case so the UI can give an
+ * actionable hint instead of a dead end.
+ */
+export function liveViewStatus(
+  token: WhitehashToken,
+  resolver: ResolverConfig,
+): LiveViewStatus {
+  if (!token.assigned) return { kind: "unrevealed" }
+  const uri = renderArtifactUri(token)
+  if (!uri) return { kind: "unavailable" }
+  const url = resolveUri(uri, resolver, { chain: token.chain })
+  if (url) return { kind: "ok", url }
+  if (/^onchfs:\/\//i.test(uri) && !resolver.onchfsProxy) {
+    return { kind: "needs-onchfs-proxy" }
+  }
+  return { kind: "unavailable" }
 }
 
 export function tokenKey(token: WhitehashToken): string {

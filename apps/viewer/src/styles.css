@@ -397,3 +397,9 @@ textarea {
 .center {
   text-align: center;
 }
+
+.badge.link-badge {
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}

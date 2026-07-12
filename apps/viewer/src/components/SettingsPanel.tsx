@@ -71,7 +71,9 @@ export function SettingsPanel({
       <section>
         <h3>onchfs proxy URL</h3>
         <p className="muted">
-          Required for onchfs artworks (many Base pieces). Self-host apps/onchfs-proxy.
+          Required to view onchfs artworks (many Ethereum & Base pieces store their code
+          on-chain). Run <code>pnpm --filter @whitehash/onchfs-proxy start</code> and point
+          this at it (e.g. http://localhost:3000), or deploy apps/onchfs-proxy.
         </p>
         <input
           type="text"
