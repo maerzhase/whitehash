@@ -63,7 +63,7 @@ function baseUrl(chain: TezosChain, config: ChainReaderConfig): string {
  * Hex-decode a big-map `token_info[""]` value into a UTF-8 metadata URI.
  * TzKT returns these values hex-encoded (e.g. "697066733a2f2f..." → "ipfs://...").
  */
-function hexToUtf8(hex: string): string {
+export function hexToUtf8(hex: string): string {
   const clean = hex.startsWith("0x") ? hex.slice(2) : hex
   const bytes = new Uint8Array(clean.length / 2)
   for (let i = 0; i < bytes.length; i++) {

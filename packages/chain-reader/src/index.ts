@@ -20,7 +20,28 @@ export * from "./types.js"
 export { EVM_NETWORKS, TEZOS_NETWORKS, isEvmChain, isTezosChain } from "./networks.js"
 export { normalizeMetadata, isAssigned } from "./metadata.js"
 export { isTezosAddress, getTezosWalletTokens } from "./tezos.js"
-export { isEvmAddress, discoverEvmCollections, getEvmWalletTokens } from "./evm.js"
+export {
+  isEvmAddress,
+  discoverEvmCollections,
+  getEvmWalletTokens,
+  getEvmWalletTokensViaRpc,
+} from "./evm.js"
+export {
+  BLOCKSCOUT_DEFAULTS,
+  discoverEvmCollectionsViaBlockscout,
+  getEvmWalletTokensViaBlockscout,
+} from "./blockscout.js"
+export {
+  listProjects,
+  listTezosProjects,
+  listEvmProjects,
+  getTezosProject,
+  getEvmProjectInfo,
+  listTezosProjectTokens,
+  listEvmProjectTokens,
+  type WhitehashProject,
+  type ProjectPage,
+} from "./browse.js"
 
 /** viem-checksum-independent 0x-address shape check. */
 export function looksLikeEvmAddress(address: string): boolean {

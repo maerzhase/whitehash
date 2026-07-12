@@ -70,6 +70,15 @@ export interface ChainReaderConfig {
   /** Override TzKT base URLs per Tezos network. */
   tzkt?: Partial<Record<"tezos:mainnet" | "tezos:ghostnet", string>>
   evm?: {
+    /**
+     * How to enumerate EVM ownership. "blockscout" (default) uses the
+     * open-source Blockscout indexer's public instances — fast, full history —
+     * and falls back to "rpc" if unreachable. "rpc" forces the trustless
+     * Transfer-log scan over JSON-RPC.
+     */
+    ownershipSource?: "blockscout" | "rpc"
+    /** Override Blockscout instance base URLs per EVM network. */
+    blockscout?: Partial<Record<ChainId, string>>
     /** Override RPC endpoints per EVM network. */
     rpcs?: Partial<Record<ChainId, string[]>>
     /** Max block span per getLogs call before adaptive halving. */

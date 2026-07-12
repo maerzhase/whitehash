@@ -13,6 +13,12 @@ export interface TezosNetworkConfig {
   defaultTzktBaseUrl: string
   /** gentk FA2 NFT contracts (v1, v2, v3) that hold user-owned artworks. */
   gentkContracts: string[]
+  /**
+   * fxhash issuer contracts (project registries), oldest → newest. Each
+   * project is an entry in the contract's `ledger` big map with an IPFS
+   * metadata pointer.
+   */
+  issuerContracts: { version: string; address: string }[]
 }
 
 export interface EvmNetworkConfig {
@@ -41,6 +47,12 @@ export const TEZOS_NETWORKS: Record<
       "KT1U6EHmNxJTkvaWJ4ThczG4FSDaHC21ssvi", // gentk_v2
       "KT1EfsNuqwLAWDd3o4pvfUx1CAh5GMdTrRvr", // gentk_v3
     ],
+    issuerContracts: [
+      { version: "v0", address: "KT1AEVuykWeuuFX7QkEAMNtffzwhe1Z98hJS" },
+      { version: "v1", address: "KT1XCoGnfupWk7Sp8536EfrxcP73LmT68Nyr" },
+      { version: "v2", address: "KT1BJC12dG17CVvPKJ1VYaNnaT5mzfnUTwXv" },
+      { version: "v3", address: "KT1Xpmp15KfqoePNW9HczFmqaGNHwadV2a3b" },
+    ],
   },
   "tezos:ghostnet": {
     chainId: "tezos:ghostnet",
@@ -50,6 +62,12 @@ export const TEZOS_NETWORKS: Record<
       "KT1ExHjELnDuat9io3HkDcrBhHmek7h8EVXG", // gentk_v1
       "KT1NkZho1yRkDdQnN4Mz93sDYyY2pPrEHTNs", // gentk_v2
       "KT1TtVAyjh4Ahdm8sLZwFnL7tqoLf59XrK2h", // gentk_v3
+    ],
+    issuerContracts: [
+      { version: "v0", address: "KT1PyfrDD85RxUWz8dMHoC92MxdPzecSQ5t9" },
+      { version: "v1", address: "KT1QwWVZogqPZZtGSVxGpLkEWar7LFvAsMdd" },
+      { version: "v2", address: "KT1Sy7X6TubmZ39G8CHVrUcxjc3jiF68P8oB" },
+      { version: "v3", address: "KT1DfymMp3qD5Pd5ujPjp7UsQbppY9yY1Hbf" },
     ],
   },
 }

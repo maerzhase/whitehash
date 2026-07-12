@@ -6,11 +6,15 @@ import { AddressForm, pushRecent } from "./components/AddressForm.js"
 import { TokenGrid } from "./components/TokenGrid.js"
 import { TokenDetail } from "./components/TokenDetail.js"
 import { SettingsPanel } from "./components/SettingsPanel.js"
-import type { WhitehashToken } from "@whitehash/chain-reader"
+import { BrowseView } from "./components/BrowseView.js"
+import { ProjectView } from "./components/ProjectView.js"
+import type { ChainId, WhitehashToken } from "@whitehash/chain-reader"
 
 type Route =
   | { name: "home" }
   | { name: "settings" }
+  | { name: "browse" }
+  | { name: "project"; chain: string; ref: string }
   | { name: "wallet"; address: string }
   | { name: "token"; address: string; key: string }
 
@@ -18,6 +22,16 @@ function parseHash(): Route {
   const hash = location.hash.replace(/^#/, "")
   const parts = hash.split("/").filter(Boolean)
   if (parts[0] === "settings") return { name: "settings" }
+  if (parts[0] === "browse") {
+    if (parts[1] && parts[2]) {
+      return {
+        name: "project",
+        chain: decodeURIComponent(parts[1]),
+        ref: decodeURIComponent(parts[2]),
+      }
+    }
+    return { name: "browse" }
+  }
   if (parts[0] === "w" && parts[1]) {
     const address = decodeURIComponent(parts[1])
     if (parts[2] === "t" && parts[3] && parts[4] && parts[5]) {
@@ -75,6 +89,9 @@ export function App() {
               {loading ? "loading…" : "refresh"}
             </button>
           ) : null}
+          <button className="link" onClick={() => navigate("/browse")}>
+            browse
+          </button>
           <button className="link" onClick={() => navigate("/settings")}>
             settings
           </button>
@@ -83,7 +100,33 @@ export function App() {
 
       <main>
         {route.name === "home" ? (
-          <AddressForm onSubmit={addr => navigate(walletHash(addr))} />
+          <>
+            <AddressForm onSubmit={addr => navigate(walletHash(addr))} />
+            <p className="muted center">
+              …or{" "}
+              <button className="link" onClick={() => navigate("/browse")}>
+                browse all published projects →
+              </button>
+            </p>
+          </>
+        ) : null}
+
+        {route.name === "browse" ? (
+          <BrowseView
+            settings={settings}
+            onOpenProject={(chain, ref) =>
+              navigate(`/browse/${encodeURIComponent(chain)}/${encodeURIComponent(ref)}`)
+            }
+          />
+        ) : null}
+
+        {route.name === "project" ? (
+          <ProjectView
+            chain={route.chain as ChainId}
+            refId={route.ref}
+            settings={settings}
+            onBack={() => navigate("/browse")}
+          />
         ) : null}
 
         {route.name === "settings" ? (

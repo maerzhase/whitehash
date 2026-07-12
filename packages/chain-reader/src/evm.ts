@@ -148,7 +148,37 @@ function chunked<T>(arr: T[], size: number): T[][] {
   return out
 }
 
+/**
+ * Enumerate owned tokens. Dispatches on `config.evm.ownershipSource`:
+ * - "blockscout" (default): Blockscout indexer — fast, full history, falls
+ *   back to the RPC scan if the instance is unreachable.
+ * - "rpc": pure JSON-RPC Transfer-log scan — trustless but slow over keyless
+ *   public RPCs (eth_getLogs is capped at ~10k blocks).
+ */
 export async function getEvmWalletTokens(
+  address: string,
+  chain: EvmChain,
+  config: ChainReaderConfig,
+  onProgress?: ProgressCallback,
+): Promise<WhitehashToken[]> {
+  if (!isEvmAddress(address)) throw new Error(`Not an EVM address: ${address}`)
+  const source = config.evm?.ownershipSource ?? "blockscout"
+  if (source === "blockscout") {
+    try {
+      const { getEvmWalletTokensViaBlockscout } = await import("./blockscout.js")
+      return await getEvmWalletTokensViaBlockscout(address, chain, config, onProgress)
+    } catch (err) {
+      onProgress?.({
+        chain,
+        phase: "discover",
+        message: `Blockscout unavailable (${err instanceof Error ? err.message : err}); falling back to RPC scan`,
+      })
+    }
+  }
+  return getEvmWalletTokensViaRpc(address, chain, config, onProgress)
+}
+
+export async function getEvmWalletTokensViaRpc(
   address: string,
   chain: EvmChain,
   config: ChainReaderConfig,
@@ -292,7 +322,35 @@ export async function getEvmWalletTokens(
   return tokens
 }
 
-async function fetchEvmMetadata(
+/** Read tokenURI for a batch of tokens via multicall. Order-preserving. */
+export async function readTokenUris(
+  chain: EvmChain,
+  config: ChainReaderConfig,
+  items: { contract: string; tokenId: string }[],
+): Promise<(string | null)[]> {
+  if (items.length === 0) return []
+  const network = EVM_NETWORKS[chain]
+  const client = makeClient(chain, config)
+  const out: (string | null)[] = []
+  for (const batch of chunked(items, MULTICALL_BATCH)) {
+    const results = await client.multicall({
+      allowFailure: true,
+      multicallAddress: network.multicall3,
+      contracts: batch.map(c => ({
+        address: getAddress(c.contract),
+        abi: genArtAbi,
+        functionName: "tokenURI" as const,
+        args: [BigInt(c.tokenId)],
+      })),
+    })
+    for (const r of results) {
+      out.push(r.status === "success" ? (r.result as string) : null)
+    }
+  }
+  return out
+}
+
+export async function fetchEvmMetadata(
   metadataUri: string | null,
   config: ChainReaderConfig,
 ): Promise<Record<string, unknown> | null> {

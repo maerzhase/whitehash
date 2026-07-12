@@ -1,6 +1,23 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-12.
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-12 (rev 2).
+
+## Post-plan additions (rev 2)
+
+- **Blockscout-first EVM** (replaces the plan's RPC-scan default): Blockscout is the EVM
+  analog of TzKT — open-source, self-hostable, public instances. Wallet lookup on Base
+  went from "3 tokens, bounded scan" to **all 133 tokens in ~23s cold** (instant from
+  cache), including refreshing 79 stale mint-placeholder metadata entries from chain.
+  Pure-RPC scan retained as trustless fallback (`evm.ownershipSource: "rpc"`). This also
+  obsoletes the empty-snapshot problem: discovery reads the factory's full log history
+  via Blockscout in a handful of requests.
+- **Contract-first project browser**: `listProjects` / project-iteration listing for both
+  chains (Tezos: issuer ledger big maps v0–v3 + name-prefix iteration matching; EVM:
+  factory history + Blockscout instances), surfaced in the viewer at `#/browse` — chain
+  tabs, issuer-era selector, project grid, per-project iteration grid, inline token
+  detail. Data layer live-verified on both chains; UI verified by typecheck/build (the
+  in-session browser tool disconnected before a visual pass — click through `#/browse`
+  to confirm).
 
 ## Done (M0–M5) — the core viewer works end-to-end
 

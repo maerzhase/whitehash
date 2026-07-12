@@ -22,21 +22,41 @@ Every token is normalized to a uniform `WhitehashToken` with a protocol-native
 `artifactUri` (already carrying `?fxhash=...#0x...` render state) and an `assigned` flag
 that is `false` for unrevealed "waiting to be signed" placeholders.
 
-## EVM performance note
+## EVM ownership sources
 
-Keyless public RPCs cap `eth_getLogs` to ~10,000 blocks. Discovering the full collection
-set (and scanning a wallet's entire transfer history) therefore takes many requests over
-public RPCs. Two mechanisms address this:
+Two interchangeable sources, selected via `evm.ownershipSource`:
 
-- **Snapshots** (`snapshots/*.json`): committed collection lists so the library only scans
-  *new* collections at read time. Regenerate with `pnpm --filter @whitehash/chain-reader
-  snapshot:update` (a full historical scan; run it offline / on a cron).
-- **`evm.maxBlock`**: cap the scanned head (for tests / bounded scans).
+- **`"blockscout"` (default)** — the EVM analog of TzKT: [Blockscout](https://blockscout.com)
+  is an open-source, self-hostable, public-good indexer with public instances for all four
+  supported networks. One paginated call lists an address's NFTs (with metadata); the
+  factory's full `ProjectCreated` history comes from its logs endpoint with no block-range
+  limits. Stale cached metadata (mint-time placeholders) is detected and re-read from
+  chain via `tokenURI`. Instance URLs are overridable via `evm.blockscout` (point them at
+  your own Blockscout if you self-host one).
+- **`"rpc"`** — fully trustless Transfer-log scan over plain JSON-RPC. Keyless public RPCs
+  cap `eth_getLogs` at ~10,000 blocks, so full-history scans are slow without an
+  archive-capable RPC (`evm.rpcs`). Used automatically as fallback when Blockscout is
+  unreachable. Committed snapshots (`snapshots/*.json`, regenerate via `snapshot:update`)
+  and `evm.maxBlock` bound the work.
 
-Runtime ownership scanning still walks a wallet's transfer history from the earliest
-relevant block. For a responsive browser experience, configure an archive-capable RPC
-(one that permits wide `eth_getLogs` ranges) via `evm.rpcs`, and cache results. See
-PLAN.md §3.7 and the viewer's settings.
+## Browsing projects (contract-first)
+
+Beyond wallet lookups, the library can enumerate everything published on the contracts:
+
+```ts
+import { listProjects, listTezosProjectTokens, listEvmProjectTokens } from "@whitehash/chain-reader"
+
+const page = await listProjects("tezos:mainnet", config, { issuerVersion: "v3" })
+// → [{ ref: "v3:31804", name: "Scale", supply: 500, displayUri: "ipfs://…" }, …]
+
+const iterations = await listTezosProjectTokens("tezos:mainnet", "Scale", config)
+// EVM: listEvmProjects / getEvmProjectInfo / listEvmProjectTokens
+```
+
+Tezos projects come from the issuer contracts' `ledger` big maps (all versions v0–v3);
+iterations are matched by fxhash's universal "{project name} #{n}" naming convention.
+EVM projects are the factory's `ProjectCreated` history; iterations via Blockscout token
+instances.
 
 ## Attribution
 
