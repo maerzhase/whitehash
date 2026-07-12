@@ -188,10 +188,27 @@ export async function getEvmWalletTokensViaBlockscout(
     })
   }
 
-  // Refresh tokens whose cached metadata looks like the mint placeholder.
-  const staleIdx = owned
+  const tokens = await buildEvmTokensRefreshingStale(chain, config, owned, onProgress)
+  onProgress?.({ chain, phase: "done", message: "Done", found: tokens.length })
+  return tokens
+}
+
+/**
+ * Build normalized tokens from Blockscout items, refreshing any whose cached
+ * metadata is a mint-time placeholder by re-reading tokenURI from chain.
+ * Shared by the wallet path and the project-browser path — Blockscout caches
+ * metadata at first sight, so both need this to show revealed artworks.
+ */
+export async function buildEvmTokensRefreshingStale(
+  chain: EvmChain,
+  config: ChainReaderConfig,
+  items: { contract: string; tokenId: string; metadata: Record<string, unknown> | null }[],
+  onProgress?: ProgressCallback,
+): Promise<WhitehashToken[]> {
+  const staleIdx = items
     .map((o, i) => (looksStale(o.metadata) ? i : -1))
     .filter(i => i >= 0)
+
   const refreshedUris = new Map<number, string | null>()
   if (staleIdx.length > 0) {
     onProgress?.({
@@ -202,12 +219,12 @@ export async function getEvmWalletTokensViaBlockscout(
     const uris = await readTokenUris(
       chain,
       config,
-      staleIdx.map(i => ({ contract: owned[i]!.contract, tokenId: owned[i]!.tokenId })),
+      staleIdx.map(i => ({ contract: items[i]!.contract, tokenId: items[i]!.tokenId })),
     )
-    staleIdx.forEach((ownedIndex, j) => refreshedUris.set(ownedIndex, uris[j] ?? null))
+    staleIdx.forEach((idx, j) => refreshedUris.set(idx, uris[j] ?? null))
   }
 
-  // Fetch refreshed metadata concurrently (it's one IPFS fetch per stale token).
+  // Fetch refreshed metadata concurrently (one fetch per stale token).
   const freshMeta = new Map<number, Record<string, unknown> | null>()
   {
     const indices = [...refreshedUris.keys()]
@@ -223,9 +240,7 @@ export async function getEvmWalletTokensViaBlockscout(
     )
   }
 
-  const tokens: WhitehashToken[] = []
-  for (let i = 0; i < owned.length; i++) {
-    const o = owned[i]!
+  return items.map((o, i) => {
     let rawMeta = o.metadata
     let metadataUri: string | null = null
     if (refreshedUris.has(i)) {
@@ -234,7 +249,7 @@ export async function getEvmWalletTokensViaBlockscout(
       if (fresh) rawMeta = fresh
     }
     const norm = normalizeMetadata(rawMeta ?? {})
-    tokens.push({
+    return {
       chain,
       contract: o.contract,
       tokenId: o.tokenId,
@@ -249,9 +264,6 @@ export async function getEvmWalletTokensViaBlockscout(
       assigned: norm.assigned,
       metadataUri,
       raw: rawMeta,
-    })
-  }
-
-  onProgress?.({ chain, phase: "done", message: "Done", found: tokens.length })
-  return tokens
+    }
+  })
 }

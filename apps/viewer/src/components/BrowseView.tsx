@@ -5,6 +5,7 @@ import {
   isEvmChain,
   isTezosChain,
   type ChainId,
+  type ListOrder,
   type WhitehashProject,
 } from "@whitehash/chain-reader"
 import { resolveUri } from "@whitehash/resolve"
@@ -55,6 +56,24 @@ function shortAddr(a: string): string {
   return `${a.slice(0, 8)}…${a.slice(-4)}`
 }
 
+export function SortToggle({
+  order,
+  onChange,
+}: {
+  order: ListOrder
+  onChange: (o: ListOrder) => void
+}) {
+  return (
+    <div className="toggle small">
+      {(["newest", "oldest"] as const).map(o => (
+        <button key={o} className={order === o ? "on" : ""} onClick={() => onChange(o)}>
+          {o} first
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export function BrowseView({
   settings,
   onOpenProject,
@@ -65,9 +84,11 @@ export function BrowseView({
   const chains = settings.mode === "mainnet" ? MAINNET_CHAINS : TESTNET_CHAINS
   const [chain, setChain] = useState<ChainId>(chains[0]!)
   const [issuerVersion, setIssuerVersion] = useState("v3")
+  const [order, setOrder] = useState<ListOrder>("newest")
   const { projects, loading, error, hasMore, loadMore } = useProjects(
     chain,
     issuerVersion,
+    order,
     settings,
   )
 
@@ -96,6 +117,7 @@ export function BrowseView({
             ))}
           </div>
         ) : null}
+        <SortToggle order={order} onChange={setOrder} />
       </div>
 
       {error ? <p className="status error">{error}</p> : null}

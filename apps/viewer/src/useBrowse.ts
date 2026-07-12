@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
   getEvmProjectInfo,
+  getEvmProjectPreview,
   getTezosProject,
   isEvmChain,
   isTezosChain,
@@ -12,6 +13,7 @@ import {
   listProjects,
   listTezosProjectTokens,
   type ChainId,
+  type ListOrder,
   type WhitehashProject,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
@@ -20,6 +22,7 @@ import { chainReaderConfigFrom, type Settings } from "./settings.js"
 export function useProjects(
   chain: ChainId,
   issuerVersion: string,
+  order: ListOrder,
   settings: Settings,
 ) {
   const [projects, setProjects] = useState<WhitehashProject[]>([])
@@ -38,6 +41,7 @@ export function useProjects(
         const page = await listProjects(chain, config, {
           issuerVersion,
           cursor: fromCursor,
+          order,
         })
         if (runId.current !== id) return
         setProjects(prev => (append ? [...prev, ...page.projects] : page.projects))
@@ -48,7 +52,7 @@ export function useProjects(
         if (runId.current === id) setLoading(false)
       }
     },
-    [chain, issuerVersion, settings],
+    [chain, issuerVersion, order, settings],
   )
 
   useEffect(() => {
@@ -64,7 +68,12 @@ export function useProjects(
   return { projects, loading, error, hasMore: cursor !== null, loadMore }
 }
 
-export function useProject(chain: ChainId, ref: string, settings: Settings) {
+export function useProject(
+  chain: ChainId,
+  ref: string,
+  order: ListOrder,
+  settings: Settings,
+) {
   const [project, setProject] = useState<WhitehashProject | null>(null)
   const [tokens, setTokens] = useState<WhitehashToken[]>([])
   const [cursor, setCursor] = useState<string | null>(null)
@@ -87,7 +96,7 @@ export function useProject(chain: ChainId, ref: string, settings: Settings) {
           if (runId.current !== id) return
           setProject(proj)
           if (proj?.name) {
-            const page = await listTezosProjectTokens(chain, proj.name, config)
+            const page = await listTezosProjectTokens(chain, proj.name, config, { order })
             if (runId.current !== id) return
             setTokens(page.tokens)
             setCursor(page.cursor)
@@ -116,13 +125,16 @@ export function useProject(chain: ChainId, ref: string, settings: Settings) {
         if (runId.current === id) setLoading(false)
       }
     })()
-  }, [chain, ref, settings])
+  }, [chain, ref, order, settings])
 
   const loadMore = useCallback(async () => {
     if (!cursor) return
     const config = chainReaderConfigFrom(settings)
     if (isTezosChain(chain) && project?.name) {
-      const page = await listTezosProjectTokens(chain, project.name, config, { cursor })
+      const page = await listTezosProjectTokens(chain, project.name, config, {
+        cursor,
+        order,
+      })
       setTokens(prev => [...prev, ...page.tokens])
       setCursor(page.cursor)
     } else if (isEvmChain(chain)) {
@@ -130,7 +142,7 @@ export function useProject(chain: ChainId, ref: string, settings: Settings) {
       setTokens(prev => [...prev, ...page.tokens])
       setCursor(page.cursor)
     }
-  }, [chain, ref, cursor, project, settings])
+  }, [chain, ref, cursor, order, project, settings])
 
   return { project, tokens, loading, error, hasMore: cursor !== null, loadMore }
 }
@@ -150,13 +162,8 @@ export function useEvmProjectCard(
     void (async () => {
       const info = await getEvmProjectInfo(chain, contract, config)
       if (alive && info.name) setName(info.name)
-      try {
-        const page = await listEvmProjectTokens(chain, contract, config)
-        const t = page.tokens[0]
-        if (alive) setThumb(t?.thumbnailUri ?? t?.displayUri ?? null)
-      } catch {
-        /* preview is best-effort */
-      }
+      const preview = await getEvmProjectPreview(chain, contract, config)
+      if (alive) setThumb(preview)
     })()
     return () => {
       alive = false

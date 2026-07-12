@@ -1,7 +1,13 @@
 import { useState } from "react"
-import type { ChainId, WhitehashToken } from "@whitehash/chain-reader"
+import {
+  isTezosChain,
+  type ChainId,
+  type ListOrder,
+  type WhitehashToken,
+} from "@whitehash/chain-reader"
 import { resolverConfigFrom, type Settings } from "../settings.js"
 import { useProject } from "../useBrowse.js"
+import { SortToggle } from "./BrowseView.js"
 import { TokenGrid } from "./TokenGrid.js"
 import { TokenDetail } from "./TokenDetail.js"
 
@@ -16,9 +22,11 @@ export function ProjectView({
   settings: Settings
   onBack: () => void
 }) {
+  const [order, setOrder] = useState<ListOrder>("oldest")
   const { project, tokens, loading, error, hasMore, loadMore } = useProject(
     chain,
     refId,
+    order,
     settings,
   )
   const [open, setOpen] = useState<WhitehashToken | null>(null)
@@ -39,6 +47,8 @@ export function ProjectView({
           <span className="chip">{project.supply} editions</span>
         ) : null}
         {project?.description ? <p className="muted">{project.description}</p> : null}
+        {/* Blockscout's instances endpoint has a fixed order, so the toggle is Tezos-only. */}
+        {isTezosChain(chain) ? <SortToggle order={order} onChange={setOrder} /> : null}
       </div>
 
       {error ? <p className="status error">{error}</p> : null}

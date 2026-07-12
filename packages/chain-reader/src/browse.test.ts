@@ -38,6 +38,21 @@ describe("listTezosProjects", () => {
     expect(p.supply).toBe(500)
     expect(p.thumbnailUri).toBe("ipfs://QmThumb")
     expect(page.cursor).toBeNull() // fewer than limit → no next page
+
+    // default order is newest-first
+    const urls = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(c =>
+      String(c[0]),
+    )
+    expect(urls.some(u => u.includes("sort.desc=id"))).toBe(true)
+  })
+
+  it("supports oldest-first ordering", async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify([]))) as unknown as
+      typeof fetch
+    await listTezosProjects("tezos:mainnet", config, { order: "oldest" }, fetchImpl)
+    expect(String((fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls[0]![0])).toContain(
+      "sort.asc=id",
+    )
   })
 })
 

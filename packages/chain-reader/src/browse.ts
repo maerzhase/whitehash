@@ -14,6 +14,7 @@
 import { fetchWithGatewayFallback } from "@whitehash/resolve"
 import {
   blockscoutBaseUrl,
+  buildEvmTokensRefreshingStale,
   discoverEvmCollectionsViaBlockscout,
 } from "./blockscout.js"
 import { normalizeMetadata } from "./metadata.js"
@@ -51,6 +52,9 @@ export interface ProjectPage {
   /** Opaque cursor for the next page; null = no more pages. */
   cursor: string | null
 }
+
+/** Listing order. Cursors are order-specific — don't mix across orders. */
+export type ListOrder = "newest" | "oldest"
 
 // ---------------------------------------------------------------------------
 // Tezos
@@ -91,7 +95,12 @@ async function fetchProjectMetadata(
 export async function listTezosProjects(
   chain: TezosChain,
   config: ChainReaderConfig,
-  options: { issuerVersion?: string; cursor?: string | null; limit?: number } = {},
+  options: {
+    issuerVersion?: string
+    cursor?: string | null
+    limit?: number
+    order?: ListOrder
+  } = {},
   fetchImpl: typeof fetch = fetch,
 ): Promise<ProjectPage> {
   const network = TEZOS_NETWORKS[chain]
@@ -100,10 +109,11 @@ export async function listTezosProjects(
   if (!issuer) throw new Error(`Unknown issuer version: ${version}`)
   const limit = options.limit ?? 12
   const offset = options.cursor ? Number(options.cursor) : 0
+  const sort = (options.order ?? "newest") === "newest" ? "sort.desc" : "sort.asc"
 
   const url =
     `${tzktBase(chain, config)}/v1/contracts/${issuer.address}/bigmaps/ledger/keys` +
-    `?limit=${limit}&offset=${offset}&sort.desc=id&select=key,active,value`
+    `?limit=${limit}&offset=${offset}&${sort}=id&select=key,active,value`
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`TzKT HTTP ${res.status} for ${url}`)
   const keys = (await res.json()) as TzktLedgerKey[]
@@ -186,19 +196,21 @@ export async function listTezosProjectTokens(
   chain: TezosChain,
   projectName: string,
   config: ChainReaderConfig,
-  options: { cursor?: string | null; limit?: number } = {},
+  options: { cursor?: string | null; limit?: number; order?: ListOrder } = {},
   fetchImpl: typeof fetch = fetch,
 ): Promise<{ tokens: WhitehashToken[]; cursor: string | null }> {
   const network = TEZOS_NETWORKS[chain]
   const limit = options.limit ?? 24
   const offset = options.cursor ? Number(options.cursor) : 0
   const pattern = encodeURIComponent(`${projectName} #*`)
+  // Iterations default to oldest-first (#1, #2, …) — the natural reading order.
+  const sort = (options.order ?? "oldest") === "oldest" ? "sort.asc" : "sort.desc"
 
   const pages = await Promise.all(
     network.gentkContracts.map(async contract => {
       const url =
         `${tzktBase(chain, config)}/v1/tokens?contract=${contract}` +
-        `&metadata.name.as=${pattern}&limit=${limit}&offset=${offset}&sort.asc=tokenId`
+        `&metadata.name.as=${pattern}&limit=${limit}&offset=${offset}&${sort}=tokenId`
       const res = await fetchImpl(url)
       if (!res.ok) return []
       return (await res.json()) as {
@@ -250,14 +262,15 @@ export async function listTezosProjectTokens(
 export async function listEvmProjects(
   chain: EvmChain,
   config: ChainReaderConfig,
-  options: { cursor?: string | null; limit?: number } = {},
+  options: { cursor?: string | null; limit?: number; order?: ListOrder } = {},
   fetchImpl: typeof fetch = fetch,
 ): Promise<ProjectPage> {
   const limit = options.limit ?? 12
   const offset = options.cursor ? Number(options.cursor) : 0
+  const dir = (options.order ?? "newest") === "newest" ? -1 : 1
   const snapshot = await discoverEvmCollectionsViaBlockscout(chain, config, fetchImpl)
   const ordered = [...snapshot.collections].sort(
-    (a, b) => b.createdAtBlock - a.createdAtBlock,
+    (a, b) => dir * (a.createdAtBlock - b.createdAtBlock),
   )
   const page = ordered.slice(offset, offset + limit)
   return {
@@ -308,6 +321,33 @@ interface BsInstance {
   metadata?: Record<string, unknown> | null
 }
 
+/**
+ * A single preview thumbnail for an EVM project card — refreshes only the first
+ * instance from chain if its cached metadata is stale, so grids stay cheap.
+ */
+export async function getEvmProjectPreview(
+  chain: EvmChain,
+  contract: string,
+  config: ChainReaderConfig,
+  fetchImpl: typeof fetch = fetch,
+): Promise<string | null> {
+  try {
+    const res = await fetchImpl(
+      `${blockscoutBaseUrl(chain, config)}/api/v2/tokens/${contract}/instances`,
+    )
+    if (!res.ok) return null
+    const data = (await res.json()) as { items?: BsInstance[] }
+    const first = (data.items ?? []).find(i => i.id !== undefined && i.id !== null)
+    if (!first) return null
+    const [token] = await buildEvmTokensRefreshingStale(chain, config, [
+      { contract, tokenId: String(first.id), metadata: first.metadata ?? null },
+    ])
+    return token?.thumbnailUri ?? token?.displayUri ?? null
+  } catch {
+    return null
+  }
+}
+
 /** List an EVM project's iterations via Blockscout token instances. */
 export async function listEvmProjectTokens(
   chain: EvmChain,
@@ -326,27 +366,17 @@ export async function listEvmProjectTokens(
     next_page_params?: Record<string, unknown> | null
   }
 
-  const tokens: WhitehashToken[] = []
-  for (const item of data.items ?? []) {
-    if (item.id === undefined || item.id === null) continue
-    const norm = normalizeMetadata(item.metadata ?? {})
-    tokens.push({
-      chain,
+  // Blockscout caches metadata at mint time, so instances often show the
+  // "waiting to be signed" placeholder even after reveal — refresh from chain
+  // (same as the wallet path) so iterations get real, renderable metadata.
+  const items = (data.items ?? [])
+    .filter(item => item.id !== undefined && item.id !== null)
+    .map(item => ({
       contract,
       tokenId: String(item.id),
-      name: norm.name,
-      description: norm.description,
-      iterationHash: norm.iterationHash,
-      artifactUri: norm.artifactUri,
-      displayUri: norm.displayUri,
-      thumbnailUri: norm.thumbnailUri,
-      generatorUri: norm.generatorUri,
-      attributes: norm.attributes,
-      assigned: norm.assigned,
-      metadataUri: null,
-      raw: item.metadata,
-    })
-  }
+      metadata: item.metadata ?? null,
+    }))
+  const tokens = await buildEvmTokensRefreshingStale(chain, config, items)
 
   const nextCursor = data.next_page_params
     ? new URLSearchParams(
@@ -365,7 +395,12 @@ export async function listEvmProjectTokens(
 export async function listProjects(
   chain: ChainId,
   config: ChainReaderConfig,
-  options: { issuerVersion?: string; cursor?: string | null; limit?: number } = {},
+  options: {
+    issuerVersion?: string
+    cursor?: string | null
+    limit?: number
+    order?: ListOrder
+  } = {},
   onProgress?: ProgressCallback,
 ): Promise<ProjectPage> {
   onProgress?.({ chain, phase: "discover", message: "Listing projects" })

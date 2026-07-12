@@ -37,10 +37,12 @@ export {
   listEvmProjects,
   getTezosProject,
   getEvmProjectInfo,
+  getEvmProjectPreview,
   listTezosProjectTokens,
   listEvmProjectTokens,
   type WhitehashProject,
   type ProjectPage,
+  type ListOrder,
 } from "./browse.js"
 
 /** viem-checksum-independent 0x-address shape check. */
