@@ -22,10 +22,11 @@
   --color-muted: #9296a1;
   --color-faint: #6b6e78;
 
-  /* Primary accent (periwinkle) + text placed on it. */
-  --color-primary: #7f92ff;
-  --color-primary-hover: #6d82ff;
-  --color-primary-fg: #0b0b0e;
+  /* Primary — the warm cream sampled from the whitehash logo. Used as a light
+   * CTA/accent on the dark canvas, with dark text placed on it. */
+  --color-primary: #f4e7d8;
+  --color-primary-hover: #ffffff;
+  --color-primary-fg: #171310;
 
   /* Status. */
   --color-warning: #e2a94c;
@@ -33,7 +34,7 @@
   --color-danger: #e5695f;
 
   /* Focus ring. */
-  --color-ring: #7f92ff;
+  --color-ring: #f4e7d8;
 
   /* Radii. */
   --radius-xs: 4px;

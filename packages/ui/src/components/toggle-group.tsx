@@ -1,14 +1,15 @@
-import type { ReactNode } from "react"
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import { ToggleGroup as BaseToggleGroup } from "@base-ui-components/react/toggle-group"
 import { Toggle } from "@base-ui-components/react/toggle"
 import { cn } from "../lib/cn.js"
 
 /**
- * ToggleGroup — a segmented single-select control. Base UI owns the behavioral
- * ceremony (roving focus, arrow-key nav, aria), which is the payoff of the
- * headless layer. Base UI models the value as an array (for multi-select); we
- * adapt it to a single string and refuse deselect so exactly one item is always
- * active, which is what a segmented control wants.
+ * ToggleGroup — a segmented single-select control with an animated indicator
+ * that slides between items. Base UI owns the behavioral ceremony (roving
+ * focus, arrow-key nav, aria); we adapt its array value to a single string,
+ * refuse deselect (a segmented control always has one item active), and render
+ * a shared highlight measured from the active item so it animates as the
+ * selection moves rather than each item flashing independently.
  */
 export interface ToggleGroupProps {
   value: string
@@ -19,19 +20,47 @@ export interface ToggleGroupProps {
 }
 
 function Root({ value, onValueChange, className, children, ...props }: ToggleGroupProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null)
+
+  useLayoutEffect(() => {
+    const root = ref.current
+    if (!root) return
+    const measure = () => {
+      const active = root.querySelector<HTMLElement>("[data-pressed]")
+      if (!active) return
+      const rootBox = root.getBoundingClientRect()
+      const box = active.getBoundingClientRect()
+      const borderLeft = parseFloat(getComputedStyle(root).borderLeftWidth) || 0
+      setIndicator({ left: box.left - rootBox.left - borderLeft, width: box.width })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(root)
+    return () => observer.disconnect()
+  }, [value, children])
+
   return (
     <BaseToggleGroup
+      ref={ref}
       value={[value]}
       onValueChange={groupValue => {
         const next = groupValue[0]
         if (typeof next === "string") onValueChange(next)
       }}
       className={cn(
-        "inline-flex gap-1 rounded-lg border border-line bg-surface p-1",
+        "relative inline-flex gap-1 rounded-lg border border-line bg-surface p-1",
         className,
       )}
       {...props}
     >
+      {indicator ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-1 top-1 rounded-md bg-primary transition-[left,width] duration-200 ease-out"
+          style={{ left: indicator.left, width: indicator.width }}
+        />
+      ) : null}
       {children}
     </BaseToggleGroup>
   )
@@ -48,9 +77,9 @@ function Item({ className, ...props }: ToggleGroupItemProps) {
   return (
     <Toggle
       className={cn(
-        "cursor-pointer rounded-md px-3.5 py-1.5 text-sm text-muted transition-colors",
+        "relative z-10 cursor-pointer rounded-md px-3.5 py-1.5 text-sm text-muted transition-colors",
         "hover:text-fg outline-none focus-visible:ring-2 focus-visible:ring-ring/70",
-        "data-[pressed]:bg-primary data-[pressed]:text-primary-fg data-[pressed]:hover:text-primary-fg",
+        "data-[pressed]:text-primary-fg data-[pressed]:hover:text-primary-fg",
         className,
       )}
       {...props}
