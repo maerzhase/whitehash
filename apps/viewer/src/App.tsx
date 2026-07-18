@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
+import { Badge, Button, Spinner, type BadgeProps } from "@whitehash/ui"
 import { loadSettings, resolverConfigFrom, type Settings } from "./settings.js"
-import { useWalletTokens } from "./useWalletTokens.js"
+import { useWalletTokens, type ChainState } from "./useWalletTokens.js"
 import { tokenKey } from "./render.js"
 import { AddressForm, pushRecent } from "./components/AddressForm.js"
 import { TokenGrid } from "./components/TokenGrid.js"
@@ -78,24 +79,28 @@ export function App() {
   }, [address])
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <button className="brand" onClick={() => navigate("/")}>
-          <img className="brand-logo" src="./logo.png" alt="" />
+    <div className="mx-auto max-w-[1100px] px-5 pb-16">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-canvas py-4">
+        <button
+          className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-fg"
+          onClick={() => navigate("/")}
+        >
+          <img className="size-7 rounded-md" src="./logo.png" alt="" />
           whitehash
         </button>
-        <nav>
+        <nav className="flex items-center gap-1">
           {address ? (
-            <button className="link" onClick={refresh} disabled={loading}>
-              {loading ? "loading…" : "refresh"}
-            </button>
+            <Button variant="ghost" size="sm" onClick={refresh} disabled={loading}>
+              {loading ? <Spinner className="size-3.5" /> : null}
+              refresh
+            </Button>
           ) : null}
-          <button className="link" onClick={() => navigate("/browse")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/browse")}>
             browse
-          </button>
-          <button className="link" onClick={() => navigate("/settings")}>
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/settings")}>
             settings
-          </button>
+          </Button>
         </nav>
       </header>
 
@@ -103,11 +108,11 @@ export function App() {
         {route.name === "home" ? (
           <>
             <AddressForm onSubmit={addr => navigate(walletHash(addr))} />
-            <p className="muted center">
+            <p className="mt-6 text-center text-muted">
               …or{" "}
-              <button className="link" onClick={() => navigate("/browse")}>
+              <Button variant="link" onClick={() => navigate("/browse")}>
                 browse all published projects →
-              </button>
+              </Button>
             </p>
           </>
         ) : null}
@@ -161,6 +166,14 @@ export function App() {
   )
 }
 
+const STATUS_VARIANT: Record<ChainState["status"], BadgeProps["variant"]> = {
+  idle: "default",
+  loading: "default",
+  cached: "accent",
+  done: "success",
+  error: "danger",
+}
+
 function WalletView({
   state,
   loading,
@@ -175,20 +188,20 @@ function WalletView({
   const chainStates = Object.values(state.chains)
   const noChains = chainStates.length === 0
   return (
-    <div className="wallet">
-      <div className="wallet-head">
-        <h2 className="mono ellipsis">{state.address}</h2>
-        <div className="statuses">
+    <div>
+      <div className="py-5">
+        <h2 className="truncate font-mono text-sm text-muted">{state.address}</h2>
+        <div className="mt-2 flex flex-wrap gap-2">
           {chainStates.map(cs => (
-            <span key={cs.chain} className={`status ${cs.status}`}>
+            <Badge key={cs.chain} variant={STATUS_VARIANT[cs.status]}>
               {cs.chain}: {cs.message}
-            </span>
+            </Badge>
           ))}
         </div>
       </div>
 
       {noChains ? (
-        <p className="muted">
+        <p className="text-muted">
           That doesn’t look like a Tezos or EVM address for the current network mode.
         </p>
       ) : null}
@@ -196,7 +209,7 @@ function WalletView({
       <TokenGrid tokens={state.tokens} resolver={resolver} onOpen={onOpen} />
 
       {!loading && state.tokens.length === 0 && !noChains ? (
-        <p className="muted">No fxhash tokens found for this wallet.</p>
+        <p className="mt-4 text-muted">No fxhash tokens found for this wallet.</p>
       ) : null}
     </div>
   )
@@ -218,11 +231,13 @@ function TokenRoute({
   const token = tokens.find(t => tokenKey(t) === tokenKeyWanted)
   if (!token) {
     return (
-      <div className="detail">
-        <button className="link" onClick={onBack}>
+      <div className="pt-5">
+        <Button variant="link" onClick={onBack}>
           ← back
-        </button>
-        <p className="muted">{loading ? "Loading…" : "Token not found in this wallet."}</p>
+        </Button>
+        <p className="mt-2 text-muted">
+          {loading ? "Loading…" : "Token not found in this wallet."}
+        </p>
       </div>
     )
   }

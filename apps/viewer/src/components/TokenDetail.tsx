@@ -1,7 +1,20 @@
+import type { ReactNode } from "react"
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import type { ResolverConfig } from "@whitehash/resolve"
+import { Button } from "@whitehash/ui"
 import { artworkUrl } from "../render.js"
 import { ArtworkFrame } from "./ArtworkFrame.js"
+
+function Row({ label, children, mono }: { label: string; children: ReactNode; mono?: boolean }) {
+  return (
+    <>
+      <dt className="text-sm text-muted">{label}</dt>
+      <dd className={mono ? "truncate font-mono text-[13px]" : "truncate text-sm"}>
+        {children}
+      </dd>
+    </>
+  )
+}
 
 export function TokenDetail({
   token,
@@ -14,47 +27,47 @@ export function TokenDetail({
 }) {
   const live = artworkUrl(token, resolver)
   return (
-    <div className="detail">
-      <button className="link" onClick={onBack}>
+    <div className="pt-5">
+      <Button variant="link" onClick={onBack}>
         ← back
-      </button>
-      <div className="detail-body">
+      </Button>
+      <div className="mt-3 grid gap-6 md:grid-cols-[1.4fr_1fr]">
         <ArtworkFrame token={token} resolver={resolver} />
-        <div className="detail-info">
-          <h2>{token.name ?? `#${token.tokenId}`}</h2>
-          {token.description ? <p className="muted">{token.description}</p> : null}
-          <dl>
-            <dt>Chain</dt>
-            <dd>{token.chain}</dd>
-            <dt>Contract</dt>
-            <dd className="mono">{token.contract}</dd>
-            <dt>Token ID</dt>
-            <dd className="mono">{token.tokenId}</dd>
+        <div>
+          <h2 className="mb-2 text-xl font-semibold tracking-tight">
+            {token.name ?? `#${token.tokenId}`}
+          </h2>
+          {token.description ? (
+            <p className="text-sm leading-relaxed text-muted">{token.description}</p>
+          ) : null}
+
+          <dl className="my-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+            <Row label="Chain">{token.chain}</Row>
+            <Row label="Contract" mono>{token.contract}</Row>
+            <Row label="Token ID" mono>{token.tokenId}</Row>
             {token.iterationHash ? (
-              <>
-                <dt>Hash</dt>
-                <dd className="mono ellipsis">{token.iterationHash}</dd>
-              </>
+              <Row label="Hash" mono>{token.iterationHash}</Row>
             ) : null}
-            <dt>Revealed</dt>
-            <dd>{token.assigned ? "yes" : "no (placeholder)"}</dd>
+            <Row label="Revealed">{token.assigned ? "yes" : "no (placeholder)"}</Row>
           </dl>
+
           {token.attributes.length > 0 ? (
-            <div className="attrs">
-              <h3>Features</h3>
-              <ul>
+            <div className="mt-4">
+              <h3 className="mb-2 text-sm font-semibold">Features</h3>
+              <ul className="flex flex-col gap-1">
                 {token.attributes.map(a => (
-                  <li key={a.name}>
-                    <span className="muted">{a.name}</span> {a.value}
+                  <li key={a.name} className="text-sm">
+                    <span className="text-muted">{a.name}</span> {a.value}
                   </li>
                 ))}
               </ul>
             </div>
           ) : null}
+
           {live ? (
-            <a className="link" href={live} target="_blank" rel="noreferrer">
+            <Button variant="link" render={<a href={live} target="_blank" rel="noreferrer" />} className="mt-4 inline-block">
               open artwork in new tab ↗
-            </a>
+            </Button>
           ) : null}
         </div>
       </div>

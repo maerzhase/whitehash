@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Button, Input } from "@whitehash/ui"
 
 const RECENT_KEY = "whitehash.recent.v1"
 
@@ -25,34 +26,37 @@ export function AddressForm({ onSubmit }: { onSubmit: (address: string) => void 
   }
 
   return (
-    <div className="home">
-      <h1>whitehash</h1>
-      <p className="muted">
-        View the fxhash generative art owned by any wallet — read straight from
-        Tezos, Ethereum, and Base. No indexer, no fxhash servers.
+    <div className="mx-auto mt-16 max-w-xl text-center">
+      <img src="./logo.png" alt="" className="mx-auto mb-5 size-16 rounded-2xl" />
+      <h1 className="text-4xl font-semibold tracking-tight">whitehash</h1>
+      <p className="mx-auto mt-2 max-w-md text-muted">
+        View the fxhash generative art owned by any wallet — read straight from Tezos,
+        Ethereum, and Base. No indexer, no fxhash servers.
       </p>
       <form
+        className="mt-6 flex gap-2"
         onSubmit={e => {
           e.preventDefault()
           submit(value)
         }}
       >
-        <input
+        <Input
           autoFocus
           type="text"
           placeholder="tz1… or 0x…"
           value={value}
           onChange={e => setValue(e.target.value)}
+          className="flex-1"
         />
-        <button type="submit">View</button>
+        <Button type="submit">View</Button>
       </form>
       {recent.length > 0 ? (
-        <div className="recent">
-          <span className="muted">Recent:</span>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+          <span className="text-sm text-muted">Recent:</span>
           {recent.map(a => (
-            <button key={a} className="chip link" onClick={() => submit(a)}>
+            <Button key={a} variant="secondary" size="sm" onClick={() => submit(a)}>
               {a.slice(0, 8)}…{a.slice(-4)}
-            </button>
+            </Button>
           ))}
         </div>
       ) : null}

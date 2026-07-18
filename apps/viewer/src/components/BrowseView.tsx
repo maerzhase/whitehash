@@ -8,6 +8,7 @@ import {
   type ListOrder,
   type WhitehashProject,
 } from "@whitehash/chain-reader"
+import { Badge, Button, Card, ToggleGroup } from "@whitehash/ui"
 import { resolverConfigFrom, type Settings } from "../settings.js"
 import { useEvmProjectCard, useProjects } from "../useBrowse.js"
 import { GatewayImage } from "./GatewayImage.js"
@@ -30,6 +31,10 @@ function chainLabel(chain: ChainId): string {
   return "Base Sepolia"
 }
 
+function shortAddr(a: string): string {
+  return `${a.slice(0, 8)}…${a.slice(-4)}`
+}
+
 function ProjectCard({
   project,
   settings,
@@ -48,20 +53,16 @@ function ProjectCard({
   const label = editionsLabel(project.minted ?? lazy.minted, project.editions)
 
   return (
-    <button className="card" onClick={onOpen}>
-      <div className="card-img">
+    <Button variant="card" onClick={onOpen}>
+      <Card.Media>
         <GatewayImage uri={thumbUri} chain={project.chain} resolver={resolver} alt={name ?? ""} lazy />
-      </div>
-      <div className="card-meta">
-        <span className="card-name">{name}</span>
-        {label ? <span className="chip">{label}</span> : null}
-      </div>
-    </button>
+      </Card.Media>
+      <Card.Body>
+        <Card.Title>{name}</Card.Title>
+        {label ? <Card.Meta><Badge>{label}</Badge></Card.Meta> : null}
+      </Card.Body>
+    </Button>
   )
-}
-
-function shortAddr(a: string): string {
-  return `${a.slice(0, 8)}…${a.slice(-4)}`
 }
 
 export function SortToggle({
@@ -72,13 +73,10 @@ export function SortToggle({
   onChange: (o: ListOrder) => void
 }) {
   return (
-    <div className="toggle small">
-      {(["newest", "oldest"] as const).map(o => (
-        <button key={o} className={order === o ? "on" : ""} onClick={() => onChange(o)}>
-          {o} first
-        </button>
-      ))}
-    </div>
+    <ToggleGroup value={order} onValueChange={v => onChange(v as ListOrder)} aria-label="Sort order">
+      <ToggleGroup.Item value="newest">Newest</ToggleGroup.Item>
+      <ToggleGroup.Item value="oldest">Oldest</ToggleGroup.Item>
+    </ToggleGroup>
   )
 }
 
@@ -101,36 +99,31 @@ export function BrowseView({
   )
 
   return (
-    <div className="browse">
-      <div className="browse-head">
-        <h2>Browse projects</h2>
-        <div className="toggle">
+    <div>
+      <div className="flex flex-wrap items-center gap-4 py-5">
+        <h2 className="text-lg font-semibold tracking-tight">Browse projects</h2>
+        <ToggleGroup value={chain} onValueChange={v => setChain(v as ChainId)} aria-label="Chain">
           {chains.map(c => (
-            <button key={c} className={chain === c ? "on" : ""} onClick={() => setChain(c)}>
+            <ToggleGroup.Item key={c} value={c}>
               {chainLabel(c)}
-            </button>
+            </ToggleGroup.Item>
           ))}
-        </div>
+        </ToggleGroup>
         {isTezosChain(chain) ? (
-          <div className="toggle small">
+          <ToggleGroup value={issuerVersion} onValueChange={setIssuerVersion} aria-label="Issuer era">
             {ISSUER_VERSIONS.map(v => (
-              <button
-                key={v}
-                className={issuerVersion === v ? "on" : ""}
-                onClick={() => setIssuerVersion(v)}
-                title={`fxhash issuer ${v} (era of projects)`}
-              >
+              <ToggleGroup.Item key={v} value={v} title={`fxhash issuer ${v} (era of projects)`}>
                 {v}
-              </button>
+              </ToggleGroup.Item>
             ))}
-          </div>
+          </ToggleGroup>
         ) : null}
         <SortToggle order={order} onChange={setOrder} />
       </div>
 
-      {error ? <p className="status error">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
 
-      <div className="grid">
+      <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
         {projects.map(p => (
           <ProjectCard
             key={`${p.chain}/${p.ref}`}
@@ -141,14 +134,14 @@ export function BrowseView({
         ))}
       </div>
 
-      {loading ? <p className="muted">Loading projects…</p> : null}
+      {loading ? <p className="mt-4 text-muted">Loading projects…</p> : null}
       {!loading && hasMore ? (
-        <button className="link" onClick={loadMore}>
+        <Button variant="link" className="mt-4" onClick={loadMore}>
           load more ↓
-        </button>
+        </Button>
       ) : null}
       {!loading && projects.length === 0 && !error ? (
-        <p className="muted">No projects found.</p>
+        <p className="mt-4 text-muted">No projects found.</p>
       ) : null}
     </div>
   )

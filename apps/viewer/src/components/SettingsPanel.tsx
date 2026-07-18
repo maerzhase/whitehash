@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import type { ChainId } from "@whitehash/chain-reader"
+import { Button, Field, Input, Separator, Textarea, ToggleGroup } from "@whitehash/ui"
 import { defaultSettings, saveSettings, type Settings } from "../settings.js"
 
 const EVM_NETWORKS: { chain: ChainId; label: string }[] = [
@@ -17,6 +18,15 @@ function parseLines(v: string): string[] {
     .split(/[\n,]/)
     .map(s => s.trim())
     .filter(Boolean)
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="flex flex-col gap-3 py-6">
+      <h3 className="text-base font-semibold">{title}</h3>
+      {children}
+    </section>
+  )
 }
 
 export function SettingsPanel({
@@ -37,115 +47,116 @@ export function SettingsPanel({
   }
 
   return (
-    <div className="settings">
-      <button className="link" onClick={onBack}>
+    <div className="max-w-2xl pt-5">
+      <Button variant="link" onClick={onBack}>
         ← back
-      </button>
-      <h2>Settings</h2>
+      </Button>
+      <h2 className="mt-2 text-xl font-semibold tracking-tight">Settings</h2>
 
-      <section>
-        <h3>Network mode</h3>
-        <div className="toggle">
-          {(["mainnet", "testnet"] as const).map(m => (
-            <button
-              key={m}
-              className={draft.mode === m ? "on" : ""}
-              onClick={() => commit({ ...draft, mode: m })}
-            >
-              {m}
-            </button>
+      <div className="divide-y divide-line">
+        <Section title="Network mode">
+          <ToggleGroup
+            value={draft.mode}
+            onValueChange={v => commit({ ...draft, mode: v as Settings["mode"] })}
+            aria-label="Network mode"
+            className="w-fit"
+          >
+            <ToggleGroup.Item value="mainnet">Mainnet</ToggleGroup.Item>
+            <ToggleGroup.Item value="testnet">Testnet</ToggleGroup.Item>
+          </ToggleGroup>
+        </Section>
+
+        <Section title="IPFS gateways">
+          <Field.Root>
+            <Field.Description>One per line, tried in order.</Field.Description>
+            <Field.Control
+              render={<Textarea rows={3} />}
+              value={lines(draft.ipfsGateways)}
+              onChange={e => commit({ ...draft, ipfsGateways: parseLines(e.target.value) })}
+            />
+          </Field.Root>
+        </Section>
+
+        <Section title="onchfs proxy URL">
+          <Field.Root>
+            <Field.Description>
+              Required to view onchfs artworks (many Ethereum &amp; Base pieces store their
+              code on-chain). Run{" "}
+              <code className="rounded bg-surface-2 px-1 py-0.5 font-mono text-xs">
+                pnpm --filter @whitehash/onchfs-proxy start
+              </code>{" "}
+              and point this at it (e.g. http://localhost:3000), or deploy apps/onchfs-proxy.
+            </Field.Description>
+            <Field.Control
+              render={<Input />}
+              type="text"
+              placeholder="https://my-onchfs-proxy.example"
+              value={draft.onchfsProxy}
+              onChange={e => commit({ ...draft, onchfsProxy: e.target.value })}
+            />
+          </Field.Root>
+        </Section>
+
+        <Section title="EVM RPCs">
+          <p className="text-sm leading-snug text-muted">
+            Public RPCs cap log queries, so EVM wallet scans are slow. Paste an
+            archive-capable RPC (one line each) for fast lookups. Blank = library default.
+          </p>
+          {EVM_NETWORKS.map(({ chain, label }) => (
+            <Field.Root key={chain}>
+              <Field.Label>{label}</Field.Label>
+              <Field.Control
+                render={<Textarea rows={2} />}
+                value={lines(draft.rpcs[chain])}
+                onChange={e =>
+                  commit({
+                    ...draft,
+                    rpcs: { ...draft.rpcs, [chain]: parseLines(e.target.value) },
+                  })
+                }
+              />
+            </Field.Root>
           ))}
-        </div>
-      </section>
+        </Section>
 
-      <section>
-        <h3>IPFS gateways</h3>
-        <p className="muted">One per line, tried in order.</p>
-        <textarea
-          value={lines(draft.ipfsGateways)}
-          onChange={e => commit({ ...draft, ipfsGateways: parseLines(e.target.value) })}
-          rows={3}
-        />
-      </section>
-
-      <section>
-        <h3>onchfs proxy URL</h3>
-        <p className="muted">
-          Required to view onchfs artworks (many Ethereum & Base pieces store their code
-          on-chain). Run <code>pnpm --filter @whitehash/onchfs-proxy start</code> and point
-          this at it (e.g. http://localhost:3000), or deploy apps/onchfs-proxy.
-        </p>
-        <input
-          type="text"
-          placeholder="https://my-onchfs-proxy.example"
-          value={draft.onchfsProxy}
-          onChange={e => commit({ ...draft, onchfsProxy: e.target.value })}
-        />
-      </section>
-
-      <section>
-        <h3>EVM RPCs</h3>
-        <p className="muted">
-          Public RPCs cap log queries, so EVM wallet scans are slow. Paste an
-          archive-capable RPC (one line each) for fast lookups. Blank = library default.
-        </p>
-        {EVM_NETWORKS.map(({ chain, label }) => (
-          <label key={chain} className="field">
-            <span>{label}</span>
-            <textarea
-              rows={2}
-              value={lines(draft.rpcs[chain])}
+        <Section title="TzKT base URLs">
+          <Field.Root>
+            <Field.Label>Mainnet</Field.Label>
+            <Field.Control
+              render={<Input />}
+              type="text"
+              placeholder="https://api.tzkt.io"
+              value={draft.tzkt["tezos:mainnet"] ?? ""}
               onChange={e =>
                 commit({
                   ...draft,
-                  rpcs: { ...draft.rpcs, [chain]: parseLines(e.target.value) },
+                  tzkt: { ...draft.tzkt, "tezos:mainnet": e.target.value || undefined },
                 })
               }
             />
-          </label>
-        ))}
-      </section>
+          </Field.Root>
+          <Field.Root>
+            <Field.Label>Ghostnet</Field.Label>
+            <Field.Control
+              render={<Input />}
+              type="text"
+              placeholder="https://api.ghostnet.tzkt.io"
+              value={draft.tzkt["tezos:ghostnet"] ?? ""}
+              onChange={e =>
+                commit({
+                  ...draft,
+                  tzkt: { ...draft.tzkt, "tezos:ghostnet": e.target.value || undefined },
+                })
+              }
+            />
+          </Field.Root>
+        </Section>
+      </div>
 
-      <section>
-        <h3>TzKT base URLs</h3>
-        <label className="field">
-          <span>Mainnet</span>
-          <input
-            type="text"
-            placeholder="https://api.tzkt.io"
-            value={draft.tzkt["tezos:mainnet"] ?? ""}
-            onChange={e =>
-              commit({
-                ...draft,
-                tzkt: { ...draft.tzkt, "tezos:mainnet": e.target.value || undefined },
-              })
-            }
-          />
-        </label>
-        <label className="field">
-          <span>Ghostnet</span>
-          <input
-            type="text"
-            placeholder="https://api.ghostnet.tzkt.io"
-            value={draft.tzkt["tezos:ghostnet"] ?? ""}
-            onChange={e =>
-              commit({
-                ...draft,
-                tzkt: { ...draft.tzkt, "tezos:ghostnet": e.target.value || undefined },
-              })
-            }
-          />
-        </label>
-      </section>
-
-      <section>
-        <button
-          className="link danger"
-          onClick={() => commit(defaultSettings())}
-        >
-          reset to defaults
-        </button>
-      </section>
+      <Separator className="my-4" />
+      <Button variant="danger" size="sm" onClick={() => commit(defaultSettings())}>
+        reset to defaults
+      </Button>
     </div>
   )
 }

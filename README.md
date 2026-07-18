@@ -32,6 +32,7 @@ working as long as *any* RPC node and IPFS gateway exist.
 | [`@whitehash/resolve`](./packages/resolve) | URI → HTTP URL resolution (`ipfs://`, `onchfs://`, gateways) |
 | [`@whitehash/chain-reader`](./packages/chain-reader) | Wallet address → owned fxhash tokens, read directly from chain |
 | [`@whitehash/runtime`](./packages/runtime) | Extracted artwork runtime controller (live re-render / param exploration) |
+| [`@whitehash/ui`](./packages/ui) | Design system — composable Base UI + Tailwind primitives |
 
 ## Apps
 

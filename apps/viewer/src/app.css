@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@import "@whitehash/ui/theme.css";
+
+/* The design system is consumed as built JS, so scan its source for the class
+ * names Tailwind must generate. */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-canvas text-fg font-sans antialiased;
+  }
+}
+
+/* Diagonal-hatch placeholder for missing/loading media. */
+@utility hatch {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-surface-2),
+    var(--color-surface-2) 10px,
+    var(--color-surface) 10px,
+    var(--color-surface) 20px
+  );
+}

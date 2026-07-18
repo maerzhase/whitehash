@@ -1,5 +1,6 @@
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import type { ResolverConfig } from "@whitehash/resolve"
+import { Badge, Button, Card } from "@whitehash/ui"
 import { imageSourceUri, tokenKey } from "../render.js"
 import { GatewayImage } from "./GatewayImage.js"
 
@@ -23,31 +24,31 @@ export function TokenGrid({
 }) {
   if (tokens.length === 0) return null
   return (
-    <div className="grid">
-      {tokens.map(token => {
-        return (
-          <button
-            key={tokenKey(token)}
-            className="card"
-            onClick={() => onOpen(token)}
-          >
-            <div className="card-img">
-              <GatewayImage
-                uri={imageSourceUri(token, "thumbnail")}
-                chain={token.chain}
-                resolver={resolver}
-                alt={token.name ?? ""}
-                lazy
-              />
-              {!token.assigned ? <span className="chip warn">unrevealed</span> : null}
-            </div>
-            <div className="card-meta">
-              <span className="card-name">{token.name ?? `#${token.tokenId}`}</span>
-              <span className="chip">{chainLabel(token.chain)}</span>
-            </div>
-          </button>
-        )
-      })}
+    <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+      {tokens.map(token => (
+        <Button key={tokenKey(token)} variant="card" onClick={() => onOpen(token)}>
+          <Card.Media>
+            <GatewayImage
+              uri={imageSourceUri(token, "thumbnail")}
+              chain={token.chain}
+              resolver={resolver}
+              alt={token.name ?? ""}
+              lazy
+            />
+            {!token.assigned ? (
+              <Badge variant="warning" className="absolute left-2 top-2 bg-black/60">
+                unrevealed
+              </Badge>
+            ) : null}
+          </Card.Media>
+          <Card.Body>
+            <Card.Title>{token.name ?? `#${token.tokenId}`}</Card.Title>
+            <Card.Meta>
+              <Badge>{chainLabel(token.chain)}</Badge>
+            </Card.Meta>
+          </Card.Body>
+        </Button>
+      ))}
     </div>
   )
 }

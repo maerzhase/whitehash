@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { resolveUriAll, type ResolverConfig } from "@whitehash/resolve"
+import { cn } from "@whitehash/ui"
 
 /**
  * An <img> that falls back across every configured IPFS gateway. A single
@@ -39,13 +40,13 @@ export function GatewayImage({
   useEffect(() => setIdx(0), [uri, chain, configKey])
 
   const src = urls[idx]
-  if (!src) return <div className={`noimg ${className ?? ""}`} />
+  if (!src) return <div className={cn("hatch size-full", className)} />
 
   return (
     <img
       src={src}
       alt={alt}
-      className={className}
+      className={cn("block size-full object-cover", className)}
       loading={lazy ? "lazy" : undefined}
       onError={() => setIdx(i => i + 1)}
     />
