@@ -46,7 +46,8 @@ export function GatewayImage({
     <img
       src={src}
       alt={alt}
-      className={cn("block size-full object-cover", className)}
+      // Contain (never crop) so the whole artwork is visible inside its square.
+      className={cn("block size-full object-contain", className)}
       loading={lazy ? "lazy" : undefined}
       onError={() => setIdx(i => i + 1)}
     />

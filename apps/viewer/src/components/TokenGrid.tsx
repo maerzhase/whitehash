@@ -27,7 +27,7 @@ export function TokenGrid({
     <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
       {tokens.map(token => (
         <Button key={tokenKey(token)} variant="card" onClick={() => onOpen(token)}>
-          <Card.Media>
+          <Card.Media className="p-5">
             <GatewayImage
               uri={imageSourceUri(token, "thumbnail")}
               chain={token.chain}

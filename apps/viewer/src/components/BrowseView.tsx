@@ -54,7 +54,7 @@ function ProjectCard({
 
   return (
     <Button variant="card" onClick={onOpen}>
-      <Card.Media>
+      <Card.Media className="p-5">
         <GatewayImage uri={thumbUri} chain={project.chain} resolver={resolver} alt={name ?? ""} lazy />
       </Card.Media>
       <Card.Body>
