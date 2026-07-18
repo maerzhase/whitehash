@@ -7,8 +7,8 @@
  * (bg-surface, text-muted, border-line, rounded-card, …).
  */
 @theme {
-  /* Surfaces — near-black canvas rising to elevated overlays. */
-  --color-canvas: #0b0b0e;
+  /* Surfaces — pure-black canvas rising to elevated overlays. */
+  --color-canvas: #000000;
   --color-surface: #16161a;
   --color-surface-2: #1e1e23;
   --color-elevated: #26262c;
