@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { Badge, Button, Spinner, type BadgeProps } from "@whitehash/ui"
 import { loadSettings, resolverConfigFrom, type Settings } from "./settings.js"
 import { useWalletTokens, type ChainState } from "./useWalletTokens.js"
 import { tokenKey } from "./render.js"
-import { AddressForm, pushRecent } from "./components/AddressForm.js"
+import { pushRecent } from "./recent.js"
+import { WalletSearch } from "./components/WalletSearch.js"
 import { TokenGrid } from "./components/TokenGrid.js"
 import { TokenDetail } from "./components/TokenDetail.js"
 import { SettingsPanel } from "./components/SettingsPanel.js"
@@ -12,26 +13,17 @@ import { ProjectView } from "./components/ProjectView.js"
 import type { ChainId, WhitehashToken } from "@whitehash/chain-reader"
 
 type Route =
-  | { name: "home" }
+  | { name: "home" } // the project browser
   | { name: "settings" }
-  | { name: "browse" }
   | { name: "project"; chain: string; ref: string }
   | { name: "wallet"; address: string }
   | { name: "token"; address: string; key: string }
 
 function parseHash(): Route {
-  const hash = location.hash.replace(/^#/, "")
-  const parts = hash.split("/").filter(Boolean)
+  const parts = location.hash.replace(/^#/, "").split("/").filter(Boolean)
   if (parts[0] === "settings") return { name: "settings" }
-  if (parts[0] === "browse") {
-    if (parts[1] && parts[2]) {
-      return {
-        name: "project",
-        chain: decodeURIComponent(parts[1]),
-        ref: decodeURIComponent(parts[2]),
-      }
-    }
-    return { name: "browse" }
+  if (parts[0] === "p" && parts[1] && parts[2]) {
+    return { name: "project", chain: decodeURIComponent(parts[1]), ref: decodeURIComponent(parts[2]) }
   }
   if (parts[0] === "w" && parts[1]) {
     const address = decodeURIComponent(parts[1])
@@ -49,12 +41,12 @@ export function navigate(to: string): void {
   location.hash = to
 }
 
-function walletHash(address: string): string {
-  return `/w/${encodeURIComponent(address)}`
-}
+const walletHash = (address: string) => `/w/${encodeURIComponent(address)}`
+const projectHash = (chain: string, ref: string) =>
+  `/p/${encodeURIComponent(chain)}/${encodeURIComponent(ref)}`
 function tokenHash(token: WhitehashToken, address: string): string {
   const { chain, contract, tokenId } = token
-  return `/w/${encodeURIComponent(address)}/t/${encodeURIComponent(chain)}/${encodeURIComponent(
+  return `${walletHash(address)}/t/${encodeURIComponent(chain)}/${encodeURIComponent(
     contract,
   )}/${encodeURIComponent(tokenId)}`
 }
@@ -62,12 +54,45 @@ function tokenHash(token: WhitehashToken, address: string): string {
 export function App() {
   const [route, setRoute] = useState<Route>(parseHash())
   const [settings, setSettings] = useState<Settings>(loadSettings())
+  const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
     const onHash = () => setRoute(parseHash())
     window.addEventListener("hashchange", onHash)
     return () => window.removeEventListener("hashchange", onHash)
   }, [])
+
+  // Cmd/Ctrl+K or "/" opens wallet search (unless typing in a field).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      const typing = el && /^(input|textarea)$/i.test(el.tagName)
+      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || (e.key === "/" && !typing)) {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
+
+  // Per-view scroll restoration. Browse is kept mounted, so returning to it
+  // restores both its state and scroll position. Take over from the browser's
+  // own history scroll-restoration, which would otherwise reset us to 0.
+  const scrollMap = useRef<Record<string, number>>({})
+  useEffect(() => {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual"
+    const onScroll = () => {
+      scrollMap.current[location.hash || "#/"] = window.scrollY
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+  useLayoutEffect(() => {
+    const y = scrollMap.current[location.hash || "#/"] ?? 0
+    // Restore after layout settles (two frames covers the un-hide + reflow).
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, y)))
+  }, [route])
 
   const address =
     route.name === "wallet" || route.name === "token" ? route.address : null
@@ -78,9 +103,11 @@ export function App() {
     if (address) pushRecent(address)
   }, [address])
 
+  const isHome = route.name === "home"
+
   return (
     <div className="mx-auto max-w-[1100px] px-5 pb-16">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-canvas py-4">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-canvas py-4">
         <button
           className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-fg"
           onClick={() => navigate("/")}
@@ -95,8 +122,9 @@ export function App() {
               refresh
             </Button>
           ) : null}
-          <Button variant="ghost" size="sm" onClick={() => navigate("/browse")}>
-            browse
+          <Button variant="secondary" size="sm" onClick={() => setSearchOpen(true)}>
+            <SearchIcon />
+            Search wallet
           </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate("/settings")}>
             settings
@@ -105,42 +133,26 @@ export function App() {
       </header>
 
       <main>
-        {route.name === "home" ? (
-          <>
-            <AddressForm onSubmit={addr => navigate(walletHash(addr))} />
-            <p className="mt-6 text-center text-muted">
-              …or{" "}
-              <Button variant="link" onClick={() => navigate("/browse")}>
-                browse all published projects →
-              </Button>
-            </p>
-          </>
-        ) : null}
-
-        {route.name === "browse" ? (
+        {/* Browse is home and stays mounted so its filters, loaded projects, and
+            scroll survive drilling into a project and back. */}
+        <div hidden={!isHome}>
           <BrowseView
             settings={settings}
-            onOpenProject={(chain, ref) =>
-              navigate(`/browse/${encodeURIComponent(chain)}/${encodeURIComponent(ref)}`)
-            }
+            onOpenProject={(chain, ref) => navigate(projectHash(chain, ref))}
           />
-        ) : null}
+        </div>
 
         {route.name === "project" ? (
           <ProjectView
             chain={route.chain as ChainId}
             refId={route.ref}
             settings={settings}
-            onBack={() => navigate("/browse")}
+            onBack={() => navigate("/")}
           />
         ) : null}
 
         {route.name === "settings" ? (
-          <SettingsPanel
-            settings={settings}
-            onChange={setSettings}
-            onBack={() => history.back()}
-          />
+          <SettingsPanel settings={settings} onChange={setSettings} onBack={() => history.back()} />
         ) : null}
 
         {route.name === "wallet" && state ? (
@@ -162,7 +174,22 @@ export function App() {
           />
         ) : null}
       </main>
+
+      <WalletSearch
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onSubmit={addr => navigate(walletHash(addr))}
+      />
     </div>
+  )
+}
+
+function SearchIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+      <path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   )
 }
 

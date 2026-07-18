@@ -8,4 +8,5 @@ export {
   type ToggleGroupItemProps,
 } from "./components/toggle-group.js"
 export { Field, Input, Textarea } from "./components/field.js"
+export { Dialog, type DialogProps } from "./components/dialog.js"
 export { Spinner, Skeleton, Separator } from "./components/feedback.js"
