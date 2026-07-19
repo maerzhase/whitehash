@@ -1,6 +1,6 @@
 ---
 "@whitehash/ui": minor
-"@whitehash/viewer": minor
+"@whitehash/docs": minor
 ---
 
 Add `@whitehash/ui`, a composable design system built on Base UI + Tailwind v4: Button

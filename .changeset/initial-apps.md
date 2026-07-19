@@ -1,5 +1,5 @@
 ---
-"@whitehash/viewer": minor
+"@whitehash/docs": minor
 "@whitehash/onchfs-proxy": minor
 ---
 

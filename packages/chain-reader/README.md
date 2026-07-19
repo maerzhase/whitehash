@@ -22,6 +22,20 @@ Every token is normalized to a uniform `WhitehashToken` with a protocol-native
 `artifactUri` (already carrying `?fxhash=...#0x...` render state) and an `assigned` flag
 that is `false` for unrevealed "waiting to be signed" placeholders.
 
+## API
+
+| Export | Purpose |
+| --- | --- |
+| `createWhitehashClient(config)` | Bind wallet/project/resolver/render operations once |
+| `getWalletTokens()`, `getChainWalletTokens()` | Aggregate or single-chain ownership reads |
+| `listProjects()`, `getTezosProject()` | Discover and inspect projects |
+| `listTezosProjectTokens()`, `listEvmProjectTokens()` | Paginated minted iterations |
+| `renderArtifactUri()`, `artworkUrl()` | Correct live URL, including gentk-v1 separate seeds |
+| `imageSourceUri()`, `imageUrl()` | Select/resolve display or thumbnail media |
+| `liveViewStatus()` | Distinguish runnable, unrevealed, onchfs-proxy, and unavailable states |
+| `detectAddressChains()` | Select the mainnet/testnet chain set for an address |
+| `WhitehashToken`, `WhitehashProject`, `ChainReaderConfig` | Normalized public contracts |
+
 ## EVM ownership sources
 
 Two interchangeable sources, selected via `evm.ownershipSource`:
@@ -61,3 +75,9 @@ instances.
 ## Attribution
 
 Contract addresses and ABI fragments are copied from the fxhash monorepo (MIT).
+
+## Versioning
+
+Patches preserve normalized token/project shapes and network semantics; compatible reads,
+fields, and networks are minor; removing fields or changing ownership/render contracts is
+major. ESM-only; publication is not enabled yet.

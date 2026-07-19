@@ -1,6 +1,6 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-19 (rev 7).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-19 (rev 8).
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
@@ -34,6 +34,7 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
 | M10 layer sink + React | ✅ | Token semantics + bound client in L0; provider, cache, hooks in `@whitehash/react`; app-local copies removed |
 | M11 full design system | ✅ | Compound domain components + gallery/search blocks in `@whitehash/ui`; precompiled and Tailwind-v4 consumption verified |
 | M12 docs app | ✅ | `apps/docs` is a static docs-first site built exclusively from `@whitehash/ui`, with live API pages, guides, and showcases |
+| M13 publish readiness | ✅ | READMEs/API tables, semver policy, ESM/style/source exports, Changesets, and packed artifacts audited; nothing published |
 
 ## M10 complete — the headless React layer
 
@@ -87,6 +88,24 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
   covered the docs landing page, sticky API navigation, copy feedback, Artwork demo,
   known 133-token wallet, token detail, and live sandboxed iframe with a clean console.
 
+## M13 complete — release-ready, publication still gated
+
+- **Package documentation is complete.** The root layer chooser and the READMEs for
+  `resolve`, `chain-reader`, `react`, and `ui` document setup, public API tables, ESM
+  behavior, style paths where applicable, and semver discipline.
+- **Exports are audited.** Every toolkit package has explicit types/import/default ESM
+  conditions. UI additionally exposes `/styles.css`, `/theme.css`, and `/source`; pure
+  packages are marked side-effect-free while CSS is retained.
+- **Packed artifacts are verified.** `pnpm pack` includes declarations, built ESM,
+  READMEs, chain snapshots, UI precompiled CSS, and the intentional UI source tree; tests
+  and app files are excluded. Workspace dependencies are rewritten to package versions.
+- **Changesets is healthy.** Historical app entries follow the viewer→docs rename,
+  nonexistent ignores are gone, `changeset status` resolves all six current workspaces,
+  and the M10–M13 changesets remain queued for the maintainer-controlled first version.
+- **No release action taken.** Versions remain `0.0.0`, Changesets remains in private
+  versioning mode with restricted access, scope availability remains unverified, and no
+  npm command that publishes or changes package versions has run.
+
 ## Post-plan additions (beyond the original M0–M5 plan)
 
 All live-verified in the browser unless noted.
@@ -135,12 +154,12 @@ All live-verified in the browser unless noted.
   gap in the "no fxhash infra" guarantee that's baked into the chain, not chosen by us.
   Possible follow-up: reconstruct an IPFS metadata path where one exists.
 
-## Not yet built (from the plan)
+## Critical-path reframe complete
 
-Critical path after the reframe (M10–M12 are complete):
-
-- **M13** publish readiness — package READMEs, exports-map audit, changesets flip;
-  publishing itself stays a user decision.
+M10–M13 are complete. The toolkit layers, complete published design-system package,
+static docs/showcase app, and release artifacts are ready for maintainer review. npm
+scope verification, initial versioning, public-access configuration, and publication are
+explicitly deferred until the maintainer gives separate approval.
 
 Layer-0 packages, slot in when convenient:
 

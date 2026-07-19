@@ -33,6 +33,17 @@ await resolver.fetch("ipfs://Qm...") // tries each gateway in order
 | `temp://...` | `null` (fxhash pre-mint scheme, unsupported by design) |
 | unknown scheme / empty | `null` |
 
+## API
+
+| Export | Purpose |
+| --- | --- |
+| `defaultResolverConfig()` | Public IPFS defaults with onchfs deliberately disabled |
+| `resolveUri()` | Resolve one URI through the first configured gateway |
+| `resolveUriAll()` | Produce the ordered fallback URL list |
+| `fetchWithGatewayFallback()` | Fetch until one configured gateway succeeds |
+| `createResolver(config)` | Bind all resolver operations to one config |
+| `chainSlug()` | Convert a chain ID for the onchfs proxy path |
+
 `onchfsProxy` has no default — there is no fxhash-independent public onchfs gateway to
 default to. Self-host one with [`apps/onchfs-proxy`](../../apps/onchfs-proxy).
 
@@ -40,3 +51,9 @@ default to. Self-host one with [`apps/onchfs-proxy`](../../apps/onchfs-proxy).
 
 Resolution rules are a dependency-free port of the fxhash `proxyUrl` helper (MIT), with
 all fxhash-hosted default endpoints removed.
+
+## Versioning
+
+Patches preserve resolution output for supported schemes; compatible schemes/options are
+minor; changing existing URI semantics or return contracts is major. ESM-only;
+publication is not enabled yet.

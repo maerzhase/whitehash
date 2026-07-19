@@ -1,6 +1,6 @@
 ---
 "@whitehash/ui": minor
-"@whitehash/viewer": patch
+"@whitehash/docs": patch
 ---
 
 Publish the complete whitehash design system: compound artwork and token components,
