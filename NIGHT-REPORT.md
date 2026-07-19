@@ -13,6 +13,10 @@ Run date: 2026-07-19 (Europe/Lisbon)
   project lists, and composable `Card` + `Artwork` token recipes. Removed the public
   `useEvmProjectCard` and `TokenCard` seams, updated every docs/app/package call site,
   and added a five-scenario quickstart.
+- Phase 2 / M6: added `@whitehash/runtime` as a framework-free attributed extraction
+  with an optional `/react` entry, caller-injected content resolution, parameter codecs,
+  runtime controls, and iframe synchronization. Token details now have an Explore tab,
+  and the static docs include a live variations guide.
 
 ## Decisions
 
@@ -36,6 +40,13 @@ Run date: 2026-07-19 (Europe/Lisbon)
   wallet/contract addresses, CIDs/content URIs, and common pasted token/project URL
   paths. This keeps routing deterministic and avoids introducing an indexer or an
   fxhash-hosted runtime dependency.
+- M6 connector: require the caller to inject `resolveUri`; accept optional explicit
+  self-hosted emulator/legacy bases, but provide no fxhash-hosted default. This keeps
+  the runtime portable and preserves the toolkit's infrastructure hard line.
+- M6 package boundary: keep React optional behind `@whitehash/runtime/react`; the core
+  build contains no React import. Small deep-clone/merge/debounce helpers are local so
+  the extracted state semantics stay framework-free without expanding the dependency
+  surface.
 
 ## Verification evidence
 
@@ -51,10 +62,21 @@ Run date: 2026-07-19 (Europe/Lisbon)
 - M14 repository gate: `pnpm build && pnpm check-types && pnpm test` — green; docs
   static export generated 38/38 routes, 6/6 build tasks passed, 10/10 type tasks
   passed, and 10/10 test tasks passed (74 tests passed, 2 opt-in live tests skipped).
+- M6 controller acceptance: `pnpm --filter @whitehash/runtime test` exercises a fake
+  iframe end to end: changing Density changes serialized input bytes and its navigation
+  URL; changing the seed produces a second distinct URL.
+- M6 browser acceptance: served the 39-route static export, opened the live variations
+  guide, changed Density from 1 to 7 (fragment changed from
+  `#0x3ff0000000000000` to `#0x401c000000000000`), then clicked New hash and observed a
+  distinct render URL. The iframe reloaded and browser console warnings/errors were 0.
+- M6 repository gate: `pnpm build && pnpm check-types && pnpm test` — green; 7/7 build
+  tasks, 12/12 type tasks, and 12/12 test tasks; 75 tests passed and 2 opt-in live tests
+  skipped. `pnpm install --lockfile-only --offline --frozen-lockfile` also accepted the
+  regenerated lockfile.
 
 ## Parked or incomplete
 
-- M6, M9, M7, and closeout remain at this checkpoint.
+- M9, M7, and closeout remain at this checkpoint.
 
 ## Morning: look at these first
 

@@ -14,7 +14,7 @@ surface for one artwork, a wallet, project browsing, iterations, and plain TypeS
 
 | Layer | Package | Use it when |
 | --- | --- | --- |
-| Framework-free | [`@whitehash/resolve`](./packages/resolve), [`@whitehash/chain-reader`](./packages/chain-reader) | You want plain TypeScript, a custom renderer, or non-React integration |
+| Framework-free | [`@whitehash/resolve`](./packages/resolve), [`@whitehash/chain-reader`](./packages/chain-reader), [`@whitehash/runtime`](./packages/runtime) | You want plain TypeScript, a custom renderer, interactive variations, or non-React integration |
 | Headless React | [`@whitehash/react`](./packages/react) | You want hooks for fetching, caching, gateway fallback, and iframe state |
 | Complete UI | [`@whitehash/ui`](./packages/ui) | You want composable artwork, token, gallery, and search components |
 

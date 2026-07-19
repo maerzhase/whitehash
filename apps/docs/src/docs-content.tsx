@@ -296,6 +296,23 @@ import { WhitehashProvider } from "@whitehash/ui"
 export function Providers({ children }: { children: React.ReactNode }) {
   return <WhitehashProvider config={config}>{children}</WhitehashProvider>
 }` },
+  variations: { title: "Explore variations", description: "Drive the original content-addressed generator with a different seed or declared fx(params), entirely in the browser.", code: `import { BlockchainType, createRuntimeConnector } from "@whitehash/runtime"
+import { ArtworkIframe, useRuntimeController } from "@whitehash/runtime/react"
+
+const connector = createRuntimeConnector({
+  resolveUri: uri => client.resolveUri(uri, { chain: token.chain }),
+})
+const runtime = useRuntimeController({
+  state: {
+    cid: token.generatorUri!,
+    chain: BlockchainType.TEZOS,
+    hash: token.iterationHash!,
+    definition: token.raw.params,
+  },
+  options: { connector, autoRefresh: true },
+})
+
+return <ArtworkIframe ref={runtime.ref} />` },
   proxy: { title: "Self-host onchfs", description: "Serve onchfs:// bytes over HTTP so browsers can load on-chain artwork code in an iframe.", code: `# Node, container, or local development
 PORT=3939 pnpm --filter @whitehash/onchfs-proxy start
 
@@ -320,6 +337,7 @@ function GuideDetails({ slug }: { slug: string }) {
 })
 
 const wallet = useWalletTokens(address, { client })`} /></DocsSection></>
+  if (slug === "variations") return <><DocsSection title="Try it on any token"><div className="docs-prose"><p>Open a token from a wallet or project, then choose <strong>Explore</strong>. The docs app derives the generator URI, original seed, snippet version, serialized input bytes, and published parameter definitions from normalized token metadata.</p><p><strong>New hash</strong> produces a different render URL immediately. When a project publishes fx(params), editing a control serializes the new values and reloads the isolated artwork frame.</p></div></DocsSection><DocsSection title="Infrastructure stays yours"><Callout>The runtime has no fxhash-hosted default. Its connector accepts an injected <code>resolveUri</code>, plus optional self-hosted emulator or legacy-wrapper bases.</Callout></DocsSection></>
   if (slug === "proxy") return <><DocsSection title="What is already in the repository"><div className="docs-prose"><p><code>apps/onchfs-proxy</code> contains the working Hono service, a Node entry, and a Vercel catch-all adapter. It supports Tezos mainnet/Ghostnet, Ethereum/Sepolia, and Base/Base Sepolia.</p><p>There is not yet a dedicated Cloudflare Worker deployment entry. The Hono app exposes a standard <code>fetch</code> handler and is structurally portable, but the onchfs dependency bundle should be verified against Worker limits before calling it supported.</p></div></DocsSection><DocsSection title="Request and caching"><CodeBlock language="text" code={`GET /eip155-8453/{cid}/index.html?fxhash=…
   → choose the Base resolver
   → read content-addressed bytes from configured Base RPCs

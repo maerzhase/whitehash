@@ -681,7 +681,7 @@ folds into M12.
 - **M5 — viewer** ✅ (now the seed of apps/docs): Acceptance: enter a known collector
   address → grid renders; open a token → live artwork runs in the iframe from a public
   gateway; works with `pnpm build && npx serve dist` (no dev server); settings persist.
-- **M6 — runtime extraction + explore mode** (§4.5; ships as layer-0 `@whitehash/runtime`
+- **M6 — runtime extraction + explore mode** ✅ (§4.5; ships as layer-0 `@whitehash/runtime`
   with a `/react` subpath). Acceptance: for a params token, editing a param re-renders
   live; new-hash button produces a different variation.
 - **M7 — archive-cli**. Acceptance: archive a wallet, disconnect network, open the

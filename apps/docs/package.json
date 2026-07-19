@@ -16,6 +16,7 @@
     "@whitehash/chain-reader": "workspace:*",
     "@whitehash/react": "workspace:*",
     "@whitehash/resolve": "workspace:*",
+    "@whitehash/runtime": "workspace:*",
     "@whitehash/ui": "workspace:*",
     "geist": "1.7.2",
     "next": "^16.2.10",

@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { App } from "../../src/App"
 
-const GUIDE_SLUGS = ["getting-started", "how-it-works", "configuration", "theming", "next", "proxy"]
+const GUIDE_SLUGS = ["getting-started", "how-it-works", "configuration", "theming", "variations", "next", "proxy"]
 const API_SLUGS = [
   "whitehash-provider", "use-whitehash", "use-wallet-tokens", "use-projects", "use-project",
   "use-gateway-image", "use-artwork-frame", "button", "card", "badge",

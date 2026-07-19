@@ -1,6 +1,6 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-19 (rev 8).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 9).
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
@@ -18,7 +18,7 @@ policy, and app→package extraction inventory: **PLAN §4.7**; sequencing: **M1
 hooks) → M11 (ui = full design system) → M12 (docs app) → M13 (publish readiness)**.
 The data layer (resolve/chain-reader/proxy) is unchanged by this.
 
-`pnpm build && pnpm check-types && pnpm test` all green (6 packages, 67 tests + 2 opt-in
+`pnpm build && pnpm check-types && pnpm test` all green (7 packages, 75 tests + 2 opt-in
 live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain-reader test`.
 
 ## Done — the core viewer works end-to-end
@@ -35,6 +35,8 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
 | M11 full design system | ✅ | Compound domain components + gallery/search blocks in `@whitehash/ui`; precompiled and Tailwind-v4 consumption verified |
 | M12 docs app | ✅ | `apps/docs` is a static docs-first site built exclusively from `@whitehash/ui`, with live API pages, guides, and showcases |
 | M13 publish readiness | ✅ | READMEs/API tables, semver policy, ESM/style/source exports, Changesets, and packed artifacts audited; nothing published |
+| M14 API ergonomics | ✅ | Five-scenario quickstart independently built; typed refs/universal client surface; chain-named/card seams removed |
+| M6 runtime | ✅ | Framework-free core + `/react`; injected resolution; live params/new-hash variations acceptance passed |
 
 ## M10 complete — the headless React layer
 
@@ -161,23 +163,21 @@ static docs/showcase app, and release artifacts are ready for maintainer review.
 scope verification, initial versioning, public-access configuration, and publication are
 explicitly deferred until the maintainer gives separate approval.
 
-## Next up: M14 — API ergonomics & composability review (gates first publish)
+## M14 complete — API ergonomics & composability review
 
-Added 2026-07-19 (PLAN §4.8 + §5 M14): a README-driven redesign pass over every public
-export — the API must be understandable at first glimpse. Breaking changes are free
-until the first publish, so this happens BEFORE any release. Recorded critiques to
-resolve: (1) `useProjects`/`useProject` — justify two hooks or unify via props;
-(2) `useEvmProjectCard` — chain-specific leakage; enrichment must be universal and
-chain-invisible; (3) opaque refs/addresses — first-class `ProjectRef`/`TokenRef` +
-`parseRef`/`formatRef` + a `resolveInput()` that accepts pasted fxhash URLs/CIDs/
-addresses; (4) `TokenCard` collapses into a `Card` + `Artwork.*` composition recipe
-(keep `TokenGrid` only if it earns its place; blocks tier stays). Method + acceptance in
-PLAN §4.8.
+The README-driven redesign is complete. `ProjectRef`/`TokenRef`, `parseRef`/`formatRef`,
+`resolveInput`, and universal client methods now form the public data vocabulary.
+`useProjects` and `useProject` remain deliberately parallel list/detail hooks;
+progressive hydration replaced `useEvmProjectCard`; token cards are documented
+`Card` + `Artwork.*` recipes while `TokenGrid` owns layout only. A fresh agent built all
+five quickstart scenarios in an isolated Vite app using only the quickstart text.
 
 Layer-0 packages, slot in when convenient:
 
-- **M6** `@whitehash/runtime` — runtime controller for live param exploration /
-  re-seeding (extraction map in PLAN §4.5); do before M11 if `Artwork.Explore` is wanted.
+- **M6 complete** — `@whitehash/runtime` provides the attributed framework-free runtime
+  extraction plus `/react`. URI resolution is injected, the docs expose token-level
+  Explore and a live variations guide, and browser acceptance verified both parameter
+  serialization/re-rendering and a distinct new-hash variation.
 - **M7** `apps/archive-cli` — wallet → self-contained offline folder (PLAN §4.6).
 - **M9** `@whitehash/onchfs-sw` — client-side onchfs via a service worker (PLAN §5 M9).
 
