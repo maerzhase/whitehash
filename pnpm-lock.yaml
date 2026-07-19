@@ -54,6 +54,9 @@ importers:
       '@whitehash/chain-reader':
         specifier: workspace:*
         version: link:../../packages/chain-reader
+      '@whitehash/react':
+        specifier: workspace:*
+        version: link:../../packages/react
       '@whitehash/resolve':
         specifier: workspace:*
         version: link:../../packages/resolve
@@ -63,9 +66,6 @@ importers:
       geist:
         specifier: 1.7.2
         version: 1.7.2(next@16.2.10(@babel/core@7.29.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
-      idb-keyval:
-        specifier: 6.2.2
-        version: 6.2.2
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -116,6 +116,31 @@ importers:
       tsx:
         specifier: 4.20.6
         version: 4.20.6
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/node@20.19.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.20.6)
+
+  packages/react:
+    dependencies:
+      '@whitehash/chain-reader':
+        specifier: workspace:*
+        version: link:../chain-reader
+      idb-keyval:
+        specifier: 6.2.2
+        version: 6.2.2
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.2
+        version: 19.2.2
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      tsup:
+        specifier: 8.5.0
+        version: 8.5.0(jiti@2.7.0)(postcss@8.5.17)(tsx@4.20.6)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3

@@ -1,30 +1,28 @@
-/**
- * Data hooks for the contract-first project browser: paginated project lists
- * and per-project iteration lists, for both chains.
- */
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
-  getEvmProjectInfo,
-  getEvmProjectPreview,
-  getTezosProject,
   isEvmChain,
   isTezosChain,
-  listEvmProjectTokens,
-  listProjects,
-  listTezosProjectTokens,
   type ChainId,
   type ListOrder,
+  type WhitehashClient,
   type WhitehashProject,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
-import { chainReaderConfigFrom, type Settings } from "./settings.js"
+import { useWhitehash } from "./context.js"
 
-export function useProjects(
-  chain: ChainId,
-  issuerVersion: string,
-  order: ListOrder,
-  settings: Settings,
-) {
+export interface UseProjectsOptions {
+  issuerVersion?: string
+  order?: ListOrder
+  limit?: number
+  client?: WhitehashClient
+}
+
+export function useProjects(chain: ChainId, options: UseProjectsOptions = {}) {
+  const context = useWhitehash()
+  const client = options.client ?? context.client
+  const issuerVersion = options.issuerVersion
+  const order = options.order ?? "newest"
+  const limit = options.limit
   const [projects, setProjects] = useState<WhitehashProject[]>([])
   const [cursor, setCursor] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -37,22 +35,24 @@ export function useProjects(
       setLoading(true)
       setError(null)
       try {
-        const config = chainReaderConfigFrom(settings)
-        const page = await listProjects(chain, config, {
+        const page = await client.listProjects(chain, {
           issuerVersion,
           cursor: fromCursor,
           order,
+          limit,
         })
         if (runId.current !== id) return
-        setProjects(prev => (append ? [...prev, ...page.projects] : page.projects))
+        setProjects(previous => append ? [...previous, ...page.projects] : page.projects)
         setCursor(page.cursor)
-      } catch (err) {
-        if (runId.current === id) setError(err instanceof Error ? err.message : String(err))
+      } catch (cause) {
+        if (runId.current === id) {
+          setError(cause instanceof Error ? cause.message : String(cause))
+        }
       } finally {
         if (runId.current === id) setLoading(false)
       }
     },
-    [chain, issuerVersion, order, settings],
+    [chain, client, issuerVersion, limit, order],
   )
 
   useEffect(() => {
@@ -63,17 +63,24 @@ export function useProjects(
 
   const loadMore = useCallback(() => {
     if (cursor && !loading) void load(true, cursor)
-  }, [cursor, loading, load])
+  }, [cursor, load, loading])
 
   return { projects, loading, error, hasMore: cursor !== null, loadMore }
+}
+
+export interface UseProjectOptions {
+  order?: ListOrder
+  client?: WhitehashClient
 }
 
 export function useProject(
   chain: ChainId,
   ref: string,
-  order: ListOrder,
-  settings: Settings,
+  options: UseProjectOptions = {},
 ) {
+  const context = useWhitehash()
+  const client = options.client ?? context.client
+  const order = options.order ?? "oldest"
   const [project, setProject] = useState<WhitehashProject | null>(null)
   const [tokens, setTokens] = useState<WhitehashToken[]>([])
   const [cursor, setCursor] = useState<string | null>(null)
@@ -83,28 +90,31 @@ export function useProject(
 
   useEffect(() => {
     const id = ++runId.current
-    const config = chainReaderConfigFrom(settings)
     setProject(null)
     setTokens([])
     setCursor(null)
     setLoading(true)
     setError(null)
-    ;(async () => {
+    void (async () => {
       try {
         if (isTezosChain(chain)) {
-          const proj = await getTezosProject(chain, ref, config)
+          const value = await client.getProject(chain, ref)
           if (runId.current !== id) return
-          setProject(proj)
-          if (proj?.name) {
-            const page = await listTezosProjectTokens(chain, proj.name, config, { order })
+          setProject(value)
+          if (value?.name) {
+            const page = await client.listProjectTokens(chain, ref, {
+              projectName: value.name,
+              order,
+            })
             if (runId.current !== id) return
             setTokens(page.tokens)
             setCursor(page.cursor)
           }
         } else if (isEvmChain(chain)) {
-          const info = await getEvmProjectInfo(chain, ref, config)
-          if (runId.current !== id) return
-          const page = await listEvmProjectTokens(chain, ref, config)
+          const [info, page] = await Promise.all([
+            client.getEvmProjectInfo(chain, ref),
+            client.listProjectTokens(chain, ref),
+          ])
           if (runId.current !== id) return
           setProject({
             chain,
@@ -113,66 +123,75 @@ export function useProject(
             description: null,
             displayUri: page.tokens[0]?.displayUri ?? null,
             thumbnailUri: page.tokens[0]?.thumbnailUri ?? null,
-            editions: null, // EVM cap isn't exposed via standard ERC-721
+            editions: null,
             minted: info.minted ?? null,
             raw: info,
           })
           setTokens(page.tokens)
           setCursor(page.cursor)
         }
-      } catch (err) {
-        if (runId.current === id) setError(err instanceof Error ? err.message : String(err))
+      } catch (cause) {
+        if (runId.current === id) {
+          setError(cause instanceof Error ? cause.message : String(cause))
+        }
       } finally {
         if (runId.current === id) setLoading(false)
       }
     })()
-  }, [chain, ref, order, settings])
+  }, [chain, client, order, ref])
 
   const loadMore = useCallback(async () => {
-    if (!cursor) return
-    const config = chainReaderConfigFrom(settings)
-    if (isTezosChain(chain) && project?.name) {
-      const page = await listTezosProjectTokens(chain, project.name, config, {
+    if (!cursor || loading) return
+    setLoading(true)
+    setError(null)
+    try {
+      const page = await client.listProjectTokens(chain, ref, {
         cursor,
         order,
+        projectName: project?.name ?? undefined,
       })
-      setTokens(prev => [...prev, ...page.tokens])
+      setTokens(previous => [...previous, ...page.tokens])
       setCursor(page.cursor)
-    } else if (isEvmChain(chain)) {
-      const page = await listEvmProjectTokens(chain, ref, config, { cursor })
-      setTokens(prev => [...prev, ...page.tokens])
-      setCursor(page.cursor)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setLoading(false)
     }
-  }, [chain, ref, cursor, order, project, settings])
+  }, [chain, client, cursor, loading, order, project?.name, ref])
 
   return { project, tokens, loading, error, hasMore: cursor !== null, loadMore }
 }
 
-/** Lazy name/supply/preview for an EVM project card. */
+/** Lazy name, supply, and image details for an EVM project card. */
 export function useEvmProjectCard(
   chain: ChainId,
   contract: string,
-  settings: Settings,
+  options: { client?: WhitehashClient } = {},
 ) {
+  const context = useWhitehash()
+  const client = options.client ?? context.client
   const [name, setName] = useState<string | null>(null)
   const [thumb, setThumb] = useState<string | null>(null)
   const [minted, setMinted] = useState<number | null>(null)
+
   useEffect(() => {
-    if (!isEvmChain(chain)) return
+    if (!isEvmChain(chain) || !contract) return
     let alive = true
-    const config = chainReaderConfigFrom(settings)
-    void (async () => {
-      const info = await getEvmProjectInfo(chain, contract, config)
-      if (alive) {
-        if (info.name) setName(info.name)
-        if (info.minted !== undefined) setMinted(info.minted ?? null)
-      }
-      const preview = await getEvmProjectPreview(chain, contract, config)
-      if (alive) setThumb(preview)
-    })()
+    void Promise.all([
+      client.getEvmProjectInfo(chain, contract),
+      client.getEvmProjectPreview(chain, contract),
+    ]).then(([info, preview]) => {
+      if (!alive) return
+      setName(info.name ?? null)
+      setMinted(info.minted ?? null)
+      setThumb(preview)
+    }).catch(() => {
+      // Card enrichment is best-effort; the project remains navigable by ref.
+    })
     return () => {
       alive = false
     }
-  }, [chain, contract, settings])
+  }, [chain, client, contract])
+
   return { name, thumb, minted }
 }

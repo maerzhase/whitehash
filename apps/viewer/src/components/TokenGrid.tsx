@@ -1,7 +1,5 @@
-import type { WhitehashToken } from "@whitehash/chain-reader"
-import type { ResolverConfig } from "@whitehash/resolve"
+import { imageSourceUri, tokenKey, type WhitehashToken } from "@whitehash/chain-reader"
 import { Badge, Button, Card, Skeleton } from "@whitehash/ui"
-import { imageSourceUri, tokenKey } from "../render.js"
 import { GatewayImage } from "./GatewayImage.js"
 
 function chainLabel(chain: string): string {
@@ -36,11 +34,9 @@ export function TokenGridSkeleton({ count = 8 }: { count?: number }) {
 
 export function TokenGrid({
   tokens,
-  resolver,
   onOpen,
 }: {
   tokens: WhitehashToken[]
-  resolver: ResolverConfig
   onOpen: (token: WhitehashToken) => void
 }) {
   if (tokens.length === 0) return null
@@ -55,7 +51,6 @@ export function TokenGrid({
               <GatewayImage
                 uri={imageSourceUri(token, "thumbnail")}
                 chain={token.chain}
-                resolver={resolver}
                 alt={token.name ?? ""}
                 lazy
               />

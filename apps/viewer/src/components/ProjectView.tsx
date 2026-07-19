@@ -5,9 +5,8 @@ import {
   type ListOrder,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
+import { useProject } from "@whitehash/react"
 import { Badge, Button } from "@whitehash/ui"
-import { resolverConfigFrom, type Settings } from "../settings.js"
-import { useProject } from "../useBrowse.js"
 import { SortToggle, editionsLabel } from "./BrowseView.js"
 import { TokenGrid, TokenGridSkeleton } from "./TokenGrid.js"
 import { TokenDetail } from "./TokenDetail.js"
@@ -15,26 +14,18 @@ import { TokenDetail } from "./TokenDetail.js"
 export function ProjectView({
   chain,
   refId,
-  settings,
   onBack,
 }: {
   chain: ChainId
   refId: string
-  settings: Settings
   onBack: () => void
 }) {
   const [order, setOrder] = useState<ListOrder>("oldest")
-  const { project, tokens, loading, error, hasMore, loadMore } = useProject(
-    chain,
-    refId,
-    order,
-    settings,
-  )
+  const { project, tokens, loading, error, hasMore, loadMore } = useProject(chain, refId, { order })
   const [open, setOpen] = useState<WhitehashToken | null>(null)
-  const resolver = resolverConfigFrom(settings)
 
   if (open) {
-    return <TokenDetail token={open} resolver={resolver} onBack={() => setOpen(null)} />
+    return <TokenDetail token={open} onBack={() => setOpen(null)} />
   }
 
   const label = project ? editionsLabel(project.minted, project.editions) : ""
@@ -66,7 +57,7 @@ export function ProjectView({
       {loading && tokens.length === 0 ? (
         <TokenGridSkeleton />
       ) : (
-        <TokenGrid tokens={tokens} resolver={resolver} onOpen={setOpen} />
+        <TokenGrid tokens={tokens} onOpen={setOpen} />
       )}
 
       <div className="mt-4 flex min-h-10 items-start" aria-live="polite">

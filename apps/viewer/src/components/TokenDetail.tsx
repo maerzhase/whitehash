@@ -1,8 +1,7 @@
 import type { ReactNode } from "react"
 import type { WhitehashToken } from "@whitehash/chain-reader"
-import type { ResolverConfig } from "@whitehash/resolve"
+import { useWhitehash } from "@whitehash/react"
 import { Button } from "@whitehash/ui"
-import { artworkUrl } from "../render.js"
 import { ArtworkFrame } from "./ArtworkFrame.js"
 
 function Row({ label, children, mono }: { label: string; children: ReactNode; mono?: boolean }) {
@@ -18,21 +17,20 @@ function Row({ label, children, mono }: { label: string; children: ReactNode; mo
 
 export function TokenDetail({
   token,
-  resolver,
   onBack,
 }: {
   token: WhitehashToken
-  resolver: ResolverConfig
   onBack: () => void
 }) {
-  const live = artworkUrl(token, resolver)
+  const { client } = useWhitehash()
+  const live = client.artworkUrl(token)
   return (
     <div className="pt-5">
       <Button variant="link" onClick={onBack}>
         ← Back
       </Button>
       <div className="mt-5 grid gap-8 md:grid-cols-[1.4fr_1fr]">
-        <ArtworkFrame token={token} resolver={resolver} />
+        <ArtworkFrame token={token} />
         <div>
           <h2 className="mb-3 font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">
             {token.name ?? `#${token.tokenId}`}

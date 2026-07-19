@@ -1,38 +1,30 @@
-/**
- * Turn a token into the URLs the UI needs: the live artwork URL (for the
- * sandboxed iframe) and image URLs (for grid/detail previews). The token's
- * chain is threaded through so `onchfs://` artifacts route through the proxy
- * with the correct network.
- */
 import { resolveUri, type ResolverConfig } from "@whitehash/resolve"
-import type { WhitehashToken } from "@whitehash/chain-reader"
+import type { WhitehashToken } from "./types.js"
 
 /**
- * The protocol-native render URI with the token's seed applied. Most fxhash
- * tokens (Tezos gentk v2/v3, EVM) already embed `?fxhash=...` in artifactUri,
- * but gentk v1 stores the seed only in `iterationHash` and expects the consumer
- * to append it — without this, a v1 piece renders a random iteration instead of
- * the one the token actually is.
+ * Return the protocol-native render URI with the token seed applied.
+ *
+ * gentk v1 stores its seed separately in `iterationHash`; newer Tezos tokens
+ * and EVM tokens already carry their render state in the artifact URI.
  */
 export function renderArtifactUri(token: WhitehashToken): string | null {
   if (!token.artifactUri) return null
-  const uri = token.artifactUri
-  if (token.iterationHash && !/[?#]/.test(uri)) {
-    return `${uri}?fxhash=${encodeURIComponent(token.iterationHash)}`
+  if (token.iterationHash && !/[?#]/.test(token.artifactUri)) {
+    return `${token.artifactUri}?fxhash=${encodeURIComponent(token.iterationHash)}`
   }
-  return uri
+  return token.artifactUri
 }
 
+/** Resolve a token's live artwork URL for its chain. */
 export function artworkUrl(
   token: WhitehashToken,
   resolver: ResolverConfig,
 ): string | null {
   const uri = renderArtifactUri(token)
-  if (!uri) return null
-  return resolveUri(uri, resolver, { chain: token.chain })
+  return uri ? resolveUri(uri, resolver, { chain: token.chain }) : null
 }
 
-/** The raw (protocol-native) image URI to display, thumbnail preferred. */
+/** Pick a protocol-native image URI, falling back to the other image size. */
 export function imageSourceUri(
   token: WhitehashToken,
   prefer: "display" | "thumbnail" = "thumbnail",
@@ -42,19 +34,14 @@ export function imageSourceUri(
   return first ?? second ?? null
 }
 
+/** Resolve the preferred token image URL for its chain. */
 export function imageUrl(
   token: WhitehashToken,
   resolver: ResolverConfig,
   prefer: "display" | "thumbnail" = "thumbnail",
 ): string | null {
   const uri = imageSourceUri(token, prefer)
-  if (!uri) return null
-  return resolveUri(uri, resolver, { chain: token.chain })
-}
-
-/** True when the artwork can be shown live (revealed + resolvable). */
-export function canRenderLive(token: WhitehashToken, resolver: ResolverConfig): boolean {
-  return liveViewStatus(token, resolver).kind === "ok"
+  return uri ? resolveUri(uri, resolver, { chain: token.chain }) : null
 }
 
 export type LiveViewStatus =
@@ -63,11 +50,7 @@ export type LiveViewStatus =
   | { kind: "needs-onchfs-proxy" }
   | { kind: "unavailable" }
 
-/**
- * Why (or whether) a token can be shown live. Distinguishes the common
- * "artwork is on onchfs but no proxy is configured" case so the UI can give an
- * actionable hint instead of a dead end.
- */
+/** Explain whether a token can be rendered live and, if not, why. */
 export function liveViewStatus(
   token: WhitehashToken,
   resolver: ResolverConfig,
@@ -83,6 +66,15 @@ export function liveViewStatus(
   return { kind: "unavailable" }
 }
 
+/** True when the artwork is revealed and resolvable with this configuration. */
+export function canRenderLive(
+  token: WhitehashToken,
+  resolver: ResolverConfig,
+): boolean {
+  return liveViewStatus(token, resolver).kind === "ok"
+}
+
+/** Stable identity for a token across every supported chain. */
 export function tokenKey(token: WhitehashToken): string {
   return `${token.chain}/${token.contract}/${token.tokenId}`
 }

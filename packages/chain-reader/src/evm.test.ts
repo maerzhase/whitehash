@@ -14,33 +14,27 @@ describe("isEvmAddress", () => {
   })
 })
 
-// Opt-in live integration test against a known Base holder, bounded with
-// `maxBlock` so it stays a handful of RPC calls. Set WHITEHASH_LIVE_TEST=1.
+// Opt-in live integration test against a known Base holder. Set
+// WHITEHASH_LIVE_TEST=1.
 const live = process.env.WHITEHASH_LIVE_TEST === "1" ? describe : describe.skip
 live("getEvmWalletTokens (live Base)", () => {
   // "In the Folds" — collection 0xfe38... on Base, holder owns iterations 1-3,
-  // minted shortly after the collection was created at block 24792053.
+  // alongside tokens from other collections discovered by Blockscout.
   const COLLECTION = "0xfe38c07c5ef421b301ba07fc4c03041c848af09e"
-  const CREATED = 24792053
   const HOLDER = "0x2ce8641036f22627402bd4b1b7d1ed8a8499b205"
 
   const config: ChainReaderConfig = {
     resolver: defaultResolverConfig(),
-    evm: {
-      maxBlock: CREATED + 9000,
-      snapshot: {
-        chainId: "eip155:8453",
-        lastScannedBlock: CREATED - 1,
-        collections: [{ address: COLLECTION, projectId: "?", createdAtBlock: CREATED }],
-      },
-    },
   }
 
   it("reads owned tokens with resolvable metadata", async () => {
     const tokens = await getEvmWalletTokens(HOLDER, "eip155:8453", config)
     expect(tokens.length).toBeGreaterThanOrEqual(1)
-    for (const t of tokens) {
-      expect(t.contract.toLowerCase()).toBe(COLLECTION)
+    const collectionTokens = tokens.filter(
+      token => token.contract.toLowerCase() === COLLECTION,
+    )
+    expect(collectionTokens.length).toBeGreaterThanOrEqual(1)
+    for (const t of collectionTokens) {
       expect(t.assigned).toBe(true)
       expect(t.iterationHash).toMatch(/^0x[0-9a-f]+$/i)
       expect(t.artifactUri).toMatch(/^(ipfs|onchfs):\/\//)

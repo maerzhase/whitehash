@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { Badge, Button, Spinner, type BadgeProps } from "@whitehash/ui"
-import { loadSettings, resolverConfigFrom, type Settings } from "./settings.js"
-import { useWalletTokens, type ChainState } from "./useWalletTokens.js"
-import { tokenKey } from "./render.js"
+import { WhitehashProvider, useWalletTokens, type ChainState } from "@whitehash/react"
+import { tokenKey, type ChainId, type WhitehashToken } from "@whitehash/chain-reader"
+import { chainReaderConfigFrom, loadSettings, type Settings } from "./settings.js"
 import { pushRecent } from "./recent.js"
 import { WalletSearch } from "./components/WalletSearch.js"
 import { TokenGrid } from "./components/TokenGrid.js"
@@ -10,7 +10,6 @@ import { TokenDetail } from "./components/TokenDetail.js"
 import { SettingsPanel } from "./components/SettingsPanel.js"
 import { BrowseView } from "./components/BrowseView.js"
 import { ProjectView } from "./components/ProjectView.js"
-import type { ChainId, WhitehashToken } from "@whitehash/chain-reader"
 
 type Route =
   | { name: "home" } // the project browser
@@ -52,8 +51,26 @@ function tokenHash(token: WhitehashToken, address: string): string {
 }
 
 export function App() {
-  const [route, setRoute] = useState<Route>(parseHash())
   const [settings, setSettings] = useState<Settings>(loadSettings())
+  const config = useMemo(
+    () => ({ ...chainReaderConfigFrom(settings), mode: settings.mode }),
+    [settings],
+  )
+  return (
+    <WhitehashProvider config={config}>
+      <ViewerApp settings={settings} onSettingsChange={setSettings} />
+    </WhitehashProvider>
+  )
+}
+
+function ViewerApp({
+  settings,
+  onSettingsChange,
+}: {
+  settings: Settings
+  onSettingsChange: (settings: Settings) => void
+}) {
+  const [route, setRoute] = useState<Route>(parseHash())
   const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
@@ -96,8 +113,7 @@ export function App() {
 
   const address =
     route.name === "wallet" || route.name === "token" ? route.address : null
-  const { state, loading, refresh } = useWalletTokens(address, settings)
-  const resolver = useMemo(() => resolverConfigFrom(settings), [settings])
+  const { state, loading, refresh } = useWalletTokens(address)
 
   useEffect(() => {
     if (address) pushRecent(address)
@@ -142,7 +158,6 @@ export function App() {
             scroll survive drilling into a project and back. */}
         <div hidden={!isHome}>
           <BrowseView
-            settings={settings}
             onOpenProject={(chain, ref) => navigate(projectHash(chain, ref))}
           />
         </div>
@@ -151,20 +166,18 @@ export function App() {
           <ProjectView
             chain={route.chain as ChainId}
             refId={route.ref}
-            settings={settings}
             onBack={() => navigate("/")}
           />
         ) : null}
 
         {route.name === "settings" ? (
-          <SettingsPanel settings={settings} onChange={setSettings} onBack={() => history.back()} />
+          <SettingsPanel settings={settings} onChange={onSettingsChange} onBack={() => history.back()} />
         ) : null}
 
         {route.name === "wallet" && state ? (
           <WalletView
             state={state}
             loading={loading}
-            resolver={resolver}
             onOpen={t => navigate(tokenHash(t, state.address))}
           />
         ) : null}
@@ -174,7 +187,6 @@ export function App() {
             tokenKeyWanted={route.key}
             tokens={state.tokens}
             loading={loading}
-            resolver={resolver}
             onBack={() => navigate(walletHash(route.address))}
           />
         ) : null}
@@ -209,12 +221,10 @@ const STATUS_VARIANT: Record<ChainState["status"], BadgeProps["variant"]> = {
 function WalletView({
   state,
   loading,
-  resolver,
   onOpen,
 }: {
   state: NonNullable<ReturnType<typeof useWalletTokens>["state"]>
   loading: boolean
-  resolver: ReturnType<typeof resolverConfigFrom>
   onOpen: (t: WhitehashToken) => void
 }) {
   const chainStates = Object.values(state.chains)
@@ -238,7 +248,7 @@ function WalletView({
         </p>
       ) : null}
 
-      <TokenGrid tokens={state.tokens} resolver={resolver} onOpen={onOpen} />
+      <TokenGrid tokens={state.tokens} onOpen={onOpen} />
 
       {!loading && state.tokens.length === 0 && !noChains ? (
         <p className="mt-4 text-muted">No fxhash tokens found for this wallet.</p>
@@ -251,13 +261,11 @@ function TokenRoute({
   tokenKeyWanted,
   tokens,
   loading,
-  resolver,
   onBack,
 }: {
   tokenKeyWanted: string
   tokens: WhitehashToken[]
   loading: boolean
-  resolver: ReturnType<typeof resolverConfigFrom>
   onBack: () => void
 }) {
   const token = tokens.find(t => tokenKey(t) === tokenKeyWanted)
@@ -273,5 +281,5 @@ function TokenRoute({
       </div>
     )
   }
-  return <TokenDetail token={token} resolver={resolver} onBack={onBack} />
+  return <TokenDetail token={token} onBack={onBack} />
 }

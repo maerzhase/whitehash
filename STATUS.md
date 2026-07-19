@@ -1,6 +1,6 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-12 (rev 4).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-19 (rev 5).
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
@@ -18,7 +18,7 @@ policy, and app→package extraction inventory: **PLAN §4.7**; sequencing: **M1
 hooks) → M11 (ui = full design system) → M12 (docs app) → M13 (publish readiness)**.
 The data layer (resolve/chain-reader/proxy) is unchanged by this.
 
-`pnpm build && pnpm check-types && pnpm test` all green (6 packages, 57 tests + 2 opt-in
+`pnpm build && pnpm check-types && pnpm test` all green (6 packages, 65 tests + 2 opt-in
 live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain-reader test`.
 
 ## Done — the core viewer works end-to-end
@@ -31,6 +31,23 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
 | M3 chain-reader / EVM | ✅ | Live vs Base. Blockscout-first ownership (RPC scan fallback) |
 | M4 onchfs-proxy | ✅ | Hono app; verified serving a real Base + ETH onchfs artwork over HTTP |
 | M5 viewer | ✅ | Live in-browser: wallet grid, sandboxed render, browse, settings |
+| M10 layer sink + React | ✅ | Token semantics + bound client in L0; provider, cache, hooks in `@whitehash/react`; app-local copies removed |
+
+## M10 complete — the headless React layer
+
+- **Token semantics live in chain-reader.** `renderArtifactUri` (including the gentk-v1
+  separate-seed correction), `imageSourceUri`, `artworkUrl`, `liveViewStatus`, and token
+  identity helpers are framework-free exports with unit coverage.
+- **One-import low-level facade.** `createWhitehashClient(config)` binds chain reads,
+  project browsing, URI resolution, and token semantics once for non-React consumers.
+- **`@whitehash/react` is the ceremony layer.** `WhitehashProvider`, pluggable
+  IndexedDB/memory caches, `useWalletTokens`, `useProjects`/`useProject`,
+  `useGatewayImage`, and `useArtworkFrame` own fetching, progress, cache-first refresh,
+  gateway fallback, and sandboxed iframe state without importing styling.
+- **Viewer dogfoods the packages.** The former local `render.ts`, `cache.ts`,
+  `useWalletTokens.ts`, and `useBrowse.ts` copies are deleted. Browser verification
+  loaded 133 tokens for the known Tezos fixture and ran a gentk-v1 artwork live with
+  the seed preserved in its iframe URL; console clean. Both opt-in Tezos/Base tests pass.
 
 ## Post-plan additions (beyond the original M0–M5 plan)
 
@@ -82,11 +99,8 @@ All live-verified in the browser unless noted.
 
 ## Not yet built (from the plan)
 
-Critical path after the reframe:
+Critical path after the reframe (M10 is complete):
 
-- **M10** layer sink + `@whitehash/react` — move token semantics (`render.ts`) down into
-  chain-reader (+ `createWhitehashClient` facade); extract the app's hooks/provider/cache
-  into a headless React package. PLAN §4.7.
 - **M11** `@whitehash/ui` → full published design system — add domain components
   (compound `Artwork.*`, `TokenCard`/`TokenGrid`, blocks, `AddressSearch`/`WalletSearch`)
   to the primitives; dual-consumption build (precompiled styles.css / Tailwind source).

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   MAINNET_CHAINS,
   TESTNET_CHAINS,
@@ -8,9 +8,8 @@ import {
   type ListOrder,
   type WhitehashProject,
 } from "@whitehash/chain-reader"
+import { useEvmProjectCard, useProjects, useWhitehash } from "@whitehash/react"
 import { Badge, Button, Card, Skeleton, ToggleGroup } from "@whitehash/ui"
-import { resolverConfigFrom, type Settings } from "../settings.js"
-import { useEvmProjectCard, useProjects } from "../useBrowse.js"
 import { GatewayImage } from "./GatewayImage.js"
 
 /** "5 / 500", "5 minted", or "" when nothing is known. */
@@ -37,17 +36,14 @@ function shortAddr(a: string): string {
 
 function ProjectCard({
   project,
-  settings,
   onOpen,
 }: {
   project: WhitehashProject
-  settings: Settings
   onOpen: () => void
 }) {
-  const resolver = resolverConfigFrom(settings)
   const isEvm = isEvmChain(project.chain)
   // EVM projects carry no name/preview/count in the factory log — fetch lazily.
-  const lazy = useEvmProjectCard(project.chain, isEvm ? project.ref : "", settings)
+  const lazy = useEvmProjectCard(project.chain, isEvm ? project.ref : "")
   const name = project.name ?? lazy.name ?? (isEvm ? shortAddr(project.ref) : project.ref)
   const thumbUri = project.thumbnailUri ?? project.displayUri ?? lazy.thumb
   const label = editionsLabel(project.minted ?? lazy.minted, project.editions)
@@ -56,7 +52,7 @@ function ProjectCard({
     <Button variant="card" onClick={onOpen}>
       <Card.Media className="bg-canvas">
         <div className="absolute inset-3">
-          <GatewayImage uri={thumbUri} chain={project.chain} resolver={resolver} alt={name ?? ""} lazy />
+          <GatewayImage uri={thumbUri} chain={project.chain} alt={name ?? ""} lazy />
         </div>
       </Card.Media>
       <Card.Body>
@@ -101,22 +97,23 @@ export function SortToggle({
 }
 
 export function BrowseView({
-  settings,
   onOpenProject,
 }: {
-  settings: Settings
   onOpenProject: (chain: ChainId, ref: string) => void
 }) {
-  const chains = settings.mode === "mainnet" ? MAINNET_CHAINS : TESTNET_CHAINS
+  const { mode } = useWhitehash()
+  const chains = mode === "mainnet" ? MAINNET_CHAINS : TESTNET_CHAINS
   const [chain, setChain] = useState<ChainId>(chains[0]!)
   const [issuerVersion, setIssuerVersion] = useState("v3")
   const [order, setOrder] = useState<ListOrder>("newest")
-  const { projects, loading, error, hasMore, loadMore } = useProjects(
-    chain,
+
+  useEffect(() => {
+    if (!chains.includes(chain)) setChain(chains[0]!)
+  }, [chain, chains])
+  const { projects, loading, error, hasMore, loadMore } = useProjects(chain, {
     issuerVersion,
     order,
-    settings,
-  )
+  })
   const initialLoading = loading && projects.length === 0
 
   return (
@@ -171,7 +168,6 @@ export function BrowseView({
             <ProjectCard
               key={`${p.chain}/${p.ref}`}
               project={p}
-              settings={settings}
               onOpen={() => onOpenProject(p.chain, p.ref)}
             />
           ))

@@ -10,14 +10,14 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "check-types": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@whitehash/chain-reader": "workspace:*",
+    "@whitehash/react": "workspace:*",
     "@whitehash/resolve": "workspace:*",
     "@whitehash/ui": "workspace:*",
     "geist": "1.7.2",
-    "idb-keyval": "6.2.2",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },

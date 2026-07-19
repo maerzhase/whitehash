@@ -1,45 +1,30 @@
-import { useState } from "react"
-import type { WhitehashToken } from "@whitehash/chain-reader"
-import type { ResolverConfig } from "@whitehash/resolve"
+import { imageSourceUri, type WhitehashToken } from "@whitehash/chain-reader"
+import { useArtworkFrame } from "@whitehash/react"
 import { Badge, Button } from "@whitehash/ui"
-import { artworkUrl, imageSourceUri, liveViewStatus } from "../render.js"
 import { GatewayImage } from "./GatewayImage.js"
-
-// Sandbox + allow values match fxhash's ArtworkIframe so generative pieces that
-// use motion sensors / audio behave the same.
-const SANDBOX = "allow-scripts allow-same-origin allow-modals"
-const ALLOW =
-  "accelerometer; camera; gyroscope; microphone; xr-spatial-tracking; fullscreen"
 
 const FRAME = "relative aspect-square overflow-hidden rounded-card border border-line bg-surface"
 
 export function ArtworkFrame({
   token,
-  resolver,
 }: {
   token: WhitehashToken
-  resolver: ResolverConfig
 }) {
-  const [playing, setPlaying] = useState(false)
-  const live = artworkUrl(token, resolver)
+  const { status, playing, play, stop, iframeProps } = useArtworkFrame(token)
   const stillUri = imageSourceUri(token, "display")
-  const status = liveViewStatus(token, resolver)
 
-  if (playing && live) {
+  if (playing && iframeProps.src) {
     return (
       <div className={FRAME}>
         <iframe
-          title={token.name ?? "artwork"}
-          src={live}
-          sandbox={SANDBOX}
-          allow={ALLOW}
+          {...iframeProps}
           className="block size-full border-0"
         />
         <Button
           variant="secondary"
           size="sm"
           className="absolute bottom-3 left-3 bg-black/70"
-          onClick={() => setPlaying(false)}
+          onClick={stop}
         >
           ◼ Stop
         </Button>
@@ -52,7 +37,6 @@ export function ArtworkFrame({
       <GatewayImage
         uri={stillUri}
         chain={token.chain}
-        resolver={resolver}
         alt={token.name ?? ""}
         className="object-contain"
       />
@@ -60,7 +44,7 @@ export function ArtworkFrame({
         <Button
           size="sm"
           className="absolute bottom-3 left-3"
-          onClick={() => setPlaying(true)}
+          onClick={play}
         >
           ▶ Run live
         </Button>
