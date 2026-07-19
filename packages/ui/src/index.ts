@@ -30,14 +30,12 @@ export {
 } from "./components/token-card.js"
 export {
   WalletGallery,
-  WalletGalleryContent,
   ProjectBrowser,
   ProjectGallery,
   SortToggle,
   chainLabel,
   editionsLabel,
   type WalletGalleryProps,
-  type WalletGalleryContentProps,
   type ProjectBrowserProps,
   type ProjectGalleryProps,
 } from "./components/galleries.js"
@@ -48,3 +46,18 @@ export {
   type AddressSearchProps,
   type WalletSearchProps,
 } from "./components/address-search.js"
+export {
+  SiteHeader,
+  ToolkitHero,
+  DocsShell,
+  DocsPage,
+  DocsHeading,
+  DocsSection,
+  LiveDemo,
+  Callout,
+  CodeBlock,
+  type SiteHeaderProps,
+  type ToolkitHeroProps,
+  type DocsNavItem,
+} from "./components/docs.js"
+export { TokenDetails, type TokenDetailsProps } from "./components/token-details.js"

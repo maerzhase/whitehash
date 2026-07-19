@@ -1,6 +1,6 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-19 (rev 6).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-19 (rev 7).
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
@@ -33,6 +33,7 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
 | M5 viewer | ✅ | Live in-browser: wallet grid, sandboxed render, browse, settings |
 | M10 layer sink + React | ✅ | Token semantics + bound client in L0; provider, cache, hooks in `@whitehash/react`; app-local copies removed |
 | M11 full design system | ✅ | Compound domain components + gallery/search blocks in `@whitehash/ui`; precompiled and Tailwind-v4 consumption verified |
+| M12 docs app | ✅ | `apps/docs` is a static docs-first site built exclusively from `@whitehash/ui`, with live API pages, guides, and showcases |
 
 ## M10 complete — the headless React layer
 
@@ -68,6 +69,23 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
 - **Live browser acceptance.** The packaged project browser, wallet gallery, token card,
   and sandboxed Artwork iframe all ran in the viewer with a clean console. The gentk-v1
   seed remained present in the live URL.
+
+## M12 complete — docs are the product surface
+
+- **Viewer → docs.** `apps/viewer` is now `apps/docs` (`@whitehash/docs`): the landing
+  page leads with the toolkit and its three API layers, while browse, wallet, project,
+  token, settings, and live-artwork flows remain available as showcases.
+- **Package-owned chrome.** `SiteHeader`, `ToolkitHero`, `DocsShell`, `DocsPage`,
+  `DocsHeading`, `DocsSection`, `LiveDemo`, `Callout`, `CodeBlock`, and `TokenDetails`
+  were added to `@whitehash/ui`. The app has no local visual-component directory or
+  component CSS; it contains routing, settings/config, docs content, and composition.
+- **Complete API catalog.** Every exported React hook and UI component has a hash route
+  with a rendered demo and copyable usage. Guides cover getting started, choosing a
+  layer, the full design-token reference, Vite, Next.js, onchfs proxy hosting, GitHub
+  Pages/static hosting, and IPFS deployment.
+- **Static and live acceptance.** The relative-base Vite build succeeds. Browser checks
+  covered the docs landing page, sticky API navigation, copy feedback, Artwork demo,
+  known 133-token wallet, token detail, and live sandboxed iframe with a clean console.
 
 ## Post-plan additions (beyond the original M0–M5 plan)
 
@@ -119,10 +137,8 @@ All live-verified in the browser unless noted.
 
 ## Not yet built (from the plan)
 
-Critical path after the reframe (M10–M11 are complete):
+Critical path after the reframe (M10–M12 are complete):
 
-- **M12** `apps/docs` — viewer becomes the docs/showcase site (per-API pages with live
-  demos, theming reference, deploy guides; absorbs M8).
 - **M13** publish readiness — package READMEs, exports-map audit, changesets flip;
   publishing itself stays a user decision.
 
@@ -141,7 +157,7 @@ Layer-0 packages, slot in when convenient:
   populate via `pnpm --filter @whitehash/chain-reader snapshot:update` (offline) + CI cron.
 - **Gateway hangs** (vs. errors) aren't caught by `Artwork.Image`/card media; a fetch-with-timeout →
   blob approach would cover them. Low priority.
-- Viewer bundle ~620 kB minified / 196 kB gzip (mostly viem); code-splitting the EVM path would speed Tezos-only
+- Docs bundle ~635 kB minified / 200 kB gzip (mostly viem); code-splitting the EVM path would speed Tezos-only
   first loads.
 - No git remote configured — repo is local-only; push when ready.
 

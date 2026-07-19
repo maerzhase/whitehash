@@ -1,7 +1,7 @@
-import { useState, type ReactNode } from "react"
+import { useState } from "react"
 import type { ChainId } from "@whitehash/chain-reader"
-import { Button, Field, Input, Separator, Textarea, ToggleGroup } from "@whitehash/ui"
-import { defaultSettings, saveSettings, type Settings } from "../settings.js"
+import { Button, DocsSection, Field, Input, Separator, Textarea, ToggleGroup } from "@whitehash/ui"
+import { defaultSettings, saveSettings, type Settings } from "./settings.js"
 
 const EVM_NETWORKS: { chain: ChainId; label: string }[] = [
   { chain: "eip155:1", label: "Ethereum RPCs" },
@@ -20,16 +20,7 @@ function parseLines(v: string): string[] {
     .filter(Boolean)
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-4 py-8">
-      <h3 className="font-display text-xl font-semibold leading-[26px] tracking-[-0.02em]">{title}</h3>
-      {children}
-    </section>
-  )
-}
-
-export function SettingsPanel({
+export function SettingsPage({
   settings,
   onChange,
   onBack,
@@ -54,7 +45,7 @@ export function SettingsPanel({
       <h2 className="mt-4 font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">Settings</h2>
 
       <div className="divide-y divide-line">
-        <Section title="Network mode">
+        <DocsSection title="Network mode" className="flex flex-col gap-4">
           <ToggleGroup
             value={draft.mode}
             onValueChange={v => commit({ ...draft, mode: v as Settings["mode"] })}
@@ -64,9 +55,9 @@ export function SettingsPanel({
             <ToggleGroup.Item value="mainnet">Mainnet</ToggleGroup.Item>
             <ToggleGroup.Item value="testnet">Testnet</ToggleGroup.Item>
           </ToggleGroup>
-        </Section>
+        </DocsSection>
 
-        <Section title="IPFS gateways">
+        <DocsSection title="IPFS gateways" className="flex flex-col gap-4">
           <Field.Root>
             <Field.Description>One per line, tried in order.</Field.Description>
             <Field.Control
@@ -75,9 +66,9 @@ export function SettingsPanel({
               onChange={e => commit({ ...draft, ipfsGateways: parseLines(e.target.value) })}
             />
           </Field.Root>
-        </Section>
+        </DocsSection>
 
-        <Section title="onchfs proxy URL">
+        <DocsSection title="onchfs proxy URL" className="flex flex-col gap-4">
           <Field.Root>
             <Field.Description>
               Required to view onchfs artworks (many Ethereum &amp; Base pieces store their
@@ -95,9 +86,9 @@ export function SettingsPanel({
               onChange={e => commit({ ...draft, onchfsProxy: e.target.value })}
             />
           </Field.Root>
-        </Section>
+        </DocsSection>
 
-        <Section title="EVM RPCs">
+        <DocsSection title="EVM RPCs" className="flex flex-col gap-4">
           <p className="text-sm leading-snug text-muted">
             Public RPCs cap log queries, so EVM wallet scans are slow. Paste an
             archive-capable RPC (one line each) for fast lookups. Blank = library default.
@@ -117,9 +108,9 @@ export function SettingsPanel({
               />
             </Field.Root>
           ))}
-        </Section>
+        </DocsSection>
 
-        <Section title="TzKT base URLs">
+        <DocsSection title="TzKT base URLs" className="flex flex-col gap-4">
           <Field.Root>
             <Field.Label>Mainnet</Field.Label>
             <Field.Control
@@ -150,7 +141,7 @@ export function SettingsPanel({
               }
             />
           </Field.Root>
-        </Section>
+        </DocsSection>
       </div>
 
       <Separator className="my-4" />

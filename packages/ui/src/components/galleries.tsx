@@ -75,7 +75,7 @@ export interface WalletGalleryProps extends ComponentProps<"section"> {
   onOpenToken?: (token: WhitehashToken) => void
 }
 
-export function WalletGallery({ address, onOpenToken, className, ...props }: WalletGalleryProps) {
+function WalletGalleryRoot({ address, onOpenToken, className, ...props }: WalletGalleryProps) {
   const result = useWalletTokens(address)
   return (
     <WalletGalleryContent
@@ -96,7 +96,7 @@ export interface WalletGalleryContentProps extends ComponentProps<"section"> {
   onOpenToken?: (token: WhitehashToken) => void
 }
 
-export function WalletGalleryContent({
+function WalletGalleryContent({
   address,
   state,
   loading,
@@ -128,6 +128,8 @@ export function WalletGalleryContent({
     </section>
   )
 }
+
+export const WalletGallery = Object.assign(WalletGalleryRoot, { Content: WalletGalleryContent })
 
 function ProjectCard({ project, onOpen }: { project: WhitehashProject; onOpen?: () => void }) {
   const isEvm = isEvmChain(project.chain)
