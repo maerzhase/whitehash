@@ -6,6 +6,8 @@ and deployment while preserving the wallet, project, token, and live-artwork flo
 
 Product components come from `@whitehash/ui`. Documentation chrome, navigation,
 syntax-highlighted code blocks, content, and site composition stay local to this app.
+The standalone [QUICKSTART.md](./QUICKSTART.md) is the M14 first-glimpse contract and
+contains five copyable scenarios, each no more than 15 lines.
 
 ```bash
 pnpm --filter @whitehash/docs dev

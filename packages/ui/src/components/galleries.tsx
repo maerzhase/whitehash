@@ -2,15 +2,16 @@ import { useEffect, useState, type ComponentProps } from "react"
 import {
   MAINNET_CHAINS,
   TESTNET_CHAINS,
-  isEvmChain,
-  isTezosChain,
+  formatRef,
+  projectLabel,
+  tokenKey,
   type ChainId,
   type ListOrder,
+  type ProjectRef,
   type WhitehashProject,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
 import {
-  useEvmProjectCard,
   useGatewayImage,
   useProject,
   useProjects,
@@ -19,14 +20,16 @@ import {
   type ChainState,
 } from "@whitehash/react"
 import { Badge, type BadgeProps } from "./badge.js"
+import { Artwork } from "./artwork.js"
 import { Button } from "./button.js"
 import { Card } from "./card.js"
 import { Skeleton } from "./feedback.js"
 import { ToggleGroup } from "./toggle-group.js"
-import { TokenGrid, TokenGridSkeleton } from "./token-card.js"
+import { TokenGrid } from "./token-grid.js"
 import { cn } from "../lib/cn.js"
 
 const ISSUER_VERSIONS = ["v3", "v2", "v1", "v0"]
+const isTezosChain = (chain: ChainId) => chain.startsWith("tezos:")
 
 export function editionsLabel(minted: number | null, editions: number | null): string {
   if (minted !== null && editions !== null) return `${minted} / ${editions}`
@@ -41,10 +44,6 @@ export function chainLabel(chain: ChainId): string {
   if (chain === "eip155:8453") return "Base"
   if (chain === "eip155:11155111") return "Sepolia"
   return "Base Sepolia"
-}
-
-function shortAddress(address: string): string {
-  return `${address.slice(0, 8)}…${address.slice(-4)}`
 }
 
 export function SortToggle({
@@ -68,6 +67,26 @@ const STATUS_VARIANT: Record<ChainState["status"], BadgeProps["variant"]> = {
   cached: "accent",
   done: "success",
   error: "danger",
+}
+
+function ArtworkCard({ token, onOpen }: { token: WhitehashToken; onOpen?: (token: WhitehashToken) => void }) {
+  const content = (
+    <>
+      <Card.Media>
+        <Artwork.Root token={token} className="size-full rounded-none border-0">
+          <Artwork.Image source="thumbnail" />
+          <Artwork.StatusBadge />
+        </Artwork.Root>
+      </Card.Media>
+      <Card.Body>
+        <Card.Title>{token.name ?? `#${token.tokenId}`}</Card.Title>
+        <Card.Meta><Badge>{chainLabel(token.chain)}</Badge></Card.Meta>
+      </Card.Body>
+    </>
+  )
+  return onOpen
+    ? <Button variant="card" onClick={() => onOpen(token)}>{content}</Button>
+    : <Card.Root>{content}</Card.Root>
 }
 
 export interface WalletGalleryProps extends ComponentProps<"section"> {
@@ -121,7 +140,9 @@ function WalletGalleryContent({
       {noChains ? (
         <p className="text-muted">That doesn’t look like a Tezos or EVM address for the current network mode.</p>
       ) : null}
-      {state ? <TokenGrid tokens={state.tokens} onOpen={onOpenToken} /> : <TokenGridSkeleton />}
+      <TokenGrid loading={!state}>
+        {state?.tokens.map(token => <ArtworkCard key={tokenKey(token)} token={token} onOpen={onOpenToken} />)}
+      </TokenGrid>
       {!loading && state && state.tokens.length === 0 && !noChains ? (
         <p className="mt-4 text-muted">No fxhash tokens found for this wallet.</p>
       ) : null}
@@ -132,11 +153,9 @@ function WalletGalleryContent({
 export const WalletGallery = Object.assign(WalletGalleryRoot, { Content: WalletGalleryContent })
 
 function ProjectCard({ project, onOpen }: { project: WhitehashProject; onOpen?: () => void }) {
-  const isEvm = isEvmChain(project.chain)
-  const lazy = useEvmProjectCard(project.chain, isEvm ? project.ref : "")
-  const name = project.name ?? lazy.name ?? (isEvm ? shortAddress(project.ref) : project.ref)
-  const uri = project.thumbnailUri ?? project.displayUri ?? lazy.thumb
-  const label = editionsLabel(project.minted ?? lazy.minted, project.editions)
+  const name = projectLabel(project)
+  const uri = project.thumbnailUri ?? project.displayUri
+  const label = editionsLabel(project.minted, project.editions)
 
   return (
     <ProjectCardImage project={project} name={name} uri={uri} label={label} onOpen={onOpen} />
@@ -194,7 +213,7 @@ function ProjectGridSkeleton() {
 export interface ProjectBrowserProps extends Omit<ComponentProps<"section">, "onChange"> {
   chain?: ChainId
   onChainChange?: (chain: ChainId) => void
-  onOpenProject?: (chain: ChainId, ref: string) => void
+  onOpenProject?: (project: ProjectRef) => void
 }
 
 export function ProjectBrowser({
@@ -208,9 +227,9 @@ export function ProjectBrowser({
   const chains = mode === "mainnet" ? MAINNET_CHAINS : TESTNET_CHAINS
   const [localChain, setLocalChain] = useState<ChainId>(controlledChain ?? chains[0]!)
   const chain = controlledChain ?? localChain
-  const [issuerVersion, setIssuerVersion] = useState("v3")
+  const [version, setVersion] = useState("v3")
   const [order, setOrder] = useState<ListOrder>("newest")
-  const { projects, loading, error, hasMore, loadMore } = useProjects(chain, { issuerVersion, order })
+  const { projects, loading, error, hasMore, loadMore } = useProjects({ chain, version, order })
   const initialLoading = loading && projects.length === 0
 
   useEffect(() => {
@@ -230,7 +249,7 @@ export function ProjectBrowser({
           {chains.map(value => <ToggleGroup.Item key={value} value={value}>{chainLabel(value)}</ToggleGroup.Item>)}
         </ToggleGroup>
         {isTezosChain(chain) ? (
-          <ToggleGroup value={issuerVersion} onValueChange={setIssuerVersion} aria-label="Issuer era">
+          <ToggleGroup value={version} onValueChange={setVersion} aria-label="Project version">
             {ISSUER_VERSIONS.map(value => (
               <ToggleGroup.Item key={value} value={value} title={`fxhash issuer ${value} (era of projects)`}>{value}</ToggleGroup.Item>
             ))}
@@ -242,9 +261,9 @@ export function ProjectBrowser({
       <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
         {initialLoading ? <ProjectGridSkeleton /> : projects.map(project => (
           <ProjectCard
-            key={`${project.chain}/${project.ref}`}
+            key={formatRef(project.ref)}
             project={project}
-            onOpen={onOpenProject ? () => onOpenProject(project.chain, project.ref) : undefined}
+            onOpen={onOpenProject ? () => onOpenProject(project.ref) : undefined}
           />
         ))}
       </div>
@@ -259,34 +278,34 @@ export function ProjectBrowser({
 }
 
 export interface ProjectGalleryProps extends ComponentProps<"section"> {
-  chain: ChainId
-  projectRef: string
+  project: ProjectRef
   onOpenToken?: (token: WhitehashToken) => void
   onBack?: () => void
 }
 
 export function ProjectGallery({
-  chain,
-  projectRef,
+  project: projectRef,
   onOpenToken,
   onBack,
   className,
   ...props
 }: ProjectGalleryProps) {
   const [order, setOrder] = useState<ListOrder>("oldest")
-  const { project, tokens, loading, error, hasMore, loadMore } = useProject(chain, projectRef, { order })
+  const { project, tokens, loading, error, hasMore, loadMore } = useProject(projectRef, { order })
   const label = project ? editionsLabel(project.minted, project.editions) : ""
   return (
     <section className={cn("pt-8", className)} {...props}>
       {onBack ? <Button variant="link" onClick={onBack}>← All Projects</Button> : null}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-3 py-5">
-        <h2 className="font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">{project?.name ?? projectRef}</h2>
+        <h2 className="font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">{project ? projectLabel(project) : projectRef.id}</h2>
         {label ? <Badge>{label}{project?.minted !== null && project?.editions !== null ? " minted" : ""}</Badge> : null}
-        {isTezosChain(chain) ? <SortToggle order={order} onChange={setOrder} /> : null}
+        {isTezosChain(projectRef.chain) ? <SortToggle order={order} onChange={setOrder} /> : null}
       </div>
       {project?.description ? <p className="max-w-3xl text-sm leading-relaxed text-muted">{project.description}</p> : null}
       {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
-      {loading && tokens.length === 0 ? <TokenGridSkeleton /> : <TokenGrid tokens={tokens} onOpen={onOpenToken} />}
+      <TokenGrid loading={loading && tokens.length === 0}>
+        {tokens.map(token => <ArtworkCard key={tokenKey(token)} token={token} onOpen={onOpenToken} />)}
+      </TokenGrid>
       <div className="mt-4 flex min-h-10 items-start" aria-live="polite">
         {loading && tokens.length === 0 ? <span className="sr-only">Loading iterations</span> : null}
         {loading && tokens.length > 0 ? <p className="text-muted">Loading more iterations…</p> : null}

@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import type { WhitehashToken } from "@whitehash/chain-reader"
+import { parseRef, type WhitehashToken } from "@whitehash/chain-reader"
 import {
   useArtworkFrame,
-  useEvmProjectCard,
   useGatewayImage,
   useProject,
   useProjects,
@@ -28,7 +27,6 @@ import {
   Spinner,
   Textarea,
   ToggleGroup,
-  TokenCard,
   TokenDetails,
   TokenGrid,
   TokenGridSkeleton,
@@ -48,13 +46,12 @@ export const API_ENTRIES: ApiEntry[] = [
   { slug: "whitehash-provider", name: "WhitehashProvider", group: "React hooks", description: "Configure the client, network mode, and cache for every hook and component." },
   { slug: "use-whitehash", name: "useWhitehash", group: "React hooks", description: "Read the configured client, cache, and network mode." },
   { slug: "use-wallet-tokens", name: "useWalletTokens", group: "React hooks", description: "Detect an address family, query the relevant chain contracts, normalize owned tokens, and expose cache-first progress per chain." },
-  { slug: "use-projects", name: "useProjects", group: "React hooks", description: "Paginate projects for a Tezos or EVM chain." },
-  { slug: "use-project", name: "useProject", group: "React hooks", description: "Read project details and its minted iterations." },
-  { slug: "use-evm-project-card", name: "useEvmProjectCard", group: "React hooks", description: "Lazily enrich EVM project cards with name, supply, and preview." },
+  { slug: "use-projects", name: "useProjects", group: "React hooks", description: "Paginate projects and progressively hydrate missing preview fields on every chain." },
+  { slug: "use-project", name: "useProject", group: "React hooks", description: "Read project details and minted iterations from one typed ProjectRef." },
   { slug: "use-gateway-image", name: "useGatewayImage", group: "React hooks", description: "Resolve a protocol-native image URI and advance through your ordered IPFS gateways whenever an image fails." },
   { slug: "use-artwork-frame", name: "useArtworkFrame", group: "React hooks", description: "Own live-artwork play state and secure iframe attributes." },
   ...["Button", "Card", "Badge", "ToggleGroup", "Field", "Input", "Textarea", "Dialog", "Spinner", "Skeleton", "Separator"].map(name => ({ slug: name.toLowerCase(), name, group: "Primitives" as const, description: `The ${name} design-system primitive.` })),
-  ...["Artwork", "TokenCard", "TokenGrid", "TokenGridSkeleton", "TokenDetails"].map(name => ({ slug: name.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`).replace(/^-/, ""), name, group: "Domain" as const, description: `${name} composes whitehash token semantics with the headless React layer.` })),
+  ...["Artwork", "TokenGrid", "TokenGridSkeleton", "TokenDetails"].map(name => ({ slug: name.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`).replace(/^-/, ""), name, group: "Domain" as const, description: `${name} composes whitehash token semantics with the headless React layer.` })),
   ...["WalletGallery", "ProjectBrowser", "ProjectGallery", "AddressSearch", "WalletSearch", "SortToggle"].map(name => ({ slug: name.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`).replace(/^-/, ""), name, group: "Blocks" as const, description: `${name} is a ready-to-embed block with navigation delegated to the consumer.` })),
 ]
 
@@ -81,13 +78,16 @@ const USAGE: Record<string, string> = {
   Field: `<Field.Root>\n  <Field.Label>Wallet</Field.Label>\n  <Field.Control render={<Input />} />\n</Field.Root>`,
   Dialog: `<Dialog open={open} onOpenChange={setOpen}>\n  <Dialog.Content><Dialog.Title>Title</Dialog.Title></Dialog.Content>\n</Dialog>`,
   Artwork: `<Artwork.Root token={token}>\n  <Artwork.Image />\n  <Artwork.Live />\n  <Artwork.PlayButton />\n  <Artwork.StatusBadge />\n</Artwork.Root>`,
-  TokenCard: `<TokenCard token={token} onSelect={setToken} />`,
-  TokenGrid: `<TokenGrid tokens={tokens} onOpen={setToken} />`,
+  TokenGrid: `<TokenGrid>{tokens.map(token =>
+  <Card.Root key={tokenKey(token)}>
+    <Card.Media><Artwork.Root token={token}><Artwork.Image /></Artwork.Root></Card.Media>
+  </Card.Root>
+)}</TokenGrid>`,
   TokenGridSkeleton: `<TokenGridSkeleton count={8} />`,
   TokenDetails: `<TokenDetails token={token} settingsHref="/settings" />`,
   WalletGallery: `<WalletGallery address="tz1…" onOpenToken={setToken} />`,
   ProjectBrowser: `<ProjectBrowser chain="tezos:mainnet" onOpenProject={openProject} />`,
-  ProjectGallery: `<ProjectGallery chain="tezos:mainnet" projectRef="v3:…" />`,
+  ProjectGallery: `<ProjectGallery project={parseRef("project/tezos%3Amainnet/v3%3A13623", "project")} />`,
   AddressSearch: `<AddressSearch onSubmit={openWallet} />`,
   WalletSearch: `<WalletSearch open={open} onOpenChange={setOpen} onSubmit={openWallet} />`,
 }
@@ -96,9 +96,8 @@ const codeFor = (name: string) => {
   if (name.startsWith("use")) {
     const args: Record<string, string> = {
       useWalletTokens: `"tz1…"`,
-      useProjects: `"tezos:mainnet"`,
-      useProject: `"tezos:mainnet", projectRef`,
-      useEvmProjectCard: `"eip155:1", contract`,
+      useProjects: `{ chain: "tezos:mainnet", order: "newest" }`,
+      useProject: `projectRef`,
       useGatewayImage: `uri, "tezos:mainnet"`,
       useArtworkFrame: `token`,
       useWhitehash: ``,
@@ -112,7 +111,6 @@ function HookDemo({ name }: { name: string }) {
   if (name === "useWalletTokens") return <WalletHookDemo />
   if (name === "useProjects") return <ProjectsHookDemo />
   if (name === "useProject") return <ProjectHookDemo />
-  if (name === "useEvmProjectCard") return <EvmCardHookDemo />
   if (name === "useGatewayImage") return <GatewayHookDemo />
   if (name === "useArtworkFrame") return <ArtworkHookDemo />
   return <ContextHookDemo />
@@ -121,9 +119,8 @@ function HookDemo({ name }: { name: string }) {
 function HookValue({ children }: { children: string }) { return <p className="font-mono text-sm text-muted">{children}</p> }
 function ContextHookDemo() { const value = useWhitehash(); return <HookValue>{`mode: ${value.mode}; gateways: ${value.client.config.resolver.ipfsGateways.length}`}</HookValue> }
 function WalletHookDemo() { const value = useWalletTokens("tz1c3hFmjFSwunjLHECnYyjr42KRt5YiHrGX"); return <HookValue>{value.state ? `${value.state.tokens.length} tokens` : "Loading wallet…"}</HookValue> }
-function ProjectsHookDemo() { const value = useProjects("tezos:mainnet", { limit: 2 }); return <HookValue>{value.loading ? "Loading projects…" : `${value.projects.length} projects loaded`}</HookValue> }
-function ProjectHookDemo() { const value = useProject("tezos:mainnet", "v3:13623"); return <HookValue>{value.loading ? "Loading project…" : value.project?.name ?? value.error ?? "Project ready"}</HookValue> }
-function EvmCardHookDemo() { const value = useEvmProjectCard("eip155:1", "0xBb47F0ED4A7E3BffcA75660dFa3B053FB7FcE78E"); return <HookValue>{value.name ?? "Loading EVM project…"}</HookValue> }
+function ProjectsHookDemo() { const value = useProjects({ chain: "tezos:mainnet", limit: 2 }); return <HookValue>{value.loading ? "Loading projects…" : `${value.projects.length} projects loaded`}</HookValue> }
+function ProjectHookDemo() { const value = useProject(parseRef("project/tezos%3Amainnet/v3%3A13623", "project")); return <HookValue>{value.loading ? "Loading project…" : value.project?.name ?? value.error ?? "Project ready"}</HookValue> }
 function GatewayHookDemo() { const value = useGatewayImage(null, SAMPLE_TOKEN.chain); return <HookValue>{value.failed ? "Fallback exhausted" : value.src ?? "Resolving…"}</HookValue> }
 function ArtworkHookDemo() { const value = useArtworkFrame(SAMPLE_TOKEN); return <HookValue>{`${value.status.kind}; ${value.playing ? "playing" : "stopped"}`}</HookValue> }
 
@@ -142,13 +139,12 @@ function ComponentDemo({ name }: { name: string }) {
   if (name === "Skeleton") return <Skeleton className="h-16 w-full" />
   if (name === "Separator") return <Separator />
   if (name === "Artwork") return <Artwork.Root token={SAMPLE_TOKEN} className="max-w-md"><Artwork.Image /><Artwork.Live /><Artwork.PlayButton /><Artwork.StatusBadge /></Artwork.Root>
-  if (name === "TokenCard") return <TokenCard token={SAMPLE_TOKEN} className="max-w-xs" />
-  if (name === "TokenGrid") return <TokenGrid tokens={[SAMPLE_TOKEN]} />
+  if (name === "TokenGrid") return <TokenGrid><Card.Root><Card.Media><Artwork.Root token={SAMPLE_TOKEN} className="size-full rounded-none border-0"><Artwork.Image /></Artwork.Root></Card.Media><Card.Body><Card.Title>{SAMPLE_TOKEN.name}</Card.Title></Card.Body></Card.Root></TokenGrid>
   if (name === "TokenGridSkeleton") return <TokenGridSkeleton count={2} />
   if (name === "TokenDetails") return <TokenDetails token={SAMPLE_TOKEN} />
   if (name === "WalletGallery") return <WalletGallery address="tz1c3hFmjFSwunjLHECnYyjr42KRt5YiHrGX" />
   if (name === "ProjectBrowser") return <ProjectBrowser chain="tezos:mainnet" />
-  if (name === "ProjectGallery") return <ProjectGallery chain="tezos:mainnet" projectRef="v3:13623" />
+  if (name === "ProjectGallery") return <ProjectGallery project={parseRef("project/tezos%3Amainnet/v3%3A13623", "project")} />
   if (name === "AddressSearch") return <AddressSearch onSubmit={() => setOpen(true)} />
   if (name === "WalletSearch") return <><Button onClick={() => setOpen(true)}>Search wallet</Button><WalletSearch open={open} onOpenChange={setOpen} onSubmit={() => undefined} /></>
   if (name === "Callout") return <Callout>Infrastructure is public and configurable.</Callout>
@@ -316,7 +312,7 @@ export function GuidePage({ slug }: { slug: string }) {
 }
 
 function GuideDetails({ slug }: { slug: string }) {
-  if (slug === "getting-started") return <DocsSection title="What you get"><div className="docs-prose"><p>The gallery calls <code>useWalletTokens</code>, displays cached results while live reads run, and composes token previews with gateway fallback. No whitehash server is involved for wallet discovery, metadata, or IPFS images.</p><p>Configure an onchfs proxy only when you need to execute artifacts whose code uses the <code>onchfs://</code> scheme.</p></div></DocsSection>
+  if (slug === "getting-started") return <><DocsSection title="What you get"><div className="docs-prose"><p>The gallery calls <code>useWalletTokens</code>, displays cached results while live reads run, and composes token previews with gateway fallback. No whitehash server is involved for wallet discovery, metadata, or IPFS images.</p><p>Configure an onchfs proxy only when you need to execute artifacts whose code uses the <code>onchfs://</code> scheme.</p></div></DocsSection><DocsSection title="Paste and route anything"><div className="docs-prose"><p><code>ProjectRef</code> and <code>TokenRef</code> carry their chain and serialize through <code>formatRef</code>. Use <code>parseRef</code> for routes and <code>resolveInput</code> when accepting a pasted ref, artwork URL, CID, or wallet/contract address.</p><p>The docs search uses exactly that utility, then opens a wallet, project, direct token, or resolved content URL.</p></div></DocsSection></>
   if (slug === "how-it-works") return <DocsSection title="Network behavior"><div className="docs-prose"><p><strong>Tezos:</strong> TzKT enumerates balances in the known gentk v1–v3 FA2 contracts, then metadata is resolved from its protocol-native URI.</p><p><strong>Ethereum and Base:</strong> JSON-RPC reads known issuer factories and project contracts. Archive-capable RPCs make historical log scans substantially faster.</p><p><strong>Rendering:</strong> preview images use display/thumbnail metadata. Live frames use the artifact URI and token seed. These are intentionally separate paths.</p></div></DocsSection>
   if (slug === "configuration") return <><DocsSection title="IPFS gateway order"><div className="docs-prose"><p>Gateway roots do not include <code>/ipfs/</code>. Whitehash appends the CID and path, preserving query strings and fragments. Metadata requests try each gateway until a response succeeds; <code>useGatewayImage</code> advances when the browser fires an image error.</p><p>An empty gateway list cannot resolve IPFS or bare-CID content. HTTP, data, and blob URLs are passed through as-is.</p></div></DocsSection><DocsSection title="Ad-hoc client"><CodeBlock code={`const client = createWhitehashClient({
   ...config,

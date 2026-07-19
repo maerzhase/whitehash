@@ -41,7 +41,7 @@ describe("listTezosProjects", () => {
     const page = await listTezosProjects("tezos:mainnet", config, {}, fetchImpl)
     expect(page.projects).toHaveLength(1)
     const p = page.projects[0]!
-    expect(p.ref).toBe("v3:31804")
+    expect(p.ref).toEqual({ type: "project", chain: "tezos:mainnet", id: "v3:31804" })
     expect(p.name).toBe("Scale")
     expect(p.editions).toBe(500) // cap
     expect(p.minted).toBe(5) // iterations_count wins over supply-balance

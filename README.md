@@ -9,6 +9,9 @@ site is fully static; `apps/onchfs-proxy` is the only optional server piece.
 
 ## Choose an API layer
 
+Start with the [five-scenario quickstart](./apps/docs/QUICKSTART.md) to see the public
+surface for one artwork, a wallet, project browsing, iterations, and plain TypeScript.
+
 | Layer | Package | Use it when |
 | --- | --- | --- |
 | Framework-free | [`@whitehash/resolve`](./packages/resolve), [`@whitehash/chain-reader`](./packages/chain-reader) | You want plain TypeScript, a custom renderer, or non-React integration |

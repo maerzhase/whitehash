@@ -10,12 +10,14 @@ fxhash indexer, no fxhash-hosted service.
   with `ownerOf` (FxGenArt721 is not ERC721Enumerable — verified). Metadata via `tokenURI`.
 
 ```ts
-import { getWalletTokens, detectAddressChains } from "@whitehash/chain-reader"
+import { createWhitehashClient, resolveInput } from "@whitehash/chain-reader"
 import { defaultResolverConfig } from "@whitehash/resolve"
 
-const config = { resolver: defaultResolverConfig() }
-const chains = detectAddressChains("tz1...", "mainnet") // → ["tezos:mainnet"]
-const tokens = await getWalletTokens("tz1...", chains, config, e => console.log(e.message))
+const client = createWhitehashClient({ resolver: defaultResolverConfig() })
+const input = resolveInput("tz1...")
+const tokens = input.type === "address"
+  ? await client.getWalletTokens(input.address)
+  : []
 ```
 
 Every token is normalized to a uniform `WhitehashToken` with a protocol-native
@@ -27,9 +29,13 @@ that is `false` for unrevealed "waiting to be signed" placeholders.
 | Export | Purpose |
 | --- | --- |
 | `createWhitehashClient(config)` | Bind wallet/project/resolver/render operations once |
-| `getWalletTokens()`, `getChainWalletTokens()` | Aggregate or single-chain ownership reads |
-| `listProjects()`, `getTezosProject()` | Discover and inspect projects |
-| `listTezosProjectTokens()`, `listEvmProjectTokens()` | Paginated minted iterations |
+| `client.getWalletTokens(address, options?)` | Address-aware ownership reads; mainnet by default |
+| `client.listProjects(options)`, `client.getProject(ref)` | Discover and inspect projects without chain-specific methods |
+| `client.listProjectTokens(ref, options?)` | Paginated minted iterations on any supported chain |
+| `client.getToken(ref)` | Read one normalized token directly from a typed token ref |
+| `ProjectRef`, `TokenRef`, `parseRef()`, `formatRef()` | Stable references shared by clients, hooks, components, and routes |
+| `resolveInput()` | Classify pasted refs, artwork URLs, CIDs, and addresses |
+| `shortAddress()`, `projectLabel()` | Consistent human-readable labels |
 | `renderArtifactUri()`, `artworkUrl()` | Correct live URL, including gentk-v1 separate seeds |
 | `imageSourceUri()`, `imageUrl()` | Select/resolve display or thumbnail media |
 | `liveViewStatus()` | Distinguish runnable, unrevealed, onchfs-proxy, and unavailable states |
@@ -58,16 +64,17 @@ Two interchangeable sources, selected via `evm.ownershipSource`:
 Beyond wallet lookups, the library can enumerate everything published on the contracts:
 
 ```ts
-import { listProjects, listTezosProjectTokens, listEvmProjectTokens } from "@whitehash/chain-reader"
+import { createWhitehashClient, parseRef } from "@whitehash/chain-reader"
 
-const page = await listProjects("tezos:mainnet", config, { issuerVersion: "v3" })
-// → [{ ref: "v3:31804", name: "Scale", supply: 500, displayUri: "ipfs://…" }, …]
+const client = createWhitehashClient(config)
+const page = await client.listProjects({ chain: "tezos:mainnet", version: "v3" })
+// → [{ ref: { type: "project", chain: "tezos:mainnet", id: "v3:31804" }, … }]
 
-const iterations = await listTezosProjectTokens("tezos:mainnet", "Scale", config)
-// EVM: listEvmProjects / getEvmProjectInfo / listEvmProjectTokens
+const ref = parseRef("project/tezos%3Amainnet/v3%3A31804", "project")
+const iterations = await client.listProjectTokens(ref)
 ```
 
-Tezos projects come from the issuer contracts' `ledger` big maps (all versions v0–v3);
+Tezos projects come from their project-contract big maps (all versions v0–v3);
 iterations are matched by fxhash's universal "{project name} #{n}" naming convention.
 EVM projects are the factory's `ProjectCreated` history; iterations via Blockscout token
 instances.

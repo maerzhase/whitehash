@@ -17,6 +17,6 @@ describe("createWhitehashClient", () => {
   })
 
   it("binds wallet configuration without requiring chains", async () => {
-    await expect(client.getWalletTokens("tz1unused", [])).resolves.toEqual([])
+    await expect(client.getWalletTokens("tz1unused", { chains: [] })).resolves.toEqual([])
   })
 })

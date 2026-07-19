@@ -21,13 +21,10 @@ export {
   type ArtworkPlayButtonProps,
 } from "./components/artwork.js"
 export {
-  TokenCard,
   TokenGrid,
   TokenGridSkeleton,
-  type TokenCardProps,
-  type TokenCardMediaProps,
   type TokenGridProps,
-} from "./components/token-card.js"
+} from "./components/token-grid.js"
 export {
   WalletGallery,
   ProjectBrowser,

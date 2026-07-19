@@ -2,17 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { tokenKey, type ChainId, type WhitehashToken } from "@whitehash/chain-reader"
-import { useWalletTokens } from "@whitehash/react"
+import { formatRef, parseRef, resolveInput, tokenKey, type ProjectRef, type TokenRef, type WhitehashToken } from "@whitehash/chain-reader"
+import { useWalletTokens, useWhitehash } from "@whitehash/react"
 import {
   Artwork,
   Button,
+  Card,
+  Dialog,
+  Input,
   ProjectGallery,
   Spinner,
-  TokenCard,
   TokenDetails,
   WalletGallery,
-  WalletSearch,
   WhitehashProvider,
 } from "@whitehash/ui"
 import { API_ENTRIES, ApiDocPage, GuidePage, SAMPLE_TOKEN } from "./docs-content"
@@ -26,24 +27,30 @@ type Route =
   | { name: "api"; slug: string }
   | { name: "guide"; slug: string }
   | { name: "settings" }
-  | { name: "project"; chain: string; ref: string }
+  | { name: "project"; ref: ProjectRef }
   | { name: "wallet"; address: string }
   | { name: "token"; address: string; key: string }
+  | { name: "direct-token"; ref: TokenRef }
 
 function parsePath(pathname: string, search: URLSearchParams): Route {
   const parts = pathname.split("/").filter(Boolean).map(decodeURIComponent)
   if (parts[0] === "docs" && parts[1]) return { name: "api", slug: parts[1] }
   if (parts[0] === "guide" && parts[1]) return { name: "guide", slug: parts[1] }
   if (parts[0] === "settings") return { name: "settings" }
-  if (parts[0] === "p" && parts[1] && parts[2]) return { name: "project", chain: parts[1], ref: parts[2] }
+  if (parts[0] === "p" && parts[1] && parts[2]) return { name: "project", ref: { type: "project", chain: parts[1] as ProjectRef["chain"], id: parts[2] } }
   if (parts[0] === "w" && parts[1]) {
     const address = parts[1]
     if (parts[2] === "t" && parts[3] && parts[4] && parts[5]) return { name: "token", address, key: `${parts[3]}/${parts[4]}/${parts[5]}` }
     return { name: "wallet", address }
   }
-  const projectChain = search.get("projectChain")
-  const projectRef = search.get("projectRef")
-  if (projectChain && projectRef) return { name: "project", chain: projectChain, ref: projectRef }
+  const project = search.get("project")
+  if (project) {
+    try { return { name: "project", ref: parseRef(project, "project") } } catch { /* Invalid input lands on home. */ }
+  }
+  const directToken = search.get("tokenRef")
+  if (directToken) {
+    try { return { name: "direct-token", ref: parseRef(directToken, "token") } } catch { /* Invalid input lands on home. */ }
+  }
   const wallet = search.get("wallet")
   const token = search.get("token")
   if (wallet && token) return { name: "token", address: wallet, key: token }
@@ -53,7 +60,8 @@ function parsePath(pathname: string, search: URLSearchParams): Route {
 
 const segment = (value: string) => encodeURIComponent(value)
 const walletPath = (address: string) => `/?wallet=${segment(address)}`
-const projectPath = (chain: string, ref: string) => `/?projectChain=${segment(chain)}&projectRef=${segment(ref)}`
+const projectPath = (ref: ProjectRef) => `/?project=${segment(formatRef(ref))}`
+const directTokenPath = (ref: TokenRef) => `/?tokenRef=${segment(formatRef(ref))}`
 const tokenPath = (token: WhitehashToken, address: string) => `/?wallet=${segment(address)}&token=${segment(tokenKey(token))}`
 
 const DOC_NAV: DocsNavItem[] = [
@@ -78,6 +86,7 @@ function DocsApp({ settings, onSettingsChange }: { settings: Settings; onSetting
   const router = useRouter()
   const search = useSearchParams()
   const route = parsePath(pathname, search)
+  const { client } = useWhitehash()
   const [searchOpen, setSearchOpen] = useState(false)
   const navigate = (to: string) => { router.push(to); window.scrollTo(0, 0) }
 
@@ -115,15 +124,26 @@ function DocsApp({ settings, onSettingsChange }: { settings: Settings; onSetting
         <main>
           {route.name === "home" ? <HomePage onSearch={() => setSearchOpen(true)} /> : null}
           <div className="mx-auto max-w-[1200px] px-4 pb-24 sm:px-6">
-            {route.name === "project" ? <ProjectRoute chain={route.chain as ChainId} projectRef={route.ref} onBack={() => navigate("/")} /> : null}
+            {route.name === "project" ? <ProjectRoute projectRef={route.ref} onBack={() => navigate("/")} /> : null}
             {route.name === "settings" ? <SettingsPage settings={settings} onChange={onSettingsChange} onBack={() => router.back()} /> : null}
             {route.name === "wallet" && wallet.state ? <WalletGallery.Content address={wallet.state.address} state={wallet.state} loading={wallet.loading} onOpenToken={token => navigate(tokenPath(token, wallet.state!.address))} /> : null}
             {route.name === "token" && wallet.state ? <TokenRoute tokenKeyWanted={route.key} tokens={wallet.state.tokens} loading={wallet.loading} onBack={() => navigate(walletPath(route.address))} /> : null}
+            {route.name === "direct-token" ? <DirectTokenRoute tokenRef={route.ref} onBack={() => navigate("/")} /> : null}
           </div>
         </main>
       )}
 
-      <WalletSearch open={searchOpen} onOpenChange={setSearchOpen} recentAddresses={loadRecent()} onSubmit={value => navigate(walletPath(value))} />
+      <PasteSearch open={searchOpen} onOpenChange={setSearchOpen} recentAddresses={loadRecent()} onSubmit={value => {
+        const input = resolveInput(value)
+        if (input.type === "address") navigate(walletPath(input.address))
+        else if (input.type === "project") navigate(projectPath(input))
+        else if (input.type === "token") navigate(directTokenPath(input))
+        else {
+          const url = client.resolveUri(input.uri)
+          if (!url) throw new Error("This content needs a chain or configured onchfs proxy.")
+          window.open(url, "_blank", "noopener,noreferrer")
+        }
+      }} />
     </div>
   )
 }
@@ -168,7 +188,7 @@ wallet.refresh()       // bypass IndexedDB and read again`} />
       <section className="border-t border-line">
         <div className="mx-auto grid max-w-[1200px] gap-12 px-4 py-24 sm:px-6 lg:grid-cols-2 lg:py-32">
           <div><div className="section-kicker">Components are the showcase</div><h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Use the full block.<br />Replace any layer.</h2><p className="mt-5 max-w-md leading-7 text-muted">Start with a wallet gallery or compose the artwork, image fallback, live frame, and status parts yourself.</p></div>
-          <div className="showcase-row"><TokenCard token={SAMPLE_TOKEN} /><Callout>Preview images and live artifacts are separate. A token can have a working live view even when its metadata has no display image.</Callout></div>
+          <div className="showcase-row"><Card.Root><Card.Media><Artwork.Root token={SAMPLE_TOKEN} className="size-full rounded-none border-0"><Artwork.Image source="thumbnail" /></Artwork.Root></Card.Media><Card.Body><Card.Title>{SAMPLE_TOKEN.name}</Card.Title></Card.Body></Card.Root><Callout>Preview images and live artifacts are separate. A token can have a working live view even when its metadata has no display image.</Callout></div>
         </div>
       </section>
 
@@ -177,14 +197,49 @@ wallet.refresh()       // bypass IndexedDB and read again`} />
   )
 }
 
-function ProjectRoute({ chain, projectRef, onBack }: { chain: ChainId; projectRef: string; onBack: () => void }) {
+function ProjectRoute({ projectRef, onBack }: { projectRef: ProjectRef; onBack: () => void }) {
   const [token, setToken] = useState<WhitehashToken | null>(null)
   if (token) return <TokenDetails token={token} onBack={() => setToken(null)} settingsHref="/settings" />
-  return <ProjectGallery chain={chain} projectRef={projectRef} onOpenToken={setToken} onBack={onBack} />
+  return <ProjectGallery project={projectRef} onOpenToken={setToken} onBack={onBack} />
 }
 
 function TokenRoute({ tokenKeyWanted, tokens, loading, onBack }: { tokenKeyWanted: string; tokens: WhitehashToken[]; loading: boolean; onBack: () => void }) {
   const token = tokens.find(value => tokenKey(value) === tokenKeyWanted)
   if (!token) return <DocsPage className="pt-8"><Button variant="link" onClick={onBack}>← Back</Button><p className="mt-3 text-muted">{loading ? "Loading…" : "Token not found in this wallet."}</p></DocsPage>
   return <TokenDetails token={token} onBack={onBack} settingsHref="/settings" />
+}
+
+function DirectTokenRoute({ tokenRef, onBack }: { tokenRef: TokenRef; onBack: () => void }) {
+  const { client } = useWhitehash()
+  const [token, setToken] = useState<WhitehashToken | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  useEffect(() => {
+    let alive = true
+    setToken(null); setError(null)
+    void client.getToken(tokenRef).then(value => { if (alive) setToken(value) }).catch(cause => {
+      if (alive) setError(cause instanceof Error ? cause.message : String(cause))
+    })
+    return () => { alive = false }
+  }, [client, tokenRef.chain, tokenRef.contract, tokenRef.tokenId])
+  if (token) return <TokenDetails token={token} onBack={onBack} settingsHref="/settings" />
+  return <DocsPage className="pt-8"><Button variant="link" onClick={onBack}>← Back</Button><p className="mt-3 text-muted">{error ?? "Loading token…"}</p></DocsPage>
+}
+
+function PasteSearch({ open, onOpenChange, recentAddresses, onSubmit }: { open: boolean; onOpenChange: (open: boolean) => void; recentAddresses: string[]; onSubmit: (value: string) => void }) {
+  const [value, setValue] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const submit = (candidate: string) => {
+    try { onSubmit(candidate.trim()); setError(null); onOpenChange(false) }
+    catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)) }
+  }
+  return <Dialog open={open} onOpenChange={onOpenChange}><Dialog.Content>
+    <Dialog.Title>Paste anything</Dialog.Title>
+    <p className="mt-1 text-sm text-muted">Wallet address, project or token ref, artwork URL, or CID.</p>
+    <form className="mt-4 flex gap-2" onSubmit={event => { event.preventDefault(); submit(value) }}>
+      <Input value={value} onChange={event => setValue(event.target.value)} autoFocus placeholder="tz1…, 0x…, project/…, token/…, or CID" />
+      <Button type="submit">Open</Button>
+    </form>
+    {error ? <p className="mt-2 text-sm text-danger">{error}</p> : null}
+    {recentAddresses.length ? <div className="mt-4 flex flex-wrap gap-2">{recentAddresses.map(address => <Button key={address} variant="ghost" size="sm" onClick={() => submit(address)}>{address.slice(0, 8)}…</Button>)}</div> : null}
+  </Dialog.Content></Dialog>
 }

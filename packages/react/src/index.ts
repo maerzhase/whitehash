@@ -22,7 +22,6 @@ export {
 export {
   useProjects,
   useProject,
-  useEvmProjectCard,
   type UseProjectOptions,
   type UseProjectsOptions,
 } from "./use-projects.js"

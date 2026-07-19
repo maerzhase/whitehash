@@ -20,6 +20,7 @@ import {
 import { normalizeMetadata } from "./metadata.js"
 import { EVM_NETWORKS, TEZOS_NETWORKS } from "./networks.js"
 import { hexToUtf8 } from "./tezos.js"
+import type { ProjectRef } from "./refs.js"
 import type {
   ChainId,
   ChainReaderConfig,
@@ -33,11 +34,8 @@ type EvmChain = Extract<ChainId, `eip155:${string}`>
 /** A generative project (collection), uniform across chains. */
 export interface WhitehashProject {
   chain: ChainId
-  /**
-   * Stable reference. Tezos: "{issuerVersion}:{projectId}" (e.g. "v3:31804").
-   * EVM: the FxGenArt721 contract address.
-   */
-  ref: string
+  /** Stable, serializable reference used by clients, hooks, components, and routes. */
+  ref: ProjectRef
   name: string | null
   description: string | null
   displayUri: string | null
@@ -156,7 +154,7 @@ export async function listTezosProjects(
         const counts = tezosEditionCounts(k.value)
         projects[i] = {
           chain,
-          ref: `${version}:${k.key}`,
+          ref: { type: "project", chain, id: `${version}:${k.key}` },
           name: typeof meta?.["name"] === "string" ? (meta["name"] as string) : null,
           description:
             typeof meta?.["description"] === "string"
@@ -201,7 +199,7 @@ export async function getTezosProject(
   const counts = tezosEditionCounts(key.value)
   return {
     chain,
-    ref,
+    ref: { type: "project", chain, id: ref },
     name: typeof meta?.["name"] === "string" ? (meta["name"] as string) : null,
     description:
       typeof meta?.["description"] === "string" ? (meta["description"] as string) : null,
@@ -304,7 +302,7 @@ export async function listEvmProjects(
   return {
     projects: page.map(c => ({
       chain,
-      ref: c.address,
+      ref: { type: "project", chain, id: c.address },
       name: null, // filled lazily via getEvmProjectInfo
       description: null,
       displayUri: null,

@@ -11,7 +11,6 @@ import {
   listProjects,
   listTezosProjectTokens,
   type ListOrder,
-  type WhitehashProject,
 } from "./browse.js"
 import { isEvmChain, isTezosChain } from "./networks.js"
 import {
@@ -20,16 +19,20 @@ import {
   liveViewStatus,
   type LiveViewStatus,
 } from "./semantics.js"
+import type { ProjectRef, TokenRef } from "./refs.js"
+import { getToken } from "./token.js"
 import type {
   ChainId,
   ChainReaderConfig,
+  NetworkMode,
   ProgressCallback,
   WhitehashToken,
 } from "./types.js"
-import { getChainWalletTokens, getWalletTokens } from "./wallet.js"
+import { getWalletTokens } from "./wallet.js"
 
 export interface ListProjectsOptions {
-  issuerVersion?: string
+  chain: ChainId
+  version?: string
   cursor?: string | null
   limit?: number
   order?: ListOrder
@@ -39,6 +42,20 @@ export interface ListProjectTokensOptions {
   cursor?: string | null
   limit?: number
   order?: ListOrder
+}
+
+export interface GetWalletTokensOptions {
+  chains?: ChainId[]
+  mode?: NetworkMode
+  onProgress?: ProgressCallback
+}
+
+function addressChains(address: string, mode: NetworkMode): ChainId[] {
+  if (/^(tz[1-4]|KT1)/.test(address)) return [mode === "mainnet" ? "tezos:mainnet" : "tezos:ghostnet"]
+  if (/^0x[0-9a-fA-F]{40}$/.test(address)) {
+    return mode === "mainnet" ? ["eip155:1", "eip155:8453"] : ["eip155:11155111", "eip155:84532"]
+  }
+  return []
 }
 
 /** A framework-free whitehash API with configuration bound once. */
@@ -56,24 +73,28 @@ export function createWhitehashClient(config: ChainReaderConfig) {
       resolver.fetch(uri, options),
     getWalletTokens: (
       address: string,
-      chains: ChainId[],
-      onProgress?: ProgressCallback,
-    ) => getWalletTokens(address, chains, config, onProgress),
-    getChainWalletTokens: (
-      address: string,
-      chain: ChainId,
-      onProgress?: ProgressCallback,
-    ) => getChainWalletTokens(address, chain, config, onProgress),
+      options: GetWalletTokensOptions = {},
+    ) => getWalletTokens(
+      address,
+      options.chains ?? addressChains(address, options.mode ?? "mainnet"),
+      config,
+      options.onProgress,
+    ),
     listProjects: (
-      chain: ChainId,
-      options?: ListProjectsOptions,
+      options: ListProjectsOptions,
       onProgress?: ProgressCallback,
-    ) => listProjects(chain, config, options, onProgress),
-    getProject: async (chain: ChainId, ref: string) => {
-      if (isTezosChain(chain)) return getTezosProject(chain, ref, config)
+    ) => listProjects(options.chain, config, {
+      issuerVersion: options.version,
+      cursor: options.cursor,
+      limit: options.limit,
+      order: options.order,
+    }, onProgress),
+    getProject: async (ref: ProjectRef) => {
+      const { chain } = ref
+      if (isTezosChain(chain)) return getTezosProject(chain, ref.id, config)
       if (!isEvmChain(chain)) return null
-      const info = await getEvmProjectInfo(chain, ref, config)
-      const preview = await getEvmProjectPreview(chain, ref, config)
+      const info = await getEvmProjectInfo(chain, ref.id, config)
+      const preview = await getEvmProjectPreview(chain, ref.id, config)
       return {
         chain,
         ref,
@@ -86,33 +107,19 @@ export function createWhitehashClient(config: ChainReaderConfig) {
         raw: info,
       }
     },
-    getEvmProjectInfo: (
-      chain: ChainId,
-      contract: string,
-    ): Promise<Partial<WhitehashProject>> => {
-      if (!isEvmChain(chain)) return Promise.resolve({})
-      return getEvmProjectInfo(chain, contract, config)
-    },
-    getEvmProjectPreview: (
-      chain: ChainId,
-      contract: string,
-    ): Promise<string | null> => {
-      if (!isEvmChain(chain)) return Promise.resolve(null)
-      return getEvmProjectPreview(chain, contract, config)
-    },
-    listProjectTokens: (
-      chain: ChainId,
-      ref: string,
-      options: ListProjectTokensOptions & { projectName?: string } = {},
+    getToken: (ref: TokenRef) => getToken(ref, config),
+    listProjectTokens: async (
+      ref: ProjectRef,
+      options: ListProjectTokensOptions = {},
     ) => {
+      const { chain } = ref
       if (isTezosChain(chain)) {
-        if (!options.projectName) {
-          throw new Error("A Tezos projectName is required to list iterations")
-        }
-        return listTezosProjectTokens(chain, options.projectName, config, options)
+        const project = await getTezosProject(chain, ref.id, config)
+        if (!project?.name) return { tokens: [], cursor: null }
+        return listTezosProjectTokens(chain, project.name, config, options)
       }
       if (isEvmChain(chain)) {
-        return listEvmProjectTokens(chain, ref, config, { cursor: options.cursor })
+        return listEvmProjectTokens(chain, ref.id, config, { cursor: options.cursor })
       }
       return Promise.resolve({ tokens: [], cursor: null })
     },

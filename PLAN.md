@@ -533,7 +533,9 @@ components at layer 2 stay thin.
   pluggable cache. Every hook reads it (overridable per-call).
 - `useWalletTokens(address)` — from `apps/viewer/src/useWalletTokens.ts`: per-chain
   progress states, cache-first + live refresh.
-- `useProjects(chain, opts)` / `useProject(chain, ref)` — from `useBrowse.ts`, paginated.
+- `useProjects({chain, version?, order?, limit?})` / `useProject(projectRef, opts)` —
+  parallel list/detail lifecycles from `useBrowse.ts`; list results progressively hydrate
+  missing preview fields through the universal client API.
 - `useGatewayImage(uri, chain)` — the multi-gateway fallback as a hook (from
   `GatewayImage.tsx`): returns `{src, onError, failed}` so any `<img>` gets resilience.
 - `useArtworkFrame(token)` — live-view state machine (from `ArtworkFrame.tsx`):
@@ -556,7 +558,8 @@ both tiers, so adopters get a fully consistent product:
   - `<Artwork.Root token>` + `Artwork.Image` (gateway-fallback still) / `Artwork.Live`
     (sandboxed iframe) / `Artwork.PlayButton` / `Artwork.StatusBadge` — the ArtworkFrame
     decomposed so integrators recompose or restyle any part.
-  - `<TokenCard token>` (compound: `TokenCard.Media/Title/Meta`) and `<TokenGrid tokens>`.
+  - Token cards are the documented `Card.*` + `Artwork.*` composition recipe, not a
+    second compound family. `TokenGrid` is layout/loading only and owns no token markup.
   - Blocks: `<WalletGallery address>`, `<ProjectBrowser chain>`, `<ProjectGallery chain
     ref>` — one-liner embeds wrapping hooks + grids (the current BrowseView/ProjectView/
     WalletView, generalized: navigation delegated to callbacks/slots, never hardcoded).
@@ -576,7 +579,7 @@ both tiers, so adopters get a fully consistent product:
 | `useBrowse.ts` (useProjects/useProject/useEvmProjectCard) | `@whitehash/react` (L1) |
 | `components/GatewayImage.tsx` | hook → L1; styled part → `Artwork.Image` (L2) |
 | `components/ArtworkFrame.tsx` (incl. sandbox/allow constants) | `useArtworkFrame` (L1) + `Artwork.*` (L2) |
-| `components/TokenGrid.tsx` | `TokenCard`/`TokenGrid` (L2) |
+| `components/TokenGrid.tsx` | private block recipe using `Card`/`Artwork`; `TokenGrid` layout utility (L2) |
 | `components/BrowseView.tsx`, `ProjectView.tsx`, `WalletView` (in App) | blocks tier (L2), nav via callbacks |
 | `components/WalletSearch.tsx` | `AddressSearch` + `WalletSearch` dialog (L2, in `@whitehash/ui`) |
 | `settings.ts` (settings → config mapping) | docs app only; integrators construct config directly |

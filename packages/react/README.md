@@ -21,9 +21,8 @@ root.render(<WhitehashProvider config={config}><Wallet address="tz1…" /></Whit
 | --- | --- |
 | `WhitehashProvider`, `useWhitehash` | Provide/read the bound client, cache, and network mode |
 | `useWalletTokens(address, options?)` | Cache-first multi-chain wallet tokens, progress, loading state, and refresh |
-| `useProjects(chain, options?)` | Paginated chain project discovery |
-| `useProject(chain, ref, options?)` | Project metadata, iterations, pagination, and sort |
-| `useEvmProjectCard(chain, contract)` | Best-effort EVM name/supply/preview enrichment |
+| `useProjects({ chain, version?, order?, limit? })` | Paginated discovery with progressive preview hydration on every chain |
+| `useProject(ref, options?)` | Project metadata, iterations, pagination, and sort; the typed ref carries its chain |
 | `useGatewayImage(uri, chain)` | Ordered gateway URL with an `onError` fallback handler |
 | `useArtworkFrame(token)` | Live-view status, play/stop state, and sandboxed iframe props |
 | `createIndexedDbCache()` | Browser-persistent `WhitehashCache` implementation |

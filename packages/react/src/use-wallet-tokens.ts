@@ -61,7 +61,7 @@ export async function loadWalletChain({
     }
   }
 
-  const tokens = await client.getChainWalletTokens(address, chain, onProgress)
+  const tokens = await client.getWalletTokens(address, { chains: [chain], onProgress })
   try {
     await cache.setWalletTokens(chain, address, tokens)
   } catch {
