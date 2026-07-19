@@ -161,6 +161,19 @@ static docs/showcase app, and release artifacts are ready for maintainer review.
 scope verification, initial versioning, public-access configuration, and publication are
 explicitly deferred until the maintainer gives separate approval.
 
+## Next up: M14 — API ergonomics & composability review (gates first publish)
+
+Added 2026-07-19 (PLAN §4.8 + §5 M14): a README-driven redesign pass over every public
+export — the API must be understandable at first glimpse. Breaking changes are free
+until the first publish, so this happens BEFORE any release. Recorded critiques to
+resolve: (1) `useProjects`/`useProject` — justify two hooks or unify via props;
+(2) `useEvmProjectCard` — chain-specific leakage; enrichment must be universal and
+chain-invisible; (3) opaque refs/addresses — first-class `ProjectRef`/`TokenRef` +
+`parseRef`/`formatRef` + a `resolveInput()` that accepts pasted fxhash URLs/CIDs/
+addresses; (4) `TokenCard` collapses into a `Card` + `Artwork.*` composition recipe
+(keep `TokenGrid` only if it earns its place; blocks tier stays). Method + acceptance in
+PLAN §4.8.
+
 Layer-0 packages, slot in when convenient:
 
 - **M6** `@whitehash/runtime` — runtime controller for live param exploration /

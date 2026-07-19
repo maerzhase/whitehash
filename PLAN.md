@@ -593,6 +593,59 @@ lacks (nav bar, hero, code block, docs page shell) gets added to `@whitehash/ui`
 component — the pressure that keeps the design system complete and the product
 "super-consistent": the showcase IS the package rendering itself.
 
+### 4.8 API ergonomics & composability review (M14) — the "first glimpse" bar
+
+The toolkit's API must be the most natural one possible: **understandable at first
+glimpse, guessable without docs**. The current surface grew by extraction from the app,
+which preserved behavior but fossilized some app-shaped seams. M14 is a deliberate
+review-and-break pass over every public export — done BEFORE the first npm publish,
+while breaking changes are free (`0.0.0`, nothing published). First publish is gated on
+M14.
+
+**Method (README-driven design):**
+1. Write the ideal quickstart snippets FIRST — five scenarios, each ≤15 lines: (a) show
+   one artwork on a blog page; (b) wallet gallery; (c) browse projects with filters;
+   (d) one project's iterations; (e) non-React usage via `createWhitehashClient`. Derive
+   the API from what those snippets *want* to say, then reshape the packages to match.
+2. Inventory every export of `chain-reader`/`react`/`ui`; each must justify its
+   existence and its name to a first-time reader. Naming rules: no chain names in public
+   API names (chain is a *value*, never an identifier), no internal jargon
+   (issuer/gentk/ledger stay internal), verbs for actions, nouns for data.
+3. Acceptance: a fresh agent/person given ONLY the quickstart page (no source, no other
+   docs) reproduces all five scenarios; every removed/renamed export has a changeset
+   documenting the break.
+
+**Known critiques to resolve (recorded 2026-07-19; each needs an explicit decision in
+code + a line in the M14 changeset):**
+
+1. **`useProjects` vs `useProject` — why two hooks?** Review whether list-vs-single is
+   just data shape, not two concepts. Candidate direction: one `useProjects(chain,
+   {ref?, limit, cursor, order})` where passing `ref` narrows to one project (same
+   return shape, array of 0..n) — or keep two hooks but make `useProject` purely "one
+   project + its iterations" with obviously parallel naming/signatures. Decide by
+   writing scenario (c) and (d) snippets both ways; pick what reads naturally.
+2. **`useEvmProjectCard` — chain-specific leakage, opaque name.** EVM factory logs carry
+   no name/preview, so the app grew a lazy-enrichment hook. The chain difference must
+   disappear inside the data layer: EITHER `useProjects` progressively hydrates missing
+   fields itself (projects emit updates as enrichment lands — preferred), OR a universal
+   `useProjectPreview(project)` that no-ops when data is already present. No public API
+   may encode "Evm"/"Tezos" in its name.
+3. **Refs/addresses are opaque.** `v2:11104` and bare contract addresses leak internals.
+   Introduce a first-class reference story: a documented `ProjectRef`/`TokenRef` shape
+   used consistently across hooks, components, and docs routes; `parseRef`/`formatRef`
+   helpers; display helpers (short address, human name resolution); and a
+   `resolveInput(string)` utility that accepts what users actually paste — an fxhash
+   URL, a bare CID, a contract address, or a ref — and returns the typed ref (reuses the
+   §3.5 metadata knowledge; this also powers a paste-anything search box in the docs).
+4. **`TokenCard` duplicates `Card` + `Artwork` — collapse the middle tier.** A token
+   card should be a *recipe*, not a bespoke component: `Artwork.Root` parts must compose
+   inside `Card.Root` (e.g. `Card.Media><Artwork.Image/>`), and the docs show that
+   composition as the canonical card. Keep `TokenGrid` only if it earns its place as a
+   layout utility (responsive grid + loading skeletons); otherwise it becomes a
+   documented CSS recipe. The blocks tier (`WalletGallery` etc.) stays as the one-liner
+   convenience layer — the middle bespoke tier is what goes. One concept = one component
+   family: `Card` is the shell, `Artwork` is the art, blocks are the shortcuts.
+
 **Framework-agnostic embed (stretch, post-M13):** a web component
 (`<whitehash-artwork chain contract token-id>`) wrapping layer 0 + a minimal renderer,
 for non-React sites and blog embeds.
@@ -671,8 +724,17 @@ folds into M12.
   discipline notes, `exports` maps audited (ESM, `/styles.css`, `/react` subpaths),
   changesets flipped from private mode when the user green-lights npm publishing
   (`@whitehash` scope availability ⚠️ still unverified). Publishing remains a user
-  decision — prepare everything, do not publish without an explicit go.
-- **Stretch (post-M13)** — `<whitehash-artwork>` web component for non-React sites.
+  decision — prepare everything, do not publish without an explicit go. **The first
+  publish is additionally gated on M14** — do not release an API that hasn't passed the
+  first-glimpse review.
+- **M14 — API ergonomics & composability review** (§4.8): README-driven redesign pass
+  over every public export; resolve the four recorded critiques (hook unification,
+  chain-name leakage, opaque refs + `resolveInput`, collapsing `TokenCard` into
+  `Card`+`Artwork` composition). Breaking changes expected and free (pre-publish).
+  Acceptance: the five quickstart scenarios each read naturally in ≤15 lines; a fresh
+  agent reproduces them from the quickstart page alone; no public export carries a chain
+  name or internal fxhash jargon; docs updated to the new surface; all gates green.
+- **Stretch (post-M14)** — `<whitehash-artwork>` web component for non-React sites.
 
 ## 6. Open items the executor must resolve (and record in code/docs)
 
