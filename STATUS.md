@@ -1,6 +1,17 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-12 (rev 3).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-12 (rev 4).
+
+## ⤴ Reframe: whitehash is a toolkit, the app is its docs
+
+Decided 2026-07-12: the final outcome is a **library/toolkit** integrators embed in their
+own sites — a low-level framework-free API (layer 0), a headless React hooks API
+(layer 1, `@whitehash/react`), and a high-level composable components API (layer 2,
+`@whitehash/components`, CSS-variable themed, no Tailwind requirement). The app becomes
+`apps/docs`: dev docs + live showcase, built on the public toolkit APIs. Full
+architecture, dependency policy, and app→package extraction inventory: **PLAN §4.7**;
+sequencing: **M10 (react hooks) → M11 (components) → M12 (docs app) → M13 (publish
+readiness)**. The data layer (resolve/chain-reader/proxy) is unchanged by this.
 
 `pnpm build && pnpm check-types && pnpm test` all green (6 packages, 57 tests + 2 opt-in
 live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain-reader test`.
@@ -66,14 +77,25 @@ All live-verified in the browser unless noted.
 
 ## Not yet built (from the plan)
 
-- **M6** `@whitehash/runtime` — extract the fxhash runtime controller for live param
-  exploration / re-seeding (extraction map in PLAN §4.5). Not required for viewing.
-- **M7** `apps/archive-cli` — download a wallet's artworks to a self-contained offline
-  folder (PLAN §4.6). The strongest "art preservation" deliverable; not started.
-- **M8** deploy docs & release hygiene — GitHub Pages / IPFS deploy guide, Vercel proxy
-  button, snapshot-refresh CI cron, `changeset version` flow. npm publish stays deferred.
-- **M9** client-side onchfs via a service worker — resolve `onchfs://` in-browser so onchfs
-  art renders with zero server setup (PLAN §5 M9). Optional; proxy + hint cover it today.
+Critical path after the reframe:
+
+- **M10** layer sink + `@whitehash/react` — move token semantics (`render.ts`) down into
+  chain-reader (+ `createWhitehashClient` facade); extract the app's hooks/provider/cache
+  into a headless React package. PLAN §4.7.
+- **M11** `@whitehash/components` — compound `Artwork.*`, `TokenCard`/`TokenGrid`, blocks
+  (`WalletGallery`/`ProjectBrowser`/`ProjectGallery`), `AddressSearch`; `--wh-*` CSS-var
+  theming, no Tailwind dep. PLAN §4.7.
+- **M12** `apps/docs` — viewer becomes the docs/showcase site (per-API pages with live
+  demos, theming reference, deploy guides; absorbs M8).
+- **M13** publish readiness — package READMEs, exports-map audit, changesets flip;
+  publishing itself stays a user decision.
+
+Layer-0 packages, slot in when convenient:
+
+- **M6** `@whitehash/runtime` — runtime controller for live param exploration /
+  re-seeding (extraction map in PLAN §4.5); do before M11 if `Artwork.Explore` is wanted.
+- **M7** `apps/archive-cli` — wallet → self-contained offline folder (PLAN §4.6).
+- **M9** `@whitehash/onchfs-sw` — client-side onchfs via a service worker (PLAN §5 M9).
 
 ## Known follow-ups / smaller items
 

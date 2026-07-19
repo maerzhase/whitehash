@@ -1,9 +1,19 @@
 # whitehash — Implementation Plan
 
-A standalone, open-source, self-hostable NFT viewer and preservation toolkit for fxhash
-generative art on **Tezos, Ethereum L1, and Base** — reading everything directly from
-public blockchain infrastructure, with **zero dependency on fxhash-hosted services and
-zero `@fxhash/*` npm dependencies**.
+An open-source **toolkit** for building fxhash generative-art experiences into any
+website — on **Tezos, Ethereum L1, and Base**, reading everything directly from public
+blockchain infrastructure, with **zero dependency on fxhash-hosted services and zero
+`@fxhash/*` npm dependencies**.
+
+> **Reframe (July 2026).** whitehash's final outcome is a *library/toolkit*, not an app.
+> Integrators get a **low-level API** (framework-free data + protocol packages), a
+> **headless React layer** (hooks, no styling), and a **high-level composable components
+> API** (drop-in, themeable). The app in this repo is the toolkit's *dev docs and
+> showcase* — built with the toolkit itself (dogfooding), demonstrating every piece with
+> live examples and copyable code. Everything in §3 (the knowledge base) and the data
+> packages is unchanged by this reframe; what changes is that the app's internals get
+> promoted into published packages, per §4.7. Toolkit architecture rules live in §4.7;
+> milestones M10–M13 in §5 sequence the reframe.
 
 This document is a complete handoff plan. Every contract address, API shape, and source
 file path below was verified against the fxhash monorepo (local clone:
@@ -25,9 +35,10 @@ re-research these facts, but MUST re-verify anything marked ⚠️ before relyin
    - Public RPC nodes (user-configurable)
    - TzKT public API (`https://api.tzkt.io`) — a public-good indexer for Tezos, not fxhash infra
    - The self-hostable onchfs proxy shipped in this repo (`apps/onchfs-proxy`)
-3. **The viewer must be a fully static client-side app** (deployable to GitHub Pages /
-   IPFS / any static host). The onchfs proxy is the only server component in the project
-   and is optional (only needed for `onchfs://` artworks).
+3. **Everything browser-side must work fully client-side.** The docs/showcase app is a
+   static site (deployable to GitHub Pages / IPFS / any static host), and no toolkit
+   package may require a server to function. The onchfs proxy is the only server
+   component in the project and is optional (only needed for `onchfs://` artworks).
 4. Package namespace: `@whitehash/*`. **Not published to npm for now** — but the repo is
    designed changeset-first: changesets are configured in M0, and the executor adds a
    changeset alongside any meaningful package change, so version history accumulates and
@@ -44,6 +55,9 @@ re-research these facts, but MUST re-verify anything marked ⚠️ before relyin
 
 ## 2. Repo layout
 
+Target layout after the toolkit reframe (M10–M13). Packages are ordered by layer — each
+depends only on layers below it:
+
 ```
 whitehash/
   PLAN.md                     ← this file
@@ -54,18 +68,33 @@ whitehash/
   tsconfig.base.json          ← strict: true
   .github/workflows/ci.yml    ← build + typecheck + test on PR
   packages/
-    resolve/                  ← @whitehash/resolve    — URI → HTTP URL resolution
-    chain-reader/             ← @whitehash/chain-reader — wallet → tokens, both chains
-    runtime/                  ← @whitehash/runtime    — extracted artwork runtime (M6)
+    # — Layer 0: framework-free (the low-level API) —
+    resolve/                  ← @whitehash/resolve      — URI → HTTP URL resolution
+    chain-reader/             ← @whitehash/chain-reader — tokens/projects from chain,
+                                token semantics (render URI, live-view status)
+    runtime/                  ← @whitehash/runtime      — artwork runtime controller (M6)
+    onchfs-sw/                ← @whitehash/onchfs-sw    — client-side onchfs resolution (M9)
+    # — Layer 1: headless React (hooks, zero styling) —
+    react/                    ← @whitehash/react        — provider, hooks, cache (M10)
+    # — Layer 2: composable styled components (the high-level API) —
+    components/               ← @whitehash/components   — drop-in domain components (M11)
+    # — docs-site-private (NOT part of the toolkit) —
+    ui/                       ← @whitehash/ui           — the docs site's own design system
   apps/
+    docs/                     ← dev docs + live showcase (was apps/viewer), Vite + React
     onchfs-proxy/             ← Hono middleware, self-hostable
-    viewer/                   ← Vite + React static app
     archive-cli/              ← preservation CLI (M7)
 ```
 
-Tooling: pnpm workspaces + turbo (same as the fxhash monorepo, familiar), TypeScript
-strict, `vitest` for tests, `tsup` for package builds, changesets for versioning.
-No tailwind requirement in packages; the viewer may use it.
+Tooling: pnpm workspaces + turbo, TypeScript strict, `vitest` for tests, `tsup` for
+package builds, changesets for versioning.
+
+**Toolkit dependency policy** (what integrators inherit): Layer 0 packages depend only on
+`viem` / `onchfs` / nothing. Layer 1 adds a `react` peer dep — no styling system, no
+component library. Layer 2 styles via **plain CSS custom properties shipped as a small
+stylesheet** — Tailwind is NOT a dependency of any published package (integrators must
+not be forced into a styling system; Tailwind stays a docs-app devtool). `@whitehash/ui`
+is the docs site's own brand system and is never a dependency of toolkit packages.
 
 ---
 
@@ -391,7 +420,10 @@ Verification: deploy locally, resolve a known mainnet onchfs URI — take any Ba
 Tezos onchfs-rendered project's `generatorUri` found during M3 testing; expect 200 +
 HTML. (An executing agent can find one by scanning fetched metadata for `onchfs://`.)
 
-### 4.4 `apps/viewer`
+### 4.4 `apps/viewer` → becomes `apps/docs` (see §4.7 / M12)
+
+> Post-reframe: this app is the toolkit's docs + showcase. The spec below remains valid
+> as the showcase flows' behavior; the app's *internals* migrate to packages per §4.7.
 
 Vite + React + TypeScript, `@tanstack/react-query`, tailwind. Static build, no server.
 Routes (hash-router so it works from any static host/IPFS without rewrites):
@@ -459,12 +491,104 @@ Per token, write `{out}/{chain}/{contract}/{tokenId}/`:
   query string + fragment, so the folder replays offline.
 - Top-level `index.html` gallery over everything archived + `manifest.json`.
 
+### 4.7 The toolkit reframe: API layers & extraction map
+
+whitehash's product is the toolkit; the app is its documentation. Integrators choose
+their altitude:
+
+```
+Layer 0  @whitehash/resolve · chain-reader · runtime · onchfs-sw   (framework-free JS)
+Layer 1  @whitehash/react                                          (headless hooks)
+Layer 2  @whitehash/components                                     (styled, composable)
+Docs     apps/docs                                                 (showcase, not a package)
+```
+
+**Layer 0 — the low-level API (framework-free).** Already largely built. Additions:
+
+- Move the pure token semantics currently living in the app (`apps/viewer/src/render.ts`)
+  **down into `@whitehash/chain-reader`**: `renderArtifactUri` (applies the gentk-v1
+  separate-`iterationHash` seed — hard-won correctness that must not stay app-private),
+  `imageSourceUri`, `artworkUrl`, `liveViewStatus`. These are chain/domain logic, not UI.
+- Add a `createWhitehashClient(config)` facade in `@whitehash/chain-reader` bundling the
+  per-call config threading (`getWalletTokens`/`listProjects`/`resolveUri`/… as bound
+  methods) — the one-import entry point for non-React consumers.
+- `@whitehash/runtime` (M6) ships framework-free with a `/react` subpath export.
+- `@whitehash/onchfs-sw` (M9) becomes a package (SW registration + virtual-path resolver)
+  rather than an app feature.
+
+**Layer 1 — `@whitehash/react`, the headless React API (M10).** Extracted from the app;
+zero styling; peer-dep `react` only. Per the composable-component criteria: *headless
+hooks own the ceremony* (fetching, caching, progress, gateway fallback, iframe state);
+components at layer 2 stay thin.
+
+- `<WhitehashProvider config={…}>` — context carrying `ChainReaderConfig`/resolver +
+  pluggable cache. Every hook reads it (overridable per-call).
+- `useWalletTokens(address)` — from `apps/viewer/src/useWalletTokens.ts`: per-chain
+  progress states, cache-first + live refresh.
+- `useProjects(chain, opts)` / `useProject(chain, ref)` — from `useBrowse.ts`, paginated.
+- `useGatewayImage(uri, chain)` — the multi-gateway fallback as a hook (from
+  `GatewayImage.tsx`): returns `{src, onError, failed}` so any `<img>` gets resilience.
+- `useArtworkFrame(token)` — live-view state machine (from `ArtworkFrame.tsx`):
+  `{status, playing, play, stop, iframeProps}` where `iframeProps` carries the artwork
+  URL + the sandbox/allow attribute set — the a11y/security ceremony in one place.
+- Cache: the IndexedDB wallet cache (from `cache.ts`) behind a `WhitehashCache`
+  interface (pluggable; default `idb-keyval` implementation, `memory` for SSR/tests).
+
+**Layer 2 — `@whitehash/components`, the high-level composable API (M11).** Compound
+Root/Part components per the established criteria (Root owns state via context; parts
+consume; slots only on behavioral parts). Styled with **plain CSS custom properties**
+(`--wh-*`) via an importable `@whitehash/components/styles.css`; every part accepts
+`className`; a bare-CSS theme file overrides the look — no Tailwind requirement.
+
+- `<Artwork.Root token>` + `Artwork.Image` (gateway-fallback still) / `Artwork.Live`
+  (sandboxed iframe) / `Artwork.PlayButton` / `Artwork.StatusBadge` — the ArtworkFrame,
+  decomposed so integrators recompose or restyle any part.
+- `<TokenCard token>` (compound: `TokenCard.Media/Title/Meta`) and `<TokenGrid tokens>`.
+- `<WalletGallery address>` and `<ProjectBrowser chain>` / `<ProjectGallery chain ref>` —
+  the "blocks" tier: one-liner embeds wrapping the hooks + grids, for integrators who
+  want a working gallery in five minutes. (These are the current BrowseView/ProjectView/
+  WalletView, generalized: navigation is delegated to callbacks/slots, never hardcoded.)
+- `<AddressSearch onSubmit>` — the wallet-search input with validation + recents.
+- Explicit non-goals: the docs app's chrome (settings panel, its dialog, its nav) stays
+  app-private; generic primitives (Button/Dialog/ToggleGroup) are NOT shipped — that's
+  `@whitehash/ui`, the docs site's private brand system.
+
+**Extraction inventory** (current app file → toolkit home):
+
+| Today (`apps/viewer/src/`) | Toolkit home |
+| --- | --- |
+| `render.ts` (renderArtifactUri, liveViewStatus, …) | `@whitehash/chain-reader` (L0) |
+| `cache.ts` (IndexedDB wallet cache) | `@whitehash/react` cache impl (L1) |
+| `useWalletTokens.ts` | `@whitehash/react` (L1) |
+| `useBrowse.ts` (useProjects/useProject/useEvmProjectCard) | `@whitehash/react` (L1) |
+| `components/GatewayImage.tsx` | hook → L1; styled part → `Artwork.Image` (L2) |
+| `components/ArtworkFrame.tsx` (incl. sandbox/allow constants) | `useArtworkFrame` (L1) + `Artwork.*` (L2) |
+| `components/TokenGrid.tsx` | `TokenCard`/`TokenGrid` (L2) |
+| `components/BrowseView.tsx`, `ProjectView.tsx`, `WalletView` (in App) | blocks tier (L2), nav via callbacks |
+| `components/WalletSearch.tsx` | `AddressSearch` (L2); the spotlight dialog chrome stays docs-private |
+| `settings.ts` (settings → config mapping) | docs app only; integrators construct config directly |
+| `App.tsx` routing/scroll keep-alive | docs app only |
+
+**apps/docs (M12)** — the reframed app: docs-first structure (getting started; choose
+your layer; per-hook and per-component pages with live example + copyable code; theming
+guide with the `--wh-*` variable reference; guides for Vite/Next/self-hosting the onchfs
+proxy), plus the existing browse/wallet/token flows kept as full-app showcases — built
+exclusively on the public toolkit APIs, so the docs site is itself the integration test.
+The current surf-print design (`@whitehash/ui`) is the docs site's brand.
+
+**Framework-agnostic embed (stretch, post-M13):** a web component
+(`<whitehash-artwork chain contract token-id>`) wrapping layer 0 + a minimal renderer,
+for non-React sites and blog embeds.
+
 ---
 
 ## 5. Milestones & order
 
 Each milestone ends with: typecheck clean, tests green, and the stated acceptance check.
-Do them in order; M3 and M4 can run in parallel after M2.
+M0–M5 are complete (plus substantial post-plan work — see STATUS.md). **After the toolkit
+reframe (§4.7), the critical path is M10 → M11 → M12 → M13**; M6/M7/M9 slot in as layer-0
+packages whenever convenient (M6 before M11 if `Artwork.Explore` parts are wanted); M8
+folds into M12.
 
 - **M0 — scaffold**: repo layout §2, CI, LICENSE (MIT, with NOTICE section crediting
   fxhash for vendored code), root README stating mission + the two hard constraints,
@@ -480,16 +604,16 @@ Do them in order; M3 and M4 can run in parallel after M2.
   test on eip155:1 and eip155:8453 at minimum.
 - **M4 — onchfs-proxy**: Acceptance: local run resolves a real mainnet onchfs generator
   (200 + correct content-type).
-- **M5 — viewer**: Acceptance: enter a known collector address → grid renders; open a
-  token → live artwork runs in the iframe from a public gateway; works with `pnpm build
-  && npx serve dist` (no dev server); settings persist.
-- **M6 — runtime extraction + explore mode** (§4.5). Acceptance: for a params token,
-  editing a param re-renders live; new-hash button produces a different variation.
+- **M5 — viewer** ✅ (now the seed of apps/docs): Acceptance: enter a known collector
+  address → grid renders; open a token → live artwork runs in the iframe from a public
+  gateway; works with `pnpm build && npx serve dist` (no dev server); settings persist.
+- **M6 — runtime extraction + explore mode** (§4.5; ships as layer-0 `@whitehash/runtime`
+  with a `/react` subpath). Acceptance: for a params token, editing a param re-renders
+  live; new-hash button produces a different variation.
 - **M7 — archive-cli**. Acceptance: archive a wallet, disconnect network, open the
   folder's `index.html` — artworks replay offline.
-- **M8 — deploy docs & release hygiene**: viewer deploy guide (GitHub Pages + IPFS),
-  proxy deploy guide (Vercel button), snapshot-refresh CI cron, `changeset version`
-  release flow documented. npm publishing is explicitly deferred — do not publish.
+- **M8 — deploy & release hygiene** (folds into M12): deploy guides (docs site → GitHub
+  Pages/IPFS, proxy → Vercel button), snapshot-refresh CI cron, `changeset version` flow.
 - **M9 — client-side onchfs (service worker)**: resolve `onchfs://` entirely in the
   browser so onchfs artworks render with zero server setup — removing the one piece of
   friction that currently requires running/pointing at `apps/onchfs-proxy`. Approach: a
@@ -504,7 +628,29 @@ Do them in order; M3 and M4 can run in parallel after M2.
   (onchfs serves gzip) and CORS/CSP interplay with the artwork iframe's sandbox;
   (5) cache resolved inodes/chunks in the SW (Cache API / IndexedDB) since content is
   immutable. Acceptance: with no onchfs proxy configured, a known onchfs piece (e.g.
-  "Genomes", ETH mainnet, `0xBb47…78E`) renders live. Optional (not required for viewing).
+  "Genomes", ETH mainnet, `0xBb47…78E`) renders live. Ships as `@whitehash/onchfs-sw`.
+- **M10 — layer sink + `@whitehash/react`** (§4.7): move `render.ts` semantics down into
+  `chain-reader` (+ `createWhitehashClient` facade); extract hooks/provider/cache from
+  the app into `@whitehash/react`; app consumes the package. Acceptance: the app has no
+  local copy of any hook or token-semantics function; `@whitehash/react` has unit tests
+  with a mock cache and no styling imports; typecheck/test green.
+- **M11 — `@whitehash/components`** (§4.7): compound `Artwork.*`, `TokenCard`/`TokenGrid`,
+  blocks (`WalletGallery`, `ProjectBrowser`, `ProjectGallery`), `AddressSearch`; styling
+  via `--wh-*` CSS variables in `styles.css`; no Tailwind dependency. Acceptance: a fresh
+  Vite app with ONLY `@whitehash/components` + `@whitehash/react` + a config renders a
+  working wallet gallery in <20 lines; restyling via CSS variables alone changes the look;
+  the docs app's grids/artwork views are consumed from the package (no local copies).
+- **M12 — apps/docs** (absorbs M8): rename/restructure `apps/viewer` → `apps/docs` per
+  §4.7 (getting started, layer chooser, per-API pages with live examples + code, theming
+  reference, deploy guides). Acceptance: every exported hook and component has a page
+  with a live demo; the site builds statically; the full browse/wallet showcase still
+  passes the M5 acceptance.
+- **M13 — publish readiness**: toolkit packages get READMEs with API tables, semver
+  discipline notes, `exports` maps audited (ESM, `/styles.css`, `/react` subpaths),
+  changesets flipped from private mode when the user green-lights npm publishing
+  (`@whitehash` scope availability ⚠️ still unverified). Publishing remains a user
+  decision — prepare everything, do not publish without an explicit go.
+- **Stretch (post-M13)** — `<whitehash-artwork>` web component for non-React sites.
 
 ## 6. Open items the executor must resolve (and record in code/docs)
 
