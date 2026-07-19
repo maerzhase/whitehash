@@ -76,12 +76,12 @@ whitehash/
     onchfs-sw/                ← @whitehash/onchfs-sw    — client-side onchfs resolution (M9)
     # — Layer 1: headless React (hooks, zero styling) —
     react/                    ← @whitehash/react        — provider, hooks, cache (M10)
-    # — Layer 2: composable styled components (the high-level API) —
-    components/               ← @whitehash/components   — drop-in domain components (M11)
-    # — docs-site-private (NOT part of the toolkit) —
-    ui/                       ← @whitehash/ui           — the docs site's own design system
+    # — Layer 2: THE design system (published) — primitives + domain components —
+    ui/                       ← @whitehash/ui           — Button/Card/Dialog/… primitives
+                                AND Artwork.*, TokenGrid, gallery blocks (M11)
   apps/
-    docs/                     ← dev docs + live showcase (was apps/viewer), Vite + React
+    docs/                     ← dev docs + live showcase (was apps/viewer), Vite + React —
+                                assembled EXCLUSIVELY from @whitehash/ui
     onchfs-proxy/             ← Hono middleware, self-hostable
     archive-cli/              ← preservation CLI (M7)
 ```
@@ -91,10 +91,16 @@ package builds, changesets for versioning.
 
 **Toolkit dependency policy** (what integrators inherit): Layer 0 packages depend only on
 `viem` / `onchfs` / nothing. Layer 1 adds a `react` peer dep — no styling system, no
-component library. Layer 2 styles via **plain CSS custom properties shipped as a small
-stylesheet** — Tailwind is NOT a dependency of any published package (integrators must
-not be forced into a styling system; Tailwind stays a docs-app devtool). `@whitehash/ui`
-is the docs site's own brand system and is never a dependency of toolkit packages.
+component library. Layer 2 is **`@whitehash/ui` — a single published, opinionated design
+system** (the whitehash brand look) containing both the generic primitives and the
+art-domain components; whoever adopts it gets the consistent whitehash aesthetic out of
+the box and restyles through the design-token layer (`theme.css` CSS variables), not by
+bringing their own component library. It is consumable **two ways**: (a) non-Tailwind
+projects import a **precompiled `@whitehash/ui/styles.css`** (built at package build time
+by running Tailwind over the package source — consumers need no Tailwind toolchain);
+(b) Tailwind v4 projects import `@whitehash/ui/theme.css` + add an `@source` line for the
+package, composing with our tokens/utilities directly. Both paths are first-class and
+documented; the docs app uses (b).
 
 ---
 
@@ -499,8 +505,10 @@ their altitude:
 ```
 Layer 0  @whitehash/resolve · chain-reader · runtime · onchfs-sw   (framework-free JS)
 Layer 1  @whitehash/react                                          (headless hooks)
-Layer 2  @whitehash/components                                     (styled, composable)
-Docs     apps/docs                                                 (showcase, not a package)
+Layer 2  @whitehash/ui                                             (the design system:
+                                                                    primitives + domain)
+Docs     apps/docs                                                 (showcase, built solely
+                                                                    from @whitehash/ui)
 ```
 
 **Layer 0 — the low-level API (framework-free).** Already largely built. Additions:
@@ -534,24 +542,29 @@ components at layer 2 stay thin.
 - Cache: the IndexedDB wallet cache (from `cache.ts`) behind a `WhitehashCache`
   interface (pluggable; default `idb-keyval` implementation, `memory` for SSR/tests).
 
-**Layer 2 — `@whitehash/components`, the high-level composable API (M11).** Compound
-Root/Part components per the established criteria (Root owns state via context; parts
-consume; slots only on behavioral parts). Styled with **plain CSS custom properties**
-(`--wh-*`) via an importable `@whitehash/components/styles.css`; every part accepts
-`className`; a bare-CSS theme file overrides the look — no Tailwind requirement.
+**Layer 2 — `@whitehash/ui`, the published design system (M11).** ONE package holding
+both tiers, so adopters get a fully consistent product:
 
-- `<Artwork.Root token>` + `Artwork.Image` (gateway-fallback still) / `Artwork.Live`
-  (sandboxed iframe) / `Artwork.PlayButton` / `Artwork.StatusBadge` — the ArtworkFrame,
-  decomposed so integrators recompose or restyle any part.
-- `<TokenCard token>` (compound: `TokenCard.Media/Title/Meta`) and `<TokenGrid tokens>`.
-- `<WalletGallery address>` and `<ProjectBrowser chain>` / `<ProjectGallery chain ref>` —
-  the "blocks" tier: one-liner embeds wrapping the hooks + grids, for integrators who
-  want a working gallery in five minutes. (These are the current BrowseView/ProjectView/
-  WalletView, generalized: navigation is delegated to callbacks/slots, never hardcoded.)
-- `<AddressSearch onSubmit>` — the wallet-search input with validation + recents.
-- Explicit non-goals: the docs app's chrome (settings panel, its dialog, its nav) stays
-  app-private; generic primitives (Button/Dialog/ToggleGroup) are NOT shipped — that's
-  `@whitehash/ui`, the docs site's private brand system.
+- **Primitives** (exist today): `Button` (useRender slot), `Card`, `Badge`, `Dialog`,
+  `ToggleGroup` (animated indicator), `Field`/`Input`/`Textarea`, `Spinner`/`Skeleton`/
+  `Separator`, `cn`, plus the design tokens (`theme.css`). The whitehash brand look
+  (surf-print system) ships as the default; theming = overriding token variables.
+- **Domain components** (extracted from the app in M11), compound Root/Part per the
+  established criteria (Root owns state via context; parts consume; slots only on
+  behavioral parts); internally they consume `@whitehash/react` hooks and compose the
+  primitives above:
+  - `<Artwork.Root token>` + `Artwork.Image` (gateway-fallback still) / `Artwork.Live`
+    (sandboxed iframe) / `Artwork.PlayButton` / `Artwork.StatusBadge` — the ArtworkFrame
+    decomposed so integrators recompose or restyle any part.
+  - `<TokenCard token>` (compound: `TokenCard.Media/Title/Meta`) and `<TokenGrid tokens>`.
+  - Blocks: `<WalletGallery address>`, `<ProjectBrowser chain>`, `<ProjectGallery chain
+    ref>` — one-liner embeds wrapping hooks + grids (the current BrowseView/ProjectView/
+    WalletView, generalized: navigation delegated to callbacks/slots, never hardcoded).
+  - `<AddressSearch onSubmit>` — wallet-search input with validation + recents (and the
+    spotlight `WalletSearch` dialog composition, since Dialog is in the package).
+- Package deps: `@whitehash/react` + layer 0 + `@base-ui-components/react`, CVA, clsx,
+  tailwind-merge; `react` as peer. Ships precompiled `styles.css` AND `theme.css` +
+  source for Tailwind consumers (see §2 dependency policy).
 
 **Extraction inventory** (current app file → toolkit home):
 
@@ -565,16 +578,20 @@ consume; slots only on behavioral parts). Styled with **plain CSS custom propert
 | `components/ArtworkFrame.tsx` (incl. sandbox/allow constants) | `useArtworkFrame` (L1) + `Artwork.*` (L2) |
 | `components/TokenGrid.tsx` | `TokenCard`/`TokenGrid` (L2) |
 | `components/BrowseView.tsx`, `ProjectView.tsx`, `WalletView` (in App) | blocks tier (L2), nav via callbacks |
-| `components/WalletSearch.tsx` | `AddressSearch` (L2); the spotlight dialog chrome stays docs-private |
+| `components/WalletSearch.tsx` | `AddressSearch` + `WalletSearch` dialog (L2, in `@whitehash/ui`) |
 | `settings.ts` (settings → config mapping) | docs app only; integrators construct config directly |
 | `App.tsx` routing/scroll keep-alive | docs app only |
 
 **apps/docs (M12)** — the reframed app: docs-first structure (getting started; choose
 your layer; per-hook and per-component pages with live example + copyable code; theming
-guide with the `--wh-*` variable reference; guides for Vite/Next/self-hosting the onchfs
-proxy), plus the existing browse/wallet/token flows kept as full-app showcases — built
-exclusively on the public toolkit APIs, so the docs site is itself the integration test.
-The current surf-print design (`@whitehash/ui`) is the docs site's brand.
+guide with the design-token variable reference; guides for Vite/Next/self-hosting the
+onchfs proxy), plus the existing browse/wallet/token flows kept as full-app showcases.
+**Hard rule: the docs app is assembled exclusively from `@whitehash/ui`** — it contains
+routing, docs content, and composition only; no local visual components and no bespoke
+component CSS (page-layout glue at most). Anything the docs site needs that the package
+lacks (nav bar, hero, code block, docs page shell) gets added to `@whitehash/ui` as a
+component — the pressure that keeps the design system complete and the product
+"super-consistent": the showcase IS the package rendering itself.
 
 **Framework-agnostic embed (stretch, post-M13):** a web component
 (`<whitehash-artwork chain contract token-id>`) wrapping layer 0 + a minimal renderer,
@@ -634,17 +651,22 @@ folds into M12.
   the app into `@whitehash/react`; app consumes the package. Acceptance: the app has no
   local copy of any hook or token-semantics function; `@whitehash/react` has unit tests
   with a mock cache and no styling imports; typecheck/test green.
-- **M11 — `@whitehash/components`** (§4.7): compound `Artwork.*`, `TokenCard`/`TokenGrid`,
-  blocks (`WalletGallery`, `ProjectBrowser`, `ProjectGallery`), `AddressSearch`; styling
-  via `--wh-*` CSS variables in `styles.css`; no Tailwind dependency. Acceptance: a fresh
-  Vite app with ONLY `@whitehash/components` + `@whitehash/react` + a config renders a
-  working wallet gallery in <20 lines; restyling via CSS variables alone changes the look;
-  the docs app's grids/artwork views are consumed from the package (no local copies).
+- **M11 — `@whitehash/ui` becomes the full published design system** (§4.7): add the
+  domain components (compound `Artwork.*`, `TokenCard`/`TokenGrid`, blocks
+  `WalletGallery`/`ProjectBrowser`/`ProjectGallery`, `AddressSearch`/`WalletSearch`) to
+  the existing primitives; set up the dual consumption build (precompiled `styles.css`
+  via Tailwind at build time + `theme.css`/source for Tailwind consumers). Acceptance:
+  a fresh Vite app with ONLY `@whitehash/ui` (+ its deps) and a config renders a working
+  wallet gallery in <20 lines **without a Tailwind toolchain** (styles.css path);
+  overriding token variables alone rethemes it; the docs app imports every visual
+  component from the package (no local copies).
 - **M12 — apps/docs** (absorbs M8): rename/restructure `apps/viewer` → `apps/docs` per
   §4.7 (getting started, layer chooser, per-API pages with live examples + code, theming
-  reference, deploy guides). Acceptance: every exported hook and component has a page
-  with a live demo; the site builds statically; the full browse/wallet showcase still
-  passes the M5 acceptance.
+  reference, deploy guides). Docs chrome (nav, hero, code block, page shell) is built as
+  `@whitehash/ui` components, not app code. Acceptance: every exported hook and component
+  has a page with a live demo; the site builds statically; the full browse/wallet
+  showcase still passes the M5 acceptance; grep proves the app imports all visual
+  components from `@whitehash/ui` (no `apps/docs/src/components/*` visual leftovers).
 - **M13 — publish readiness**: toolkit packages get READMEs with API tables, semver
   discipline notes, `exports` maps audited (ESM, `/styles.css`, `/react` subpaths),
   changesets flipped from private mode when the user green-lights npm publishing

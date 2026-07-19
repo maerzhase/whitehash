@@ -6,12 +6,17 @@ Progress against [PLAN.md](./PLAN.md). Updated 2026-07-12 (rev 4).
 
 Decided 2026-07-12: the final outcome is a **library/toolkit** integrators embed in their
 own sites — a low-level framework-free API (layer 0), a headless React hooks API
-(layer 1, `@whitehash/react`), and a high-level composable components API (layer 2,
-`@whitehash/components`, CSS-variable themed, no Tailwind requirement). The app becomes
-`apps/docs`: dev docs + live showcase, built on the public toolkit APIs. Full
-architecture, dependency policy, and app→package extraction inventory: **PLAN §4.7**;
-sequencing: **M10 (react hooks) → M11 (components) → M12 (docs app) → M13 (publish
-readiness)**. The data layer (resolve/chain-reader/proxy) is unchanged by this.
+(layer 1, `@whitehash/react`), and **`@whitehash/ui` as the single published design
+system** (layer 2): the existing primitives (Button/Card/Dialog/…, the whitehash brand
+look) PLUS the art-domain components (Artwork.*, TokenGrid, gallery blocks). The app
+becomes `apps/docs`: dev docs + live showcase **assembled exclusively from
+`@whitehash/ui`** — anything the docs need that the package lacks gets added to the
+package, keeping the toolkit product fully consistent. `@whitehash/ui` ships dual
+consumption: precompiled `styles.css` (no Tailwind needed) or `theme.css`+source for
+Tailwind projects; retheming = overriding token variables. Full architecture, dependency
+policy, and app→package extraction inventory: **PLAN §4.7**; sequencing: **M10 (react
+hooks) → M11 (ui = full design system) → M12 (docs app) → M13 (publish readiness)**.
+The data layer (resolve/chain-reader/proxy) is unchanged by this.
 
 `pnpm build && pnpm check-types && pnpm test` all green (6 packages, 57 tests + 2 opt-in
 live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain-reader test`.
@@ -82,9 +87,10 @@ Critical path after the reframe:
 - **M10** layer sink + `@whitehash/react` — move token semantics (`render.ts`) down into
   chain-reader (+ `createWhitehashClient` facade); extract the app's hooks/provider/cache
   into a headless React package. PLAN §4.7.
-- **M11** `@whitehash/components` — compound `Artwork.*`, `TokenCard`/`TokenGrid`, blocks
-  (`WalletGallery`/`ProjectBrowser`/`ProjectGallery`), `AddressSearch`; `--wh-*` CSS-var
-  theming, no Tailwind dep. PLAN §4.7.
+- **M11** `@whitehash/ui` → full published design system — add domain components
+  (compound `Artwork.*`, `TokenCard`/`TokenGrid`, blocks, `AddressSearch`/`WalletSearch`)
+  to the primitives; dual-consumption build (precompiled styles.css / Tailwind source).
+  PLAN §4.7.
 - **M12** `apps/docs` — viewer becomes the docs/showcase site (per-API pages with live
   demos, theming reference, deploy guides; absorbs M8).
 - **M13** publish readiness — package READMEs, exports-map audit, changesets flip;
