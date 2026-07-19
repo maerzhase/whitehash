@@ -5,21 +5,24 @@
   "license": "MIT",
   "type": "module",
   "sideEffects": [
-    "*.css"
+    "**/*.css"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./theme.css": "./src/theme.css"
+    "./styles.css": "./dist/styles.css",
+    "./theme.css": "./src/theme.css",
+    "./source": "./src/index.ts",
+    "./source/*": "./src/*"
   },
   "files": [
     "dist",
-    "src/theme.css"
+    "src"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --external react,react-dom",
+    "build": "tsup src/index.ts --format esm --dts --clean --external react,react-dom && tailwindcss -i src/styles.css -o dist/styles.css --minify",
     "check-types": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
@@ -28,12 +31,15 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
+    "@whitehash/chain-reader": "workspace:*",
+    "@whitehash/react": "workspace:*",
     "@base-ui-components/react": "1.0.0-rc.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "tailwind-merge": "3.6.0"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.1",
     "react": "19.2.0",

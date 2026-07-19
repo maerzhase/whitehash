@@ -1,15 +1,19 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { Badge, Button, Spinner, type BadgeProps } from "@whitehash/ui"
-import { WhitehashProvider, useWalletTokens, type ChainState } from "@whitehash/react"
+import {
+  Button,
+  ProjectBrowser,
+  ProjectGallery,
+  Spinner,
+  WalletGalleryContent,
+  WalletSearch,
+} from "@whitehash/ui"
+import { WhitehashProvider, useWalletTokens } from "@whitehash/react"
 import { tokenKey, type ChainId, type WhitehashToken } from "@whitehash/chain-reader"
 import { chainReaderConfigFrom, loadSettings, type Settings } from "./settings.js"
 import { pushRecent } from "./recent.js"
-import { WalletSearch } from "./components/WalletSearch.js"
-import { TokenGrid } from "./components/TokenGrid.js"
 import { TokenDetail } from "./components/TokenDetail.js"
 import { SettingsPanel } from "./components/SettingsPanel.js"
-import { BrowseView } from "./components/BrowseView.js"
-import { ProjectView } from "./components/ProjectView.js"
+import { loadRecent } from "./recent.js"
 
 type Route =
   | { name: "home" } // the project browser
@@ -157,15 +161,33 @@ function ViewerApp({
         {/* Browse is home and stays mounted so its filters, loaded projects, and
             scroll survive drilling into a project and back. */}
         <div hidden={!isHome}>
-          <BrowseView
+          <section className="brand-hero">
+            <div className="brand-hero-copy">
+              <h1 className="brand-hero-title font-display text-primary">
+                <span>white</span><span>hash</span>
+              </h1>
+              <p className="brand-hero-description">
+                View generative art directly from Tezos, Ethereum, and Base.
+              </p>
+            </div>
+            <img
+              className="brand-hero-logo"
+              src="./logo.png"
+              alt="Whitehash"
+              width="1024"
+              height="1024"
+              fetchPriority="high"
+            />
+          </section>
+          <ProjectBrowser
             onOpenProject={(chain, ref) => navigate(projectHash(chain, ref))}
           />
         </div>
 
         {route.name === "project" ? (
-          <ProjectView
+          <ProjectRoute
             chain={route.chain as ChainId}
-            refId={route.ref}
+            projectRef={route.ref}
             onBack={() => navigate("/")}
           />
         ) : null}
@@ -175,10 +197,11 @@ function ViewerApp({
         ) : null}
 
         {route.name === "wallet" && state ? (
-          <WalletView
+          <WalletGalleryContent
+            address={state.address}
             state={state}
             loading={loading}
-            onOpen={t => navigate(tokenHash(t, state.address))}
+            onOpenToken={t => navigate(tokenHash(t, state.address))}
           />
         ) : null}
 
@@ -195,6 +218,7 @@ function ViewerApp({
       <WalletSearch
         open={searchOpen}
         onOpenChange={setSearchOpen}
+        recentAddresses={loadRecent()}
         onSubmit={addr => navigate(walletHash(addr))}
       />
     </div>
@@ -210,50 +234,24 @@ function SearchIcon() {
   )
 }
 
-const STATUS_VARIANT: Record<ChainState["status"], BadgeProps["variant"]> = {
-  idle: "default",
-  loading: "default",
-  cached: "accent",
-  done: "success",
-  error: "danger",
-}
-
-function WalletView({
-  state,
-  loading,
-  onOpen,
+function ProjectRoute({
+  chain,
+  projectRef,
+  onBack,
 }: {
-  state: NonNullable<ReturnType<typeof useWalletTokens>["state"]>
-  loading: boolean
-  onOpen: (t: WhitehashToken) => void
+  chain: ChainId
+  projectRef: string
+  onBack: () => void
 }) {
-  const chainStates = Object.values(state.chains)
-  const noChains = chainStates.length === 0
+  const [token, setToken] = useState<WhitehashToken | null>(null)
+  if (token) return <TokenDetail token={token} onBack={() => setToken(null)} />
   return (
-    <div>
-      <div className="py-5">
-        <h2 className="truncate font-mono text-sm text-muted">{state.address}</h2>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {chainStates.map(cs => (
-            <Badge key={cs.chain} variant={STATUS_VARIANT[cs.status]}>
-              {cs.chain}: {cs.message}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      {noChains ? (
-        <p className="text-muted">
-          That doesn’t look like a Tezos or EVM address for the current network mode.
-        </p>
-      ) : null}
-
-      <TokenGrid tokens={state.tokens} onOpen={onOpen} />
-
-      {!loading && state.tokens.length === 0 && !noChains ? (
-        <p className="mt-4 text-muted">No fxhash tokens found for this wallet.</p>
-      ) : null}
-    </div>
+    <ProjectGallery
+      chain={chain}
+      projectRef={projectRef}
+      onOpenToken={setToken}
+      onBack={onBack}
+    />
   )
 }
 

@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "@whitehash/ui/theme.css";
 
+/* Tailwind-v4 consumers scan the package source. Consumers without Tailwind
+ * import the package's precompiled styles.css instead. */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
 @font-face {
   font-family: "Geist Sans";
   src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2") format("woff2");
@@ -16,10 +20,6 @@
   font-style: normal;
   font-weight: 100 900;
 }
-
-/* The design system is consumed as built JS, so scan its source for the class
- * names Tailwind must generate. */
-@source "../../../packages/ui/src/**/*.{ts,tsx}";
 
 @layer base {
   :root {
@@ -153,7 +153,6 @@
   }
 }
 
-/* Diagonal-hatch placeholder for missing/loading media. */
 @utility hatch {
   background: repeating-linear-gradient(
     45deg,

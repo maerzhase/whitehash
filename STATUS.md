@@ -1,6 +1,6 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-19 (rev 5).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-19 (rev 6).
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
@@ -18,7 +18,7 @@ policy, and app→package extraction inventory: **PLAN §4.7**; sequencing: **M1
 hooks) → M11 (ui = full design system) → M12 (docs app) → M13 (publish readiness)**.
 The data layer (resolve/chain-reader/proxy) is unchanged by this.
 
-`pnpm build && pnpm check-types && pnpm test` all green (6 packages, 65 tests + 2 opt-in
+`pnpm build && pnpm check-types && pnpm test` all green (6 packages, 67 tests + 2 opt-in
 live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain-reader test`.
 
 ## Done — the core viewer works end-to-end
@@ -32,6 +32,7 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
 | M4 onchfs-proxy | ✅ | Hono app; verified serving a real Base + ETH onchfs artwork over HTTP |
 | M5 viewer | ✅ | Live in-browser: wallet grid, sandboxed render, browse, settings |
 | M10 layer sink + React | ✅ | Token semantics + bound client in L0; provider, cache, hooks in `@whitehash/react`; app-local copies removed |
+| M11 full design system | ✅ | Compound domain components + gallery/search blocks in `@whitehash/ui`; precompiled and Tailwind-v4 consumption verified |
 
 ## M10 complete — the headless React layer
 
@@ -48,6 +49,25 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
   `useWalletTokens.ts`, and `useBrowse.ts` copies are deleted. Browser verification
   loaded 133 tokens for the known Tezos fixture and ran a gentk-v1 artwork live with
   the seed preserved in its iframe URL; console clean. Both opt-in Tezos/Base tests pass.
+
+## M11 complete — the published design system
+
+- **One package, both tiers.** `@whitehash/ui` now exports the existing primitives plus
+  compound `Artwork.Root/Image/Live/PlayButton/StatusBadge`, compound `TokenCard`,
+  `TokenGrid`, `WalletGallery`, `ProjectBrowser`, `ProjectGallery`, `AddressSearch`, and
+  `WalletSearch`. Roots own context/state; behavioral seams use the existing Base UI
+  primitives while presentational parts remain plain elements.
+- **The app dogfoods the domain layer.** The six local artwork/image/grid/browser/project/
+  search component copies named by PLAN §4.7 are deleted. Viewer routing and settings
+  remain app composition until the M12 docs conversion.
+- **Both style paths work.** The package builds a self-contained `dist/styles.css` for
+  consumers with no Tailwind toolchain and exports `theme.css` plus source for Tailwind
+  v4 consumers. A fresh Vite fixture with only `@whitehash/ui` as its toolkit dependency
+  built from a 14-line entry, loaded the known 133-token wallet, and was rethemed by
+  overriding three token variables only.
+- **Live browser acceptance.** The packaged project browser, wallet gallery, token card,
+  and sandboxed Artwork iframe all ran in the viewer with a clean console. The gentk-v1
+  seed remained present in the live URL.
 
 ## Post-plan additions (beyond the original M0–M5 plan)
 
@@ -99,12 +119,8 @@ All live-verified in the browser unless noted.
 
 ## Not yet built (from the plan)
 
-Critical path after the reframe (M10 is complete):
+Critical path after the reframe (M10–M11 are complete):
 
-- **M11** `@whitehash/ui` → full published design system — add domain components
-  (compound `Artwork.*`, `TokenCard`/`TokenGrid`, blocks, `AddressSearch`/`WalletSearch`)
-  to the primitives; dual-consumption build (precompiled styles.css / Tailwind source).
-  PLAN §4.7.
 - **M12** `apps/docs` — viewer becomes the docs/showcase site (per-API pages with live
   demos, theming reference, deploy guides; absorbs M8).
 - **M13** publish readiness — package READMEs, exports-map audit, changesets flip;
@@ -123,9 +139,9 @@ Layer-0 packages, slot in when convenient:
   `collections: []`). Only matters for the **RPC fallback** path now that Blockscout is the
   default — Blockscout reads full factory history directly. If hardening the RPC path,
   populate via `pnpm --filter @whitehash/chain-reader snapshot:update` (offline) + CI cron.
-- **Gateway hangs** (vs. errors) aren't caught by `<GatewayImage>`; a fetch-with-timeout →
+- **Gateway hangs** (vs. errors) aren't caught by `Artwork.Image`/card media; a fetch-with-timeout →
   blob approach would cover them. Low priority.
-- Viewer bundle ~466 kB (mostly viem); code-splitting the EVM path would speed Tezos-only
+- Viewer bundle ~620 kB minified / 196 kB gzip (mostly viem); code-splitting the EVM path would speed Tezos-only
   first loads.
 - No git remote configured — repo is local-only; push when ready.
 

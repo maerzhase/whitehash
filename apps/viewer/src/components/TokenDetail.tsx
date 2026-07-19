@@ -1,8 +1,7 @@
 import type { ReactNode } from "react"
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import { useWhitehash } from "@whitehash/react"
-import { Button } from "@whitehash/ui"
-import { ArtworkFrame } from "./ArtworkFrame.js"
+import { Artwork, Button } from "@whitehash/ui"
 
 function Row({ label, children, mono }: { label: string; children: ReactNode; mono?: boolean }) {
   return (
@@ -24,13 +23,23 @@ export function TokenDetail({
 }) {
   const { client } = useWhitehash()
   const live = client.artworkUrl(token)
+  const needsProxy = client.liveViewStatus(token).kind === "needs-onchfs-proxy"
   return (
     <div className="pt-5">
       <Button variant="link" onClick={onBack}>
         ← Back
       </Button>
       <div className="mt-5 grid gap-8 md:grid-cols-[1.4fr_1fr]">
-        <ArtworkFrame token={token} />
+        <Artwork.Root token={token}>
+          <Artwork.Image />
+          <Artwork.Live />
+          <Artwork.PlayButton />
+          {needsProxy ? (
+            <a href="#/settings" title="Stored on onchfs">
+              <Artwork.StatusBadge />
+            </a>
+          ) : <Artwork.StatusBadge />}
+        </Artwork.Root>
         <div>
           <h2 className="mb-3 font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">
             {token.name ?? `#${token.tokenId}`}

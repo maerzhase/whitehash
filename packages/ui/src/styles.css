@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "./theme.css";
+@source "./**/*.{ts,tsx}";
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html,
+  body {
+    min-height: 100%;
+  }
+  body {
+    @apply bg-canvas text-fg font-sans antialiased;
+  }
+  ::selection {
+    color: var(--color-primary-fg);
+    background: var(--color-primary);
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@utility hatch {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-surface-2),
+    var(--color-surface-2) 8px,
+    var(--color-elevated) 8px,
+    var(--color-elevated) 10px
+  );
+}
