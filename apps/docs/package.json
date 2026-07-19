@@ -6,14 +6,16 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "onchfs:assets": "node scripts/copy-onchfs-worker.mjs",
+    "dev": "pnpm onchfs:assets && next dev",
+    "build": "pnpm onchfs:assets && next build",
     "preview": "npx serve out",
     "check-types": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@whitehash/chain-reader": "workspace:*",
+    "@whitehash/onchfs-sw": "workspace:*",
     "@whitehash/react": "workspace:*",
     "@whitehash/resolve": "workspace:*",
     "@whitehash/runtime": "workspace:*",

@@ -1,6 +1,6 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 9).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 10).
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
@@ -18,8 +18,9 @@ policy, and app→package extraction inventory: **PLAN §4.7**; sequencing: **M1
 hooks) → M11 (ui = full design system) → M12 (docs app) → M13 (publish readiness)**.
 The data layer (resolve/chain-reader/proxy) is unchanged by this.
 
-`pnpm build && pnpm check-types && pnpm test` all green (7 packages, 75 tests + 2 opt-in
-live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain-reader test`.
+`pnpm build && pnpm check-types && pnpm test` all green (8 workspaces, 78 tests + 2
+opt-in live). Live/network tests:
+`WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain-reader test`.
 
 ## Done — the core viewer works end-to-end
 
@@ -37,6 +38,7 @@ live). Live/network tests: `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain
 | M13 publish readiness | ✅ | READMEs/API tables, semver policy, ESM/style/source exports, Changesets, and packed artifacts audited; nothing published |
 | M14 API ergonomics | ✅ | Five-scenario quickstart independently built; typed refs/universal client surface; chain-named/card seams removed |
 | M6 runtime | ✅ | Framework-free core + `/react`; injected resolution; live params/new-hash variations acceptance passed |
+| M9 client-side onchfs | ✅ | Same-origin worker; Genomes rendered from ETH with no proxy, then reloaded from Cache API with the server stopped |
 
 ## M10 complete — the headless React layer
 
@@ -126,10 +128,9 @@ All live-verified in the browser unless noted.
 - **EVM browser stale-metadata fix**. Blockscout caches metadata at mint time, so browser
   iterations showed "waiting to be signed" placeholders (no live view). The wallet path's
   tokenURI-refresh was extracted to a shared helper and applied to the browser path.
-- **onchfs actionable messaging**. onchfs artworks with no proxy configured now show
-  "Stored on onchfs — set a proxy in Settings" (linking there) instead of a dead
-  "No live view available". `liveViewStatus()` distinguishes unrevealed / needs-proxy /
-  unavailable. (Verified: with a proxy set, ETH "Genomes" renders live.)
+- **onchfs actionable messaging**. `liveViewStatus()` distinguishes unrevealed,
+  needs-onchfs-resolution, and unavailable states. The static docs register the
+  same-origin resolver by default and retain a self-hosted proxy setting as fallback.
 - **Gateway-fallback images** (`<GatewayImage>`). Thumbnails/previews/stills advance to the
   next configured IPFS gateway on load *error*, instead of a broken tile. Caveat: catches
   error responses (404/429/5xx/refused), not indefinite hangs.
@@ -148,8 +149,8 @@ All live-verified in the browser unless noted.
 - **gentk v1 stores the seed in a separate `iterationHash` field**, not the artifactUri
   query. `renderArtifactUri` applies it so v1 pieces render their real iteration. v2/v3 and
   EVM embed the query already.
-- **Many Ethereum/Base artworks are `onchfs://`** → the onchfs proxy (or future M9 SW) is
-  required to view them live.
+- **Many Ethereum/Base artworks are `onchfs://`** → the M9 same-origin worker resolves
+  them directly from public chains; the HTTP proxy remains a compatibility fallback.
 - **Some EVM projects' on-chain `tokenURI` points at `media.fxhash.xyz`** (contract baseURI
   set to fxhash's server, not IPFS). The artifact *inside* is still `ipfs://` so rendering
   is decentralized, but fetching that project's metadata JSON depends on fxhash infra — a
@@ -178,8 +179,11 @@ Layer-0 packages, slot in when convenient:
   extraction plus `/react`. URI resolution is injected, the docs expose token-level
   Explore and a live variations guide, and browser acceptance verified both parameter
   serialization/re-rendering and a distinct new-hash variation.
+- **M9 complete** — `@whitehash/onchfs-sw` ships same-origin registration and worker
+  assets. The default resolver creates chain-scoped virtual paths, decompresses gzip
+  responses, and caches immutable files. Genomes #2953 rendered with no proxy and
+  reloaded after the static server was stopped.
 - **M7** `apps/archive-cli` — wallet → self-contained offline folder (PLAN §4.6).
-- **M9** `@whitehash/onchfs-sw` — client-side onchfs via a service worker (PLAN §5 M9).
 
 ## Known follow-ups / smaller items
 

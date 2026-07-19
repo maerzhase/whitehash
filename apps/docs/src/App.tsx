@@ -6,6 +6,7 @@ import { formatRef, parseRef, resolveInput, tokenKey, type ProjectRef, type Toke
 import { useWalletTokens, useWhitehash } from "@whitehash/react"
 import { BlockchainType, createRuntimeConnector, type FxParamDefinition, type FxParamDefinitions, type FxParamType, type ProjectState } from "@whitehash/runtime"
 import { ArtworkIframe, useRuntimeController } from "@whitehash/runtime/react"
+import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
 import {
   Artwork,
   Button,
@@ -81,6 +82,7 @@ const DOC_NAV: DocsNavItem[] = [
 export function App() {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
   useEffect(() => setSettings(loadSettings()), [])
+  useEffect(() => { void registerOnchfsWorker().catch(error => console.warn("onchfs worker unavailable", error)) }, [])
   const config = useMemo(() => ({ ...chainReaderConfigFrom(settings), mode: settings.mode }), [settings])
   return <WhitehashProvider config={config}><DocsApp settings={settings} onSettingsChange={setSettings} /></WhitehashProvider>
 }
@@ -144,7 +146,7 @@ function DocsApp({ settings, onSettingsChange }: { settings: Settings; onSetting
         else if (input.type === "token") navigate(directTokenPath(input))
         else {
           const url = client.resolveUri(input.uri)
-          if (!url) throw new Error("This content needs a chain or configured onchfs proxy.")
+          if (!url) throw new Error("This content needs a chain or an enabled onchfs resolver.")
           window.open(url, "_blank", "noopener,noreferrer")
         }
       }} />
@@ -173,7 +175,7 @@ function HomePage({ onSearch }: { onSearch: () => void }) {
 
       <section className="border-y border-line bg-surface">
         <div className="mx-auto grid max-w-[1200px] divide-y divide-line px-4 sm:px-6 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
-          {[['01', 'Detect', 'A tz address selects Tezos mainnet or Ghostnet; a 0x address selects Ethereum and Base.'], ['02', 'Read', 'Known contracts are queried directly through TzKT or JSON-RPC and normalized into one token shape.'], ['03', 'Render', 'IPFS gateways fall back in order; onchfs code is served by your optional self-hosted proxy.']].map(([number, title, copy]) => <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0"><div className="font-mono text-[11px] text-faint">{number}</div><h2 className="mt-4 text-lg font-medium">{title}</h2><p className="mt-2 text-sm leading-6 text-muted">{copy}</p></div>)}
+          {[['01', 'Detect', 'A tz address selects Tezos mainnet or Ghostnet; a 0x address selects Ethereum and Base.'], ['02', 'Read', 'Known contracts are queried directly through TzKT or JSON-RPC and normalized into one token shape.'], ['03', 'Render', 'IPFS gateways fall back in order; onchfs code resolves in-browser through the same-origin service worker.']].map(([number, title, copy]) => <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0"><div className="font-mono text-[11px] text-faint">{number}</div><h2 className="mt-4 text-lg font-medium">{title}</h2><p className="mt-2 text-sm leading-6 text-muted">{copy}</p></div>)}
         </div>
       </section>
 

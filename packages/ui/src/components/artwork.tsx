@@ -132,7 +132,7 @@ function PlayButton({
 
 const STATUS_COPY: Record<Exclude<LiveViewStatus["kind"], "ok">, string> = {
   unrevealed: "Not yet revealed",
-  "needs-onchfs-proxy": "Stored on onchfs — configure a proxy",
+  "needs-onchfs": "Stored on onchfs — enable the worker or configure a proxy",
   unavailable: "No live view available",
 }
 
@@ -141,7 +141,7 @@ function StatusBadge({ className, children, variant, ...props }: BadgeProps) {
   if (playing || status.kind === "ok") return null
   return (
     <Badge
-      variant={variant ?? (status.kind === "needs-onchfs-proxy" ? "accent" : "warning")}
+      variant={variant ?? (status.kind === "needs-onchfs" ? "accent" : "warning")}
       className={cn("absolute bottom-3 left-3 bg-black/70", className)}
       {...props}
     >

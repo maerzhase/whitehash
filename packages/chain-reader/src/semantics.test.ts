@@ -11,7 +11,7 @@ import {
 
 const resolver: ResolverConfig = {
   ipfsGateways: ["https://ipfs.io"],
-  onchfsProxy: "https://proxy.example",
+  onchfs: { mode: "proxy", baseUrl: "https://proxy.example" },
 }
 
 function token(partial: Partial<WhitehashToken> = {}): WhitehashToken {
@@ -64,8 +64,8 @@ describe("token semantics", () => {
 
   it("distinguishes an onchfs token that needs a proxy", () => {
     const value = token({ artifactUri: "onchfs://abc" })
-    expect(liveViewStatus(value, { ...resolver, onchfsProxy: null })).toEqual({
-      kind: "needs-onchfs-proxy",
+    expect(liveViewStatus(value, { ...resolver, onchfs: null })).toEqual({
+      kind: "needs-onchfs",
     })
   })
 

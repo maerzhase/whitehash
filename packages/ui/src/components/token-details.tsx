@@ -18,14 +18,14 @@ export interface TokenDetailsProps extends ComponentProps<"article"> {
 export function TokenDetails({ token, onBack, settingsHref, className, ...props }: TokenDetailsProps) {
   const { client } = useWhitehash()
   const live = client.artworkUrl(token)
-  const needsProxy = client.liveViewStatus(token).kind === "needs-onchfs-proxy"
+  const needsOnchfs = client.liveViewStatus(token).kind === "needs-onchfs"
   return (
     <article className={cn("pt-5", className)} {...props}>
       {onBack ? <Button variant="link" onClick={onBack}>← Back</Button> : null}
       <div className="mt-5 grid gap-8 md:grid-cols-[1.4fr_1fr]">
         <Artwork.Root token={token}>
           <Artwork.Image /><Artwork.Live /><Artwork.PlayButton />
-          {needsProxy && settingsHref ? <a href={settingsHref} title="Stored on onchfs"><Artwork.StatusBadge /></a> : <Artwork.StatusBadge />}
+          {needsOnchfs && settingsHref ? <a href={settingsHref} title="Stored on onchfs"><Artwork.StatusBadge /></a> : <Artwork.StatusBadge />}
         </Artwork.Root>
         <div>
           <h2 className="mb-3 font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">{token.name ?? `#${token.tokenId}`}</h2>

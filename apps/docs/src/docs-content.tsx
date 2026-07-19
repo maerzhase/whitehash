@@ -196,11 +196,11 @@ function ApiDetails({ name }: { name: string }) {
 })`} /></DocsSection>
     </>
   )
-  if (name === "WhitehashProvider") return <DocsSection title="Configuration boundary"><p className="docs-prose">Create the resolver and network configuration once. Every hook and UI component below the provider uses the same IPFS gateway order, onchfs proxy, TzKT endpoints, EVM RPCs, cache, and mainnet/testnet mode.</p><CodeBlock className="mt-5" code={`const config = {
+  if (name === "WhitehashProvider") return <DocsSection title="Configuration boundary"><p className="docs-prose">Create the resolver and network configuration once. Every hook and UI component below the provider uses the same IPFS gateway order, onchfs mode, TzKT endpoints, EVM RPCs, cache, and mainnet/testnet mode.</p><CodeBlock className="mt-5" code={`const config = {
   mode: "mainnet",
   resolver: {
     ipfsGateways: ["https://ipfs.io", "https://dweb.link"],
-    onchfsProxy: "https://onchfs.example.com",
+    onchfs: { mode: "proxy", baseUrl: "https://onchfs.example.com" },
   },
   tzkt: { "tezos:mainnet": "https://api.tzkt.io" },
   evm: { rpcs: { "eip155:8453": [process.env.NEXT_PUBLIC_BASE_RPC!] } },
@@ -223,7 +223,7 @@ const config = {
   mode: "mainnet",
   resolver: {
     ipfsGateways: ["https://ipfs.io", "https://dweb.link"],
-    onchfsProxy: null,
+    onchfs: null,
   },
 }
 
@@ -250,7 +250,7 @@ export function Collection({ address }: { address: string }) {
       "https://dweb.link",
     ],
     // Optional. Required only for onchfs:// live artifacts.
-    onchfsProxy: "https://onchfs.example.com",
+    onchfs: { mode: "proxy", baseUrl: "https://onchfs.example.com" },
   },
   tzkt: {
     "tezos:mainnet": "https://api.tzkt.io",
@@ -320,7 +320,7 @@ PORT=3939 pnpm --filter @whitehash/onchfs-proxy start
 cd apps/onchfs-proxy && vercel deploy
 
 # Point whitehash at the deployment
-resolver: { onchfsProxy: "https://onchfs.example.com" }`, language: "bash" },
+resolver: { onchfs: { mode: "proxy", baseUrl: "https://onchfs.example.com" } }`, language: "bash" },
 }
 
 export function GuidePage({ slug }: { slug: string }) {
@@ -329,7 +329,7 @@ export function GuidePage({ slug }: { slug: string }) {
 }
 
 function GuideDetails({ slug }: { slug: string }) {
-  if (slug === "getting-started") return <><DocsSection title="What you get"><div className="docs-prose"><p>The gallery calls <code>useWalletTokens</code>, displays cached results while live reads run, and composes token previews with gateway fallback. No whitehash server is involved for wallet discovery, metadata, or IPFS images.</p><p>Configure an onchfs proxy only when you need to execute artifacts whose code uses the <code>onchfs://</code> scheme.</p></div></DocsSection><DocsSection title="Paste and route anything"><div className="docs-prose"><p><code>ProjectRef</code> and <code>TokenRef</code> carry their chain and serialize through <code>formatRef</code>. Use <code>parseRef</code> for routes and <code>resolveInput</code> when accepting a pasted ref, artwork URL, CID, or wallet/contract address.</p><p>The docs search uses exactly that utility, then opens a wallet, project, direct token, or resolved content URL.</p></div></DocsSection></>
+  if (slug === "getting-started") return <><DocsSection title="What you get"><div className="docs-prose"><p>The gallery calls <code>useWalletTokens</code>, displays cached results while live reads run, and composes token previews with gateway fallback. No whitehash server is involved for wallet discovery, metadata, IPFS images, or onchfs artwork.</p><p>The default same-origin service worker resolves <code>onchfs://</code> code directly from public chains. A self-hosted proxy remains an explicit fallback.</p></div></DocsSection><DocsSection title="Paste and route anything"><div className="docs-prose"><p><code>ProjectRef</code> and <code>TokenRef</code> carry their chain and serialize through <code>formatRef</code>. Use <code>parseRef</code> for routes and <code>resolveInput</code> when accepting a pasted ref, artwork URL, CID, or wallet/contract address.</p><p>The docs search uses exactly that utility, then opens a wallet, project, direct token, or resolved content URL.</p></div></DocsSection></>
   if (slug === "how-it-works") return <DocsSection title="Network behavior"><div className="docs-prose"><p><strong>Tezos:</strong> TzKT enumerates balances in the known gentk v1–v3 FA2 contracts, then metadata is resolved from its protocol-native URI.</p><p><strong>Ethereum and Base:</strong> JSON-RPC reads known issuer factories and project contracts. Archive-capable RPCs make historical log scans substantially faster.</p><p><strong>Rendering:</strong> preview images use display/thumbnail metadata. Live frames use the artifact URI and token seed. These are intentionally separate paths.</p></div></DocsSection>
   if (slug === "configuration") return <><DocsSection title="IPFS gateway order"><div className="docs-prose"><p>Gateway roots do not include <code>/ipfs/</code>. Whitehash appends the CID and path, preserving query strings and fragments. Metadata requests try each gateway until a response succeeds; <code>useGatewayImage</code> advances when the browser fires an image error.</p><p>An empty gateway list cannot resolve IPFS or bare-CID content. HTTP, data, and blob URLs are passed through as-is.</p></div></DocsSection><DocsSection title="Ad-hoc client"><CodeBlock code={`const client = createWhitehashClient({
   ...config,

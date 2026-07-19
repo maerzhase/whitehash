@@ -9,7 +9,7 @@ import type { ChainId, ChainReaderConfig, NetworkMode } from "@whitehash/chain-r
 export interface Settings {
   mode: NetworkMode
   ipfsGateways: string[]
-  /** Base URL of an onchfs proxy (see apps/onchfs-proxy). Empty = disabled. */
+  /** Optional proxy fallback. Empty uses the same-origin service worker. */
   onchfsProxy: string
   /** Per-network RPC overrides (comma-joined in the UI). Empty = library default. */
   rpcs: Partial<Record<ChainId, string[]>>
@@ -49,7 +49,9 @@ export function resolverConfigFrom(settings: Settings): ResolverConfig {
     ipfsGateways: settings.ipfsGateways.length
       ? settings.ipfsGateways
       : [...DEFAULT_IPFS_GATEWAYS],
-    onchfsProxy: settings.onchfsProxy.trim() || null,
+    onchfs: settings.onchfsProxy.trim()
+      ? { mode: "proxy", baseUrl: settings.onchfsProxy.trim() }
+      : { mode: "service-worker" },
   }
 }
 

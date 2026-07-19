@@ -4,7 +4,7 @@ import { createWhitehashClient } from "./client.js"
 const client = createWhitehashClient({
   resolver: {
     ipfsGateways: ["https://ipfs.io", "https://dweb.link"],
-    onchfsProxy: null,
+    onchfs: null,
   },
 })
 

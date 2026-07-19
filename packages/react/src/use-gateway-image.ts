@@ -14,7 +14,7 @@ export function useGatewayImage(
 ) {
   const context = useWhitehash()
   const client = options.client ?? context.client
-  const configKey = `${client.config.resolver.ipfsGateways.join(",")}|${client.config.resolver.onchfsProxy ?? ""}`
+  const configKey = `${client.config.resolver.ipfsGateways.join(",")}|${JSON.stringify(client.config.resolver.onchfs)}`
   const urls = useMemo(
     () => uri ? client.resolveUriAll(uri, { chain }) : [],
     [chain, client, configKey, uri],

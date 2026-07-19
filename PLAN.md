@@ -321,7 +321,9 @@ Tiny, zero-dependency. The single source of truth for URI → HTTP URL.
 ```ts
 interface ResolverConfig {
   ipfsGateways: string[]        // ordered; default ["https://ipfs.io", "https://dweb.link"]
-  onchfsProxy: string | null    // e.g. "https://my-proxy.vercel.app"; null → onchfs unsupported
+  onchfs: { mode: "service-worker"; basePath?: string }
+    | { mode: "proxy"; baseUrl: string }
+    | null
 }
 createResolver(config): {
   resolveUri(uri: string): string | null   // null = unresolvable (e.g. onchfs w/o proxy, temp://)
@@ -336,7 +338,8 @@ fxhash defaults):
 - `ipfs://{cid}[/path][?query][#fragment]` and bare CIDs →
   `{gateway}/ipfs/{cid}[/path][?query][#fragment]` — **query and fragment MUST be
   preserved** (artifact URIs carry `?fxhash=…#0x…`)
-- `onchfs://{cid}[/path][?query][#fragment]` → `{onchfsProxy}/{cid}…` (same preservation)
+- `onchfs://{cid}[/path][?query][#fragment]` → a chain-scoped same-origin worker path
+  by default, or `{proxyBase}/{cid}…` in proxy mode (same preservation)
 - `temp://` → null (fxhash pre-mint emulator, unsupported by design)
 
 Tests: table-driven over all URI shapes incl. query+fragment preservation, v1-era
@@ -688,7 +691,7 @@ folds into M12.
   folder's `index.html` — artworks replay offline.
 - **M8 — deploy & release hygiene** (folds into M12): deploy guides (docs site → GitHub
   Pages/IPFS, proxy → Vercel button), snapshot-refresh CI cron, `changeset version` flow.
-- **M9 — client-side onchfs (service worker)**: resolve `onchfs://` entirely in the
+- **M9 — client-side onchfs (service worker)** ✅: resolve `onchfs://` entirely in the
   browser so onchfs artworks render with zero server setup — removing the one piece of
   friction that currently requires running/pointing at `apps/onchfs-proxy`. Approach: a
   service worker intercepts requests to a virtual path (e.g. `/onchfs/{network}/{cid}/…`),

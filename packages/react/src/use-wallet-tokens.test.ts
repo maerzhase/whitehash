@@ -34,7 +34,7 @@ describe("loadWalletChain", () => {
       deleteWalletTokens: vi.fn(async () => undefined),
     }
     const client = createWhitehashClient({
-      resolver: { ipfsGateways: ["https://ipfs.io"], onchfsProxy: null },
+      resolver: { ipfsGateways: ["https://ipfs.io"], onchfs: null },
     })
     client.getWalletTokens = vi.fn(async () => [liveToken])
     const cachedResults: WhitehashToken[][] = []

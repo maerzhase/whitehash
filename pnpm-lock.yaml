@@ -26,6 +26,9 @@ importers:
       '@whitehash/chain-reader':
         specifier: workspace:*
         version: link:../../packages/chain-reader
+      '@whitehash/onchfs-sw':
+        specifier: workspace:*
+        version: link:../../packages/onchfs-sw
       '@whitehash/react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -119,6 +122,22 @@ importers:
       tsx:
         specifier: 4.20.6
         version: 4.20.6
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/node@20.19.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.20.6)
+
+  packages/onchfs-sw:
+    dependencies:
+      onchfs:
+        specifier: 0.1.0
+        version: 0.1.0(typescript@5.9.3)
+    devDependencies:
+      tsup:
+        specifier: 8.5.0
+        version: 8.5.0(jiti@2.7.0)(postcss@8.5.17)(tsx@4.20.6)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3

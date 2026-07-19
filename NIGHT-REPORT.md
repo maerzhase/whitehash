@@ -17,6 +17,9 @@ Run date: 2026-07-19 (Europe/Lisbon)
   with an optional `/react` entry, caller-injected content resolution, parameter codecs,
   runtime controls, and iframe synchronization. Token details now have an Explore tab,
   and the static docs include a live variations guide.
+- Phase 2 / M9: added `@whitehash/onchfs-sw`, made the resolver's chain-scoped
+  same-origin service-worker mode the docs default, retained explicit proxy/disabled
+  modes, and wired the static docs to copy and register the worker assets.
 
 ## Decisions
 
@@ -47,6 +50,13 @@ Run date: 2026-07-19 (Europe/Lisbon)
   build contains no React import. Small deep-clone/merge/debounce helpers are local so
   the extracted state semantics stay framework-free without expanding the dependency
   surface.
+- M9 resolver mode: model onchfs as a discriminated `service-worker | proxy | null`
+  configuration instead of a nullable proxy string. This makes the zero-server path the
+  docs default while the generic resolver still requires an explicit opt-in after its
+  assets are hosted; unsupported browsers and archive tooling stay explicit.
+- M9 cache identity: exclude render query parameters from Cache API keys because onchfs
+  file bytes are content-addressed and immutable; preserve those parameters when the
+  artwork executes so each token/variation still receives its own runtime state.
 
 ## Verification evidence
 
@@ -73,10 +83,20 @@ Run date: 2026-07-19 (Europe/Lisbon)
   tasks, 12/12 type tasks, and 12/12 test tasks; 75 tests passed and 2 opt-in live tests
   skipped. `pnpm install --lockfile-only --offline --frozen-lockfile` also accepted the
   regenerated lockfile.
+- M9 package tests: worker URL parsing/cache identity, response headers, and gzip
+  decompression passed; resolver had 30 passing tests; chain-reader had 31 passing and
+  2 opt-in live tests skipped; React had 2 passing tests.
+- M9 browser acceptance: the static Next export registered `/onchfs-sw.js`; with no
+  proxy configured, Genomes #2953 from ETH project
+  `0xBb47F0ED4A7E3BffcA75660dFa3B053FB7FcE78E` rendered from its onchfs CID. After the
+  static HTTP server was stopped, reloading the exact virtual URL rendered again from
+  the immutable service-worker cache.
+- M9 repository gate: `pnpm build && pnpm check-types && pnpm test` — green across all
+  8 workspaces; 78 tests passed and 2 opt-in live tests skipped.
 
 ## Parked or incomplete
 
-- M9, M7, and closeout remain at this checkpoint.
+- M7 and closeout remain at this checkpoint.
 
 ## Morning: look at these first
 

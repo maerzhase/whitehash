@@ -18,23 +18,22 @@ export interface ResolverConfig {
    * "https://ipfs.io". Tried in order by {@link fetchWithGatewayFallback}.
    */
   ipfsGateways: string[]
-  /**
-   * Base URL of a self-hosted onchfs proxy (no trailing slash), or `null` if
-   * onchfs is not supported in this configuration. When `null`, `onchfs://`
-   * URIs resolve to `null`.
-   */
-  onchfsProxy: string | null
+  /** How onchfs virtual URLs are served; `null` disables browser resolution. */
+  onchfs:
+    | { mode: "service-worker"; basePath?: string }
+    | { mode: "proxy"; baseUrl: string }
+    | null
 }
 
 export const DEFAULT_IPFS_GATEWAYS = ["https://ipfs.io", "https://dweb.link"]
 
 /**
- * A default config. `onchfsProxy` is null by design — there is no public
+ * A default config. `onchfs` is null by design — there is no public
  * fxhash-independent onchfs gateway to default to; callers must supply their
  * own (self-hosted via `apps/onchfs-proxy`).
  */
 export function defaultResolverConfig(): ResolverConfig {
-  return { ipfsGateways: [...DEFAULT_IPFS_GATEWAYS], onchfsProxy: null }
+  return { ipfsGateways: [...DEFAULT_IPFS_GATEWAYS], onchfs: null }
 }
 
 export interface ResolveOptions {
@@ -98,7 +97,7 @@ export function chainSlug(chain: string): string {
  * Rules:
  * - `data:`, `blob:`, `http://`, `https://` → returned unchanged
  * - `ipfs://<rest>` or a bare CID → `<gateway>/ipfs/<rest>`
- * - `onchfs://<rest>` → `<onchfsProxy>/<rest>` (or `null` if no proxy)
+ * - `onchfs://<rest>` → the configured proxy or service-worker virtual path
  * - `temp://...` → `null`
  */
 export function resolveUri(
@@ -118,8 +117,10 @@ export function resolveUri(
 
   switch (scheme) {
     case "onchfs": {
-      if (!config.onchfsProxy) return null
-      const base = config.onchfsProxy.replace(/\/+$/, "")
+      if (!config.onchfs) return null
+      const base = (config.onchfs.mode === "proxy"
+        ? config.onchfs.baseUrl
+        : config.onchfs.basePath ?? "/.whitehash/onchfs").replace(/\/+$/, "")
       const prefix = options.chain ? `/${chainSlug(options.chain)}` : ""
       return `${base}${prefix}/${rest}`
     }

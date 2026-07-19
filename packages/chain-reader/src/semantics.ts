@@ -47,7 +47,7 @@ export function imageUrl(
 export type LiveViewStatus =
   | { kind: "ok"; url: string }
   | { kind: "unrevealed" }
-  | { kind: "needs-onchfs-proxy" }
+  | { kind: "needs-onchfs" }
   | { kind: "unavailable" }
 
 /** Explain whether a token can be rendered live and, if not, why. */
@@ -60,8 +60,8 @@ export function liveViewStatus(
   if (!uri) return { kind: "unavailable" }
   const url = resolveUri(uri, resolver, { chain: token.chain })
   if (url) return { kind: "ok", url }
-  if (/^onchfs:\/\//i.test(uri) && !resolver.onchfsProxy) {
-    return { kind: "needs-onchfs-proxy" }
+  if (/^onchfs:\/\//i.test(uri) && !resolver.onchfs) {
+    return { kind: "needs-onchfs" }
   }
   return { kind: "unavailable" }
 }

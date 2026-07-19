@@ -9,12 +9,17 @@ import {
 
 const config: ResolverConfig = {
   ipfsGateways: ["https://ipfs.io", "https://dweb.link"],
-  onchfsProxy: "https://proxy.example",
+  onchfs: { mode: "proxy", baseUrl: "https://proxy.example" },
 }
 
 const noProxy: ResolverConfig = {
   ipfsGateways: ["https://ipfs.io"],
-  onchfsProxy: null,
+  onchfs: null,
+}
+
+const serviceWorker: ResolverConfig = {
+  ipfsGateways: ["https://ipfs.io"],
+  onchfs: { mode: "service-worker" },
 }
 
 const CID = "QmYwSwaXj3M89rpUb1uYbfAT9x5x9zZ8bmcU3JHrYNqR4T"
@@ -68,6 +73,12 @@ describe("resolveUri", () => {
     expect(
       resolveUri(`onchfs://abc/index.html`, config, { chain: "tezos:mainnet" })
     ).toBe(`https://proxy.example/tezos-mainnet/abc/index.html`)
+  })
+
+  it("points onchfs at the same-origin service-worker virtual path", () => {
+    expect(resolveUri("onchfs://abc/index.html?fxhash=x#0xff", serviceWorker, {
+      chain: "eip155:1",
+    })).toBe("/.whitehash/onchfs/eip155-1/abc/index.html?fxhash=x#0xff")
   })
 
   it("ignores the chain hint for non-onchfs URIs", () => {

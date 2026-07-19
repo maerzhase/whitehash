@@ -73,11 +73,11 @@ export function SettingsPage({
           </Field.Root>
         </DocsSection>
 
-        <DocsSection title="onchfs proxy URL" className="flex flex-col gap-4">
+        <DocsSection title="onchfs resolution" className="flex flex-col gap-4">
           <Field.Root>
             <Field.Description>
-              Required to view onchfs artworks (many Ethereum &amp; Base pieces store their
-              code on-chain). Run{" "}
+              By default, the same-origin service worker reads on-chain files directly
+              from public RPCs. To use the server fallback instead, run{" "}
               <code className="rounded bg-surface-2 px-1 py-0.5 font-mono text-xs">
                 pnpm --filter @whitehash/onchfs-proxy start
               </code>{" "}
