@@ -1,7 +1,7 @@
 # @whitehash/ui
 
 The complete whitehash design system: Geist-dark primitives, compound art-domain
-components, one-line gallery/search blocks, and documentation chrome. Headless behavior
+components, and one-line gallery/search blocks. Headless behavior
 comes from `@whitehash/react`; this package stays thin, composable, and form-agnostic.
 
 ## Install and styles
@@ -39,10 +39,6 @@ Retheme either path by overriding semantic variables such as `--color-primary`,
 | `WalletGallery` | block | Cache-first wallet lookup and token grid (`.Content` accepts loaded state) |
 | `ProjectBrowser`, `ProjectGallery` | blocks | Chain projects and minted iterations with delegated navigation |
 | `AddressSearch`, `WalletSearch` | search | Validated form core and spotlight dialog composition |
-| `SiteHeader`, `ToolkitHero`, `DocsShell` | site chrome | Package-owned toolkit/docs shell |
-| `DocsPage`, `DocsHeading`, `DocsSection` | docs layout | Long-form documentation structure |
-| `LiveDemo`, `Callout`, `CodeBlock` | docs content | Demo framing, guidance, and copyable source |
-
 Behavioral parts expose slots only where props, refs, focus, or accessibility wiring must
 merge. Presentational leaves use ordinary elements and `className`. Compound roots own
 context; parts consume it so adopters can reorder or replace presentation.

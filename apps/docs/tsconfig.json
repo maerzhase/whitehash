@@ -6,7 +6,10 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
-    "types": ["vite/client"]
+    "allowJs": true,
+    "incremental": true,
+    "plugins": [{ "name": "next" }]
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }

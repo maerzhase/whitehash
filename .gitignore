@@ -8,3 +8,5 @@ dist/
 coverage/
 *.log
 .vercel/
+.next/
+apps/docs/out/

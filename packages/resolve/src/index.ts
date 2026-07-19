@@ -64,9 +64,24 @@ function splitScheme(uri: string): SplitUri {
   return { scheme: null, rest: uri }
 }
 
+function normalizeIpfsPath(value: string): string {
+  // Metadata and user-provided values appear in several equivalent forms:
+  // ipfs://CID, ipfs://ipfs/CID, /ipfs/CID, and bare CID. Keep the payload
+  // intact while removing only a leading gateway namespace.
+  return value
+    .replace(/^\/+/, "")
+    .replace(/^ipfs\/+/, "")
+}
+
+function normalizeGatewayRoot(gateway: string): string {
+  // Accept both a host root and the copy-paste-friendly gateway API root.
+  // `https://host/ipfs/` must not become `https://host/ipfs/ipfs/CID`.
+  return gateway.trim().replace(/\/+$/, "").replace(/\/ipfs$/i, "")
+}
+
 function joinGateway(gateway: string, rest: string): string {
   // rest = "{cid}[/path][?query][#fragment]" — appended verbatim under /ipfs/
-  return `${gateway.replace(/\/+$/, "")}/ipfs/${rest}`
+  return `${normalizeGatewayRoot(gateway)}/ipfs/${normalizeIpfsPath(rest)}`
 }
 
 /** "eip155:8453" → "eip155-8453" for use as a URL path segment. */

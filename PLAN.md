@@ -586,12 +586,13 @@ both tiers, so adopters get a fully consistent product:
 your layer; per-hook and per-component pages with live example + copyable code; theming
 guide with the design-token variable reference; guides for Vite/Next/self-hosting the
 onchfs proxy), plus the existing browse/wallet/token flows kept as full-app showcases.
-**Hard rule: the docs app is assembled exclusively from `@whitehash/ui`** — it contains
-routing, docs content, and composition only; no local visual components and no bespoke
-component CSS (page-layout glue at most). Anything the docs site needs that the package
-lacks (nav bar, hero, code block, docs page shell) gets added to `@whitehash/ui` as a
-component — the pressure that keeps the design system complete and the product
-"super-consistent": the showcase IS the package rendering itself.
+**Hard rule: the docs app is assembled exclusively from `@whitehash/ui`** for toolkit
+and product UI — it contains routing, docs content, and composition only; no bespoke
+toolkit component CSS (page-layout glue at most). **Explicit docs-chrome exception:**
+`SiteHeader`, `DocsShell`, `CodeBlock`, and related documentation-only presentation stay
+app-local. In particular, syntax highlighting (currently `prism-react-renderer`) must
+not become a dependency of `@whitehash/ui`. These components explain the product but
+are not part of the embeddable design-system surface.
 
 ### 4.8 API ergonomics & composability review (M14) — the "first glimpse" bar
 

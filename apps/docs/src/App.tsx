@@ -1,87 +1,86 @@
+"use client"
+
 import { useEffect, useMemo, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { tokenKey, type ChainId, type WhitehashToken } from "@whitehash/chain-reader"
 import { useWalletTokens } from "@whitehash/react"
 import {
+  Artwork,
   Button,
-  Callout,
-  CodeBlock,
-  DocsHeading,
-  DocsPage,
-  DocsSection,
-  DocsShell,
-  ProjectBrowser,
   ProjectGallery,
-  SiteHeader,
   Spinner,
+  TokenCard,
   TokenDetails,
-  ToolkitHero,
   WalletGallery,
   WalletSearch,
   WhitehashProvider,
-  type DocsNavItem,
 } from "@whitehash/ui"
-import { API_ENTRIES, ApiDocPage, GuidePage } from "./docs-content.js"
-import { SettingsPage } from "./settings-page.js"
-import { chainReaderConfigFrom, loadSettings, type Settings } from "./settings.js"
-import { loadRecent, pushRecent } from "./recent.js"
+import { API_ENTRIES, ApiDocPage, GuidePage, SAMPLE_TOKEN } from "./docs-content"
+import { Callout, CodeBlock, DocsPage, DocsShell, SiteHeader, type DocsNavItem } from "./components/docs-chrome"
+import { SettingsPage } from "./settings-page"
+import { chainReaderConfigFrom, defaultSettings, loadSettings, type Settings } from "./settings"
+import { loadRecent, pushRecent } from "./recent"
 
 type Route =
   | { name: "home" }
   | { name: "api"; slug: string }
   | { name: "guide"; slug: string }
-  | { name: "showcase" }
   | { name: "settings" }
   | { name: "project"; chain: string; ref: string }
   | { name: "wallet"; address: string }
   | { name: "token"; address: string; key: string }
 
-function parseHash(): Route {
-  const parts = location.hash.replace(/^#/, "").split("/").filter(Boolean)
+function parsePath(pathname: string, search: URLSearchParams): Route {
+  const parts = pathname.split("/").filter(Boolean).map(decodeURIComponent)
   if (parts[0] === "docs" && parts[1]) return { name: "api", slug: parts[1] }
   if (parts[0] === "guide" && parts[1]) return { name: "guide", slug: parts[1] }
-  if (parts[0] === "showcase") return { name: "showcase" }
   if (parts[0] === "settings") return { name: "settings" }
-  if (parts[0] === "p" && parts[1] && parts[2]) return { name: "project", chain: decodeURIComponent(parts[1]), ref: decodeURIComponent(parts[2]) }
+  if (parts[0] === "p" && parts[1] && parts[2]) return { name: "project", chain: parts[1], ref: parts[2] }
   if (parts[0] === "w" && parts[1]) {
-    const address = decodeURIComponent(parts[1])
-    if (parts[2] === "t" && parts[3] && parts[4] && parts[5]) {
-      return { name: "token", address, key: `${decodeURIComponent(parts[3])}/${decodeURIComponent(parts[4])}/${decodeURIComponent(parts[5])}` }
-    }
+    const address = parts[1]
+    if (parts[2] === "t" && parts[3] && parts[4] && parts[5]) return { name: "token", address, key: `${parts[3]}/${parts[4]}/${parts[5]}` }
     return { name: "wallet", address }
   }
+  const projectChain = search.get("projectChain")
+  const projectRef = search.get("projectRef")
+  if (projectChain && projectRef) return { name: "project", chain: projectChain, ref: projectRef }
+  const wallet = search.get("wallet")
+  const token = search.get("token")
+  if (wallet && token) return { name: "token", address: wallet, key: token }
+  if (wallet) return { name: "wallet", address: wallet }
   return { name: "home" }
 }
 
-const navigate = (to: string) => { location.hash = to }
-const walletHash = (address: string) => `/w/${encodeURIComponent(address)}`
-const projectHash = (chain: string, ref: string) => `/p/${encodeURIComponent(chain)}/${encodeURIComponent(ref)}`
-const tokenHash = (token: WhitehashToken, address: string) => `${walletHash(address)}/t/${encodeURIComponent(token.chain)}/${encodeURIComponent(token.contract)}/${encodeURIComponent(token.tokenId)}`
+const segment = (value: string) => encodeURIComponent(value)
+const walletPath = (address: string) => `/?wallet=${segment(address)}`
+const projectPath = (chain: string, ref: string) => `/?projectChain=${segment(chain)}&projectRef=${segment(ref)}`
+const tokenPath = (token: WhitehashToken, address: string) => `/?wallet=${segment(address)}&token=${segment(tokenKey(token))}`
 
 const DOC_NAV: DocsNavItem[] = [
-  { label: "Getting started", href: "#/guide/getting-started", group: "Guide" },
-  { label: "Choose a layer", href: "#/guide/layers", group: "Guide" },
-  { label: "Theming", href: "#/guide/theming", group: "Guide" },
-  { label: "Vite", href: "#/guide/vite", group: "Deploy" },
-  { label: "Next.js", href: "#/guide/next", group: "Deploy" },
-  { label: "onchfs proxy", href: "#/guide/proxy", group: "Deploy" },
-  { label: "Static hosting", href: "#/guide/deploy", group: "Deploy" },
-  ...API_ENTRIES.map(entry => ({ label: entry.name, href: `#/docs/${entry.slug}`, group: entry.group })),
+  { label: "Getting started", href: "/guide/getting-started", group: "Guide" },
+  { label: "How it works", href: "/guide/how-it-works", group: "Guide" },
+  { label: "Configuration", href: "/guide/configuration", group: "Guide" },
+  { label: "Theming", href: "/guide/theming", group: "Guide" },
+  { label: "Next.js", href: "/guide/next", group: "Deploy" },
+  { label: "onchfs proxy", href: "/guide/proxy", group: "Deploy" },
+  ...API_ENTRIES.map(entry => ({ label: entry.name, href: `/docs/${entry.slug}`, group: entry.group })),
 ]
 
 export function App() {
-  const [settings, setSettings] = useState<Settings>(loadSettings())
+  const [settings, setSettings] = useState<Settings>(defaultSettings)
+  useEffect(() => setSettings(loadSettings()), [])
   const config = useMemo(() => ({ ...chainReaderConfigFrom(settings), mode: settings.mode }), [settings])
   return <WhitehashProvider config={config}><DocsApp settings={settings} onSettingsChange={setSettings} /></WhitehashProvider>
 }
 
 function DocsApp({ settings, onSettingsChange }: { settings: Settings; onSettingsChange: (settings: Settings) => void }) {
-  const [route, setRoute] = useState<Route>(parseHash())
+  const pathname = usePathname()
+  const router = useRouter()
+  const search = useSearchParams()
+  const route = parsePath(pathname, search)
   const [searchOpen, setSearchOpen] = useState(false)
-  useEffect(() => {
-    const onHash = () => { setRoute(parseHash()); window.scrollTo(0, 0) }
-    window.addEventListener("hashchange", onHash)
-    return () => window.removeEventListener("hashchange", onHash)
-  }, [])
+  const navigate = (to: string) => { router.push(to); window.scrollTo(0, 0) }
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
@@ -99,72 +98,93 @@ function DocsApp({ settings, onSettingsChange }: { settings: Settings; onSetting
   useEffect(() => { if (address) pushRecent(address) }, [address])
 
   const docsRoute = route.name === "api" || route.name === "guide"
-  const currentHref = location.hash || "#/"
   return (
-    <div className="min-h-full bg-canvas text-fg">
-      <SiteHeader
-        logoSrc="./logo.png"
-        actions={<>
-          <Button variant="ghost" size="sm" render={<a href="#/guide/getting-started" />}>Docs</Button>
-          <Button variant="ghost" size="sm" render={<a href="#/showcase" />}>Browse</Button>
-          {address ? <Button variant="ghost" size="sm" onClick={wallet.refresh} disabled={wallet.loading}>{wallet.loading ? <Spinner className="size-3.5" /> : null}Refresh</Button> : null}
-          <Button variant="secondary" size="sm" onClick={() => setSearchOpen(true)}>Search wallet</Button>
-          <Button variant="ghost" size="sm" render={<a href="#/settings" />}>Settings</Button>
-        </>}
-      />
+    <div className="min-h-screen bg-canvas text-fg">
+      <SiteHeader actions={<>
+        <Button variant="ghost" size="sm" render={<a href="/guide/getting-started" />}>Docs</Button>
+        {address ? <Button variant="ghost" size="sm" onClick={wallet.refresh} disabled={wallet.loading}>{wallet.loading ? <Spinner className="size-3.5" /> : null}Refresh</Button> : null}
+        <Button variant="secondary" size="sm" onClick={() => setSearchOpen(true)} className="hidden sm:inline-flex">Search <kbd className="ml-2 text-[10px] text-faint">⌘K</kbd></Button>
+        <Button variant="ghost" size="sm" render={<a href="/settings" />}>Settings</Button>
+      </>} />
 
       {docsRoute ? (
-        <DocsShell items={DOC_NAV} currentHref={currentHref}>
+        <DocsShell items={DOC_NAV} currentHref={pathname}>
           {route.name === "api" ? <ApiDocPage entry={API_ENTRIES.find(entry => entry.slug === route.slug) ?? API_ENTRIES[0]!} /> : <GuidePage slug={route.slug} />}
         </DocsShell>
       ) : (
         <main>
-          {route.name === "home" ? <HomePage /> : null}
+          {route.name === "home" ? <HomePage onSearch={() => setSearchOpen(true)} /> : null}
           <div className="mx-auto max-w-[1200px] px-4 pb-24 sm:px-6">
-            {route.name === "showcase" ? <ProjectBrowser onOpenProject={(chain, ref) => navigate(projectHash(chain, ref))} /> : null}
-            {route.name === "project" ? <ProjectRoute chain={route.chain as ChainId} projectRef={route.ref} onBack={() => navigate("/showcase")} /> : null}
-            {route.name === "settings" ? <SettingsPage settings={settings} onChange={onSettingsChange} onBack={() => history.back()} /> : null}
-            {route.name === "wallet" && wallet.state ? <WalletGallery.Content address={wallet.state.address} state={wallet.state} loading={wallet.loading} onOpenToken={token => navigate(tokenHash(token, wallet.state!.address))} /> : null}
-            {route.name === "token" && wallet.state ? <TokenRoute tokenKeyWanted={route.key} tokens={wallet.state.tokens} loading={wallet.loading} onBack={() => navigate(walletHash(route.address))} /> : null}
+            {route.name === "project" ? <ProjectRoute chain={route.chain as ChainId} projectRef={route.ref} onBack={() => navigate("/")} /> : null}
+            {route.name === "settings" ? <SettingsPage settings={settings} onChange={onSettingsChange} onBack={() => router.back()} /> : null}
+            {route.name === "wallet" && wallet.state ? <WalletGallery.Content address={wallet.state.address} state={wallet.state} loading={wallet.loading} onOpenToken={token => navigate(tokenPath(token, wallet.state!.address))} /> : null}
+            {route.name === "token" && wallet.state ? <TokenRoute tokenKeyWanted={route.key} tokens={wallet.state.tokens} loading={wallet.loading} onBack={() => navigate(walletPath(route.address))} /> : null}
           </div>
         </main>
       )}
 
-      <WalletSearch open={searchOpen} onOpenChange={setSearchOpen} recentAddresses={loadRecent()} onSubmit={addressValue => navigate(walletHash(addressValue))} />
+      <WalletSearch open={searchOpen} onOpenChange={setSearchOpen} recentAddresses={loadRecent()} onSubmit={value => navigate(walletPath(value))} />
     </div>
   )
 }
 
-function HomePage() {
+function HomePage({ onSearch }: { onSearch: () => void }) {
   return (
     <>
-      <ToolkitHero
-        logoSrc="./logo.png"
-        description="Embed generative art directly from public Tezos, Ethereum, and Base infrastructure. Choose low-level reads, headless hooks, or complete UI blocks."
-        actions={<><Button render={<a href="#/guide/getting-started" />}>Get started</Button><Button variant="secondary" render={<a href="#/showcase" />}>Browse live art</Button></>}
-      />
-      <DocsPage className="px-4 pb-24 sm:px-6">
-        <DocsSection title="Choose your altitude">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div><div className="font-mono text-xs text-primary">Layer 0</div><h3 className="mt-2 text-xl font-semibold">Framework-free</h3><p className="mt-2 text-sm leading-relaxed text-muted">Read wallets, projects, metadata, and render URLs with one configured client.</p></div>
-            <div><div className="font-mono text-xs text-primary">Layer 1</div><h3 className="mt-2 text-xl font-semibold">Headless React</h3><p className="mt-2 text-sm leading-relaxed text-muted">Hooks own caching, progress, gateway fallback, and secure iframe state.</p></div>
-            <div><div className="font-mono text-xs text-primary">Layer 2</div><h3 className="mt-2 text-xl font-semibold">Complete UI</h3><p className="mt-2 text-sm leading-relaxed text-muted">Composable artwork, token, gallery, search, and documentation components.</p></div>
+      <section className="home-hero">
+        <div className="home-grid" aria-hidden />
+        <div className="hero-inner relative z-10 mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-[1200px] items-center gap-14 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-20">
+          <div className="hero-copy max-w-2xl">
+            <div className="mb-7 flex items-center gap-2 font-mono text-xs text-muted"><span className="size-1.5 rounded-full bg-success shadow-[0_0_14px_var(--color-success)]" /> Open source · Tezos, Ethereum &amp; Base</div>
+            <h1 className="font-display text-5xl font-semibold leading-[0.96] tracking-[-0.065em] sm:text-7xl lg:text-[5.25rem]">Generative art,<br /><span className="text-muted">without the platform.</span></h1>
+            <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">Read wallets from public chains, resolve content-addressed media, and render live artwork with composable React APIs.</p>
+            <div className="mt-8 flex flex-wrap gap-2"><Button render={<a href="/guide/getting-started" />}>Get started</Button><Button variant="secondary" onClick={onSearch}>Try a wallet</Button></div>
           </div>
-        </DocsSection>
-        <DocsSection title="One embed, no server"><CodeBlock code={`<WhitehashProvider config={config}>\n  <WalletGallery address="tz1…" />\n</WhitehashProvider>`} /><Callout className="mt-4">The onchfs proxy is the only optional server piece; IPFS and chain reads happen directly in the browser.</Callout></DocsSection>
-      </DocsPage>
+          <div className="hero-visual">
+            <div className="mb-3 flex items-center justify-between font-mono text-[11px] text-faint"><span>live component</span><span>tezos:mainnet</span></div>
+            <Artwork.Root token={SAMPLE_TOKEN} className="hero-artwork"><Artwork.Image /><Artwork.Live /><Artwork.PlayButton /><Artwork.StatusBadge /></Artwork.Root>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-line bg-surface">
+        <div className="mx-auto grid max-w-[1200px] divide-y divide-line px-4 sm:px-6 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+          {[['01', 'Detect', 'A tz address selects Tezos mainnet or Ghostnet; a 0x address selects Ethereum and Base.'], ['02', 'Read', 'Known contracts are queried directly through TzKT or JSON-RPC and normalized into one token shape.'], ['03', 'Render', 'IPFS gateways fall back in order; onchfs code is served by your optional self-hosted proxy.']].map(([number, title, copy]) => <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0"><div className="font-mono text-[11px] text-faint">{number}</div><h2 className="mt-4 text-lg font-medium">{title}</h2><p className="mt-2 text-sm leading-6 text-muted">{copy}</p></div>)}
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-[1200px] gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.8fr_1.2fr] lg:py-32">
+        <div><div className="section-kicker">One hook</div><h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">An address in.<br />Renderable tokens out.</h2><p className="mt-5 max-w-md leading-7 text-muted">Cache-first results arrive per chain. Refresh bypasses the cache, while a failure on one network never discards successful results from another.</p><a className="docs-text-link mt-6 inline-block" href="/docs/use-wallet-tokens">Read the API reference →</a></div>
+        <CodeBlock language="tsx" code={`const wallet = useWalletTokens(
+  "tz1c3hFmjFSwunjLHECnYyjr42KRt5YiHrGX"
+)
+
+wallet.state?.tokens   // normalized WhitehashToken[]
+wallet.state?.chains   // progress for each selected chain
+wallet.loading         // true while live reads are running
+wallet.refresh()       // bypass IndexedDB and read again`} />
+      </section>
+
+      <section className="border-t border-line">
+        <div className="mx-auto grid max-w-[1200px] gap-12 px-4 py-24 sm:px-6 lg:grid-cols-2 lg:py-32">
+          <div><div className="section-kicker">Components are the showcase</div><h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Use the full block.<br />Replace any layer.</h2><p className="mt-5 max-w-md leading-7 text-muted">Start with a wallet gallery or compose the artwork, image fallback, live frame, and status parts yourself.</p></div>
+          <div className="showcase-row"><TokenCard token={SAMPLE_TOKEN} /><Callout>Preview images and live artifacts are separate. A token can have a working live view even when its metadata has no display image.</Callout></div>
+        </div>
+      </section>
+
+      <section className="border-t border-line py-24 text-center sm:py-32"><div className="section-kicker">Build from public data</div><h2 className="mx-auto mt-4 max-w-2xl text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">Own the path from chain to canvas.</h2><div className="mt-8"><Button render={<a href="/guide/getting-started" />}>Start building</Button></div></section>
     </>
   )
 }
 
 function ProjectRoute({ chain, projectRef, onBack }: { chain: ChainId; projectRef: string; onBack: () => void }) {
   const [token, setToken] = useState<WhitehashToken | null>(null)
-  if (token) return <TokenDetails token={token} onBack={() => setToken(null)} settingsHref="#/settings" />
+  if (token) return <TokenDetails token={token} onBack={() => setToken(null)} settingsHref="/settings" />
   return <ProjectGallery chain={chain} projectRef={projectRef} onOpenToken={setToken} onBack={onBack} />
 }
 
 function TokenRoute({ tokenKeyWanted, tokens, loading, onBack }: { tokenKeyWanted: string; tokens: WhitehashToken[]; loading: boolean; onBack: () => void }) {
   const token = tokens.find(value => tokenKey(value) === tokenKeyWanted)
   if (!token) return <DocsPage className="pt-8"><Button variant="link" onClick={onBack}>← Back</Button><p className="mt-3 text-muted">{loading ? "Loading…" : "Token not found in this wallet."}</p></DocsPage>
-  return <TokenDetails token={token} onBack={onBack} settingsHref="#/settings" />
+  return <TokenDetails token={token} onBack={onBack} settingsHref="/settings" />
 }

@@ -28,6 +28,8 @@ describe("resolveUri", () => {
     ["http URL", "http://cdn.example/x.png", "http://cdn.example/x.png"],
     // ipfs plain
     ["ipfs:// plain", `ipfs://${CID}`, `https://ipfs.io/ipfs/${CID}`],
+    ["ipfs://ipfs namespace", `ipfs://ipfs/${CID}`, `https://ipfs.io/ipfs/${CID}`],
+    ["absolute /ipfs path", `/ipfs/${CID}`, `https://ipfs.io/ipfs/${CID}`],
     ["bare CID", CID, `https://ipfs.io/ipfs/${CID}`],
     // ipfs with path
     ["ipfs:// with path", `ipfs://${CID}/1/metadata.json`, `https://ipfs.io/ipfs/${CID}/1/metadata.json`],
@@ -100,6 +102,16 @@ describe("resolveUriAll", () => {
     expect(resolveUriAll(`${CID}?fxhash=x`, config)).toEqual([
       `https://ipfs.io/ipfs/${CID}?fxhash=x`,
       `https://dweb.link/ipfs/${CID}?fxhash=x`,
+    ])
+  })
+
+  it("accepts gateway roots that already end in /ipfs", () => {
+    expect(resolveUriAll(`ipfs://${CID}`, {
+      ...config,
+      ipfsGateways: ["https://ipfs.io/ipfs/", "https://dweb.link/ipfs"],
+    })).toEqual([
+      `https://ipfs.io/ipfs/${CID}`,
+      `https://dweb.link/ipfs/${CID}`,
     ])
   })
 

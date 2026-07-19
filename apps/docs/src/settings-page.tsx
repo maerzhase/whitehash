@@ -1,7 +1,8 @@
 import { useState } from "react"
 import type { ChainId } from "@whitehash/chain-reader"
-import { Button, DocsSection, Field, Input, Separator, Textarea, ToggleGroup } from "@whitehash/ui"
-import { defaultSettings, saveSettings, type Settings } from "./settings.js"
+import { Button, Field, Input, Separator, Textarea, ToggleGroup } from "@whitehash/ui"
+import { DocsSection } from "./components/docs-chrome"
+import { defaultSettings, saveSettings, type Settings } from "./settings"
 
 const EVM_NETWORKS: { chain: ChainId; label: string }[] = [
   { chain: "eip155:1", label: "Ethereum RPCs" },
@@ -59,7 +60,11 @@ export function SettingsPage({
 
         <DocsSection title="IPFS gateways" className="flex flex-col gap-4">
           <Field.Root>
-            <Field.Description>One per line, tried in order.</Field.Description>
+            <Field.Description>
+              One gateway per line, tried in order. Host roots such as
+              <code className="mx-1 rounded bg-surface-2 px-1 py-0.5 font-mono text-xs">https://ipfs.io</code>
+              and roots ending in <code className="rounded bg-surface-2 px-1 py-0.5 font-mono text-xs">/ipfs/</code> are both accepted.
+            </Field.Description>
             <Field.Control
               render={<Textarea rows={3} />}
               value={lines(draft.ipfsGateways)}
