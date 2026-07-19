@@ -16,7 +16,7 @@ function Root({ className, ...props }: ComponentProps<typeof BaseField.Root>) {
 function Label({ className, ...props }: ComponentProps<typeof BaseField.Label>) {
   return (
     <BaseField.Label
-      className={cn("text-sm font-medium text-fg", className)}
+      className={cn("text-sm font-medium leading-5 text-fg", className)}
       {...props}
     />
   )
@@ -32,9 +32,10 @@ function Description({ className, ...props }: ComponentProps<typeof BaseField.De
 }
 
 const controlClasses =
-  "w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-fg " +
+  "min-h-10 w-full rounded-sm border border-line bg-canvas px-3 py-2 text-base text-fg sm:text-sm " +
   "placeholder:text-faint outline-none transition-colors " +
-  "focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-ring/40"
+  "hover:border-line-strong focus-visible:border-line-strong " +
+  "focus-visible:shadow-[0_0_0_2px_#000,0_0_0_4px_var(--color-ring)]"
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
   return <input className={cn(controlClasses, className)} {...props} />

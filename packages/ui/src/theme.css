@@ -1,54 +1,47 @@
-/**
- * whitehash design tokens (Tailwind v4 CSS-first `@theme`).
- *
- * A restrained, gallery-dark palette: the chrome stays quiet so the artwork
- * carries the color. Tokens are semantic (surface / fg / primary / …) so
- * components never reference raw hex, and generate Tailwind utilities
- * (bg-surface, text-muted, border-line, rounded-card, …).
- */
+/** whitehash — Geist dark, warmed with the logo-derived cream. */
 @theme {
-  /* Surfaces — pure-black canvas rising to elevated overlays. */
+  /* Geist dark backgrounds and neutral surface scale. */
   --color-canvas: #000000;
-  --color-surface: #16161a;
-  --color-surface-2: #1e1e23;
-  --color-elevated: #26262c;
+  --color-surface: #000000;
+  --color-surface-2: #1a1a1a;
+  --color-elevated: #1f1f1f;
 
   /* Lines. */
-  --color-line: #2b2b32;
-  --color-line-strong: #3b3b44;
+  --color-line: #ffffff24;
+  --color-line-strong: #ffffff3d;
 
   /* Text. */
-  --color-fg: #ececef;
-  --color-muted: #9296a1;
-  --color-faint: #6b6e78;
+  --color-fg: #f4e7d8;
+  --color-muted: #a0a0a0;
+  --color-faint: #7d7d7d;
 
   /* Primary — the warm cream sampled from the whitehash logo. Used as a light
    * CTA/accent on the dark canvas, with dark text placed on it. */
   --color-primary: #f4e7d8;
   --color-primary-hover: #ffffff;
-  --color-primary-fg: #171310;
+  --color-primary-fg: #090c0a;
+
+  --color-accent: #f4e7d8;
+  --color-accent-hover: #fff8ef;
 
   /* Status. */
-  --color-warning: #e2a94c;
-  --color-success: #66cb8c;
-  --color-danger: #e5695f;
+  --color-warning: #ffae00;
+  --color-success: #00ca50;
+  --color-danger: #ff565f;
 
   /* Focus ring. */
-  --color-ring: #f4e7d8;
+  --color-ring: #47a8ff;
 
   /* Radii. */
   --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-xl: 16px;
-  --radius-card: 14px;
+  --radius-card: 12px;
 
   /* Type. */
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
-    monospace;
+  --font-sans: "Geist Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Geist Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Geist Mono", "SFMono-Regular", Consolas, monospace;
 }

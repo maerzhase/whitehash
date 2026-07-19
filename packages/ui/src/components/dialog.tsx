@@ -22,14 +22,14 @@ function Content({
     <BaseDialog.Portal>
       <BaseDialog.Backdrop
         className={cn(
-          "fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-200",
+          "fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300",
           "data-[starting-style]:opacity-0 data-[ending-style]:opacity-0",
         )}
       />
       <BaseDialog.Popup
         className={cn(
-          "fixed left-1/2 top-[16vh] z-50 w-[min(92vw,560px)] -translate-x-1/2 rounded-xl",
-          "border border-line bg-surface p-5 shadow-2xl outline-none",
+          "fixed left-1/2 top-[16vh] z-50 w-[min(92vw,560px)] -translate-x-1/2 rounded-md",
+          "border border-line bg-surface-2 p-6 shadow-[0_1px_1px_rgba(0,0,0,.02),0_8px_16px_-4px_rgba(0,0,0,.24),0_24px_32px_-8px_rgba(0,0,0,.4)] outline-none",
           "transition-[opacity,transform] duration-200 ease-out",
           "data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
           "data-[ending-style]:scale-95 data-[ending-style]:opacity-0",
@@ -46,7 +46,7 @@ function Content({
 function Title({ className, ...props }: ComponentProps<typeof BaseDialog.Title>) {
   return (
     <BaseDialog.Title
-      className={cn("text-base font-semibold text-fg", className)}
+      className={cn("font-display text-2xl font-semibold leading-8 tracking-[-0.04em] text-fg", className)}
       {...props}
     />
   )

@@ -53,7 +53,7 @@ export function WalletSearch({
         </form>
         {recent.length > 0 ? (
           <div className="mt-4">
-            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-faint">
+            <div className="mb-2 text-xs font-medium text-faint">
               Recent
             </div>
             <div className="flex flex-wrap gap-2">

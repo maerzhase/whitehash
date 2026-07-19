@@ -106,28 +106,33 @@ export function App() {
   const isHome = route.name === "home"
 
   return (
-    <div className="mx-auto max-w-[1100px] px-5 pb-16">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-canvas py-4">
+    <div className="app-shell mx-auto max-w-[1200px] px-4 pb-24 sm:px-6">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-canvas/90 py-4 backdrop-blur-md">
         <button
-          className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-fg"
+          className="group flex min-h-11 min-w-11 items-center gap-3 text-left text-fg sm:min-h-0 sm:min-w-0"
+          aria-label="Whitehash Home"
           onClick={() => navigate("/")}
         >
-          <img className="size-7 rounded-md" src="./logo.png" alt="" />
-          whitehash
+          <img className="brand-mark size-8 rounded-sm" src="./logo.png" alt="" />
+          <span className="hidden min-[480px]:block">
+            <span className="block font-display text-base font-semibold leading-5 tracking-[-0.02em]">whitehash</span>
+          </span>
         </button>
         <nav className="flex items-center gap-1">
           {address ? (
             <Button variant="ghost" size="sm" onClick={refresh} disabled={loading}>
-              {loading ? <Spinner className="size-3.5" /> : null}
-              refresh
+              <span className="flex size-3.5 items-center justify-center" aria-hidden={!loading}>
+                {loading ? <Spinner className="size-3.5" /> : null}
+              </span>
+              Refresh Wallet
             </Button>
           ) : null}
           <Button variant="secondary" size="sm" onClick={() => setSearchOpen(true)}>
             <SearchIcon />
-            Search wallet
+            Search Wallet
           </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate("/settings")}>
-            settings
+            Settings
           </Button>
         </nav>
       </header>

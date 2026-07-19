@@ -49,7 +49,7 @@ function Root({ value, onValueChange, className, children, ...props }: ToggleGro
         if (typeof next === "string") onValueChange(next)
       }}
       className={cn(
-        "relative inline-flex gap-1 rounded-lg border border-line bg-surface p-1",
+        "relative inline-flex gap-1 rounded-sm border border-line bg-canvas p-1",
         className,
       )}
       {...props}
@@ -57,7 +57,7 @@ function Root({ value, onValueChange, className, children, ...props }: ToggleGro
       {indicator ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute bottom-1 top-1 rounded-md bg-primary transition-[left,width] duration-200 ease-out"
+          className="pointer-events-none absolute bottom-1 top-1 rounded-xs bg-primary transition-[left,width] duration-150 ease-out"
           style={{ left: indicator.left, width: indicator.width }}
         />
       ) : null}
@@ -77,8 +77,8 @@ function Item({ className, ...props }: ToggleGroupItemProps) {
   return (
     <Toggle
       className={cn(
-        "relative z-10 cursor-pointer rounded-md px-3.5 py-1.5 text-sm text-muted transition-colors",
-        "hover:text-fg outline-none focus-visible:ring-2 focus-visible:ring-ring/70",
+        "relative z-10 min-h-11 cursor-pointer rounded-xs px-3 py-1 text-sm font-medium text-muted transition-colors sm:min-h-8",
+        "hover:text-fg outline-none focus-visible:shadow-[0_0_0_2px_#000,0_0_0_4px_var(--color-ring)]",
         "data-[pressed]:text-primary-fg data-[pressed]:hover:text-primary-fg",
         className,
       )}

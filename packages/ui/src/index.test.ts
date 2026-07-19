@@ -15,6 +15,7 @@ describe("buttonVariants", () => {
     const primary = buttonVariants({ variant: "primary", size: "md" })
     expect(primary).toContain("bg-primary")
     expect(primary).toContain("h-10")
+    expect(primary).not.toContain("translate")
   })
 
   it("card variant resets the inline-flex base to a column layout", () => {
@@ -23,6 +24,7 @@ describe("buttonVariants", () => {
     // card layout intent is present.
     expect(card).toContain("flex-col")
     expect(card).toContain("rounded-card")
+    expect(card).not.toContain("translate")
   })
 })
 

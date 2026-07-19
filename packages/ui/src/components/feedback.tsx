@@ -20,7 +20,7 @@ export function Spinner({ className, ...props }: ComponentProps<"span">) {
 export function Skeleton({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-surface-2", className)}
+      className={cn("animate-pulse rounded-sm bg-surface-2", className)}
       {...props}
     />
   )

@@ -15,19 +15,20 @@
   "dependencies": {
     "@whitehash/chain-reader": "workspace:*",
     "@whitehash/resolve": "workspace:*",
+    "@whitehash/ui": "workspace:*",
+    "geist": "1.7.2",
     "idb-keyval": "6.2.2",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "@whitehash/ui": "workspace:*"
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.1",
     "@vitejs/plugin-react": "5.0.4",
+    "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vite": "7.1.12",
-    "vitest": "3.2.4",
-    "@tailwindcss/vite": "4.3.3",
-    "tailwindcss": "4.3.3"
+    "vitest": "3.2.4"
   }
 }

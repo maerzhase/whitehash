@@ -22,8 +22,8 @@ function parseLines(v: string): string[] {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-3 py-6">
-      <h3 className="text-base font-semibold">{title}</h3>
+    <section className="flex flex-col gap-4 py-8">
+      <h3 className="font-display text-xl font-semibold leading-[26px] tracking-[-0.02em]">{title}</h3>
       {children}
     </section>
   )
@@ -49,9 +49,9 @@ export function SettingsPanel({
   return (
     <div className="max-w-2xl pt-5">
       <Button variant="link" onClick={onBack}>
-        ← back
+        ← Back
       </Button>
-      <h2 className="mt-2 text-xl font-semibold tracking-tight">Settings</h2>
+      <h2 className="mt-4 font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">Settings</h2>
 
       <div className="divide-y divide-line">
         <Section title="Network mode">
@@ -155,7 +155,7 @@ export function SettingsPanel({
 
       <Separator className="my-4" />
       <Button variant="danger" size="sm" onClick={() => commit(defaultSettings())}>
-        reset to defaults
+        Reset Defaults
       </Button>
     </div>
   )

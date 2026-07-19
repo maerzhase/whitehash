@@ -24,7 +24,7 @@ function Root({ className, ...props }: ComponentProps<"div">) {
 function Media({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("relative aspect-square bg-surface-2", className)}
+      className={cn("relative aspect-square border-b border-line bg-surface-2", className)}
       {...props}
     />
   )
@@ -33,7 +33,7 @@ function Media({ className, ...props }: ComponentProps<"div">) {
 function Body({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("flex items-center justify-between gap-2 px-3 py-2.5", className)}
+      className={cn("flex min-h-12 items-center justify-between gap-2 px-4 py-3", className)}
       {...props}
     />
   )
@@ -41,7 +41,7 @@ function Body({ className, ...props }: ComponentProps<"div">) {
 
 function Title({ className, ...props }: ComponentProps<"span">) {
   return (
-    <span className={cn("truncate text-sm text-fg", className)} {...props} />
+    <span className={cn("truncate text-sm font-medium text-fg", className)} {...props} />
   )
 }
 

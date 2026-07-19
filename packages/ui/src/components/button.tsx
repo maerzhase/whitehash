@@ -11,28 +11,28 @@ import { cn } from "../lib/cn.js"
  */
 export const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium " +
-    "transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/70 " +
-    "disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none",
+    "transition-[color,background-color,border-color,box-shadow] duration-150 outline-none " +
+    "focus-visible:shadow-[0_0_0_2px_#000,0_0_0_4px_var(--color-ring)] " +
+    "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-faint cursor-pointer select-none",
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-fg hover:bg-primary-hover rounded-md",
+        primary: "rounded-sm bg-primary text-primary-fg hover:bg-primary-hover",
         secondary:
-          "bg-surface-2 text-fg border border-line hover:border-line-strong rounded-md",
-        ghost: "text-muted hover:text-fg hover:bg-surface-2 rounded-md",
-        link: "text-primary hover:text-primary-hover underline-offset-4 hover:underline p-0",
-        danger: "text-danger hover:bg-danger/10 rounded-md",
+          "rounded-sm border border-line bg-canvas text-fg hover:border-line-strong hover:bg-surface-2",
+        ghost: "rounded-sm text-muted hover:bg-surface-2 hover:text-fg",
+        link: "min-h-11 p-0 text-fg underline-offset-4 hover:underline sm:min-h-0",
+        danger: "rounded-sm bg-danger text-white hover:brightness-90",
         /* Full-bleed clickable card shell — layout reset from the flex base. */
         card:
           "flex flex-col items-stretch justify-start gap-0 p-0 text-left " +
-          "bg-surface border border-line rounded-card overflow-hidden " +
-          "hover:border-line-strong transition-colors",
+          "overflow-hidden rounded-card border border-line bg-surface hover:border-line-strong",
       },
       size: {
-        sm: "h-8 px-3 text-sm rounded-md",
-        md: "h-10 px-4 text-sm",
-        lg: "h-11 px-5 text-base",
-        icon: "size-9",
+        sm: "h-11 px-2.5 text-sm rounded-sm sm:h-8",
+        md: "h-10 px-2.5 text-sm",
+        lg: "h-12 px-3.5 text-base",
+        icon: "size-10",
         none: "",
       },
     },

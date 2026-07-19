@@ -29,12 +29,12 @@ export function TokenDetail({
   return (
     <div className="pt-5">
       <Button variant="link" onClick={onBack}>
-        ← back
+        ← Back
       </Button>
-      <div className="mt-3 grid gap-6 md:grid-cols-[1.4fr_1fr]">
+      <div className="mt-5 grid gap-8 md:grid-cols-[1.4fr_1fr]">
         <ArtworkFrame token={token} resolver={resolver} />
         <div>
-          <h2 className="mb-2 text-xl font-semibold tracking-tight">
+          <h2 className="mb-3 font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">
             {token.name ?? `#${token.tokenId}`}
           </h2>
           {token.description ? (
@@ -66,7 +66,7 @@ export function TokenDetail({
 
           {live ? (
             <Button variant="link" render={<a href={live} target="_blank" rel="noreferrer" />} className="mt-4 inline-block">
-              open artwork in new tab ↗
+              Open Artwork ↗
             </Button>
           ) : null}
         </div>

@@ -9,7 +9,7 @@ import { Badge, Button } from "@whitehash/ui"
 import { resolverConfigFrom, type Settings } from "../settings.js"
 import { useProject } from "../useBrowse.js"
 import { SortToggle, editionsLabel } from "./BrowseView.js"
-import { TokenGrid } from "./TokenGrid.js"
+import { TokenGrid, TokenGridSkeleton } from "./TokenGrid.js"
 import { TokenDetail } from "./TokenDetail.js"
 
 export function ProjectView({
@@ -40,13 +40,13 @@ export function ProjectView({
   const label = project ? editionsLabel(project.minted, project.editions) : ""
 
   return (
-    <div className="pt-5">
+    <div className="pt-8">
       <Button variant="link" onClick={onBack}>
-        ← all projects
+        ← All Projects
       </Button>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
-        <h2 className="text-lg font-semibold tracking-tight">
-          {project?.name ?? (loading ? "Loading…" : refId)}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3 py-5">
+        <h2 className="font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">
+          {project?.name ?? refId}
         </h2>
         {label ? (
           <Badge>
@@ -63,17 +63,24 @@ export function ProjectView({
 
       {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
 
-      <TokenGrid tokens={tokens} resolver={resolver} onOpen={setOpen} />
+      {loading && tokens.length === 0 ? (
+        <TokenGridSkeleton />
+      ) : (
+        <TokenGrid tokens={tokens} resolver={resolver} onOpen={setOpen} />
+      )}
 
-      {loading ? <p className="mt-4 text-muted">Loading iterations…</p> : null}
-      {!loading && hasMore ? (
-        <Button variant="link" className="mt-4" onClick={() => void loadMore()}>
-          load more ↓
-        </Button>
-      ) : null}
-      {!loading && tokens.length === 0 && !error ? (
-        <p className="mt-4 text-muted">No minted iterations found.</p>
-      ) : null}
+      <div className="mt-4 flex min-h-10 items-start" aria-live="polite">
+        {loading && tokens.length === 0 ? <span className="sr-only">Loading iterations</span> : null}
+        {loading && tokens.length > 0 ? <p className="text-muted">Loading more iterations…</p> : null}
+        {!loading && hasMore ? (
+          <Button variant="link" onClick={() => void loadMore()}>
+            Load More
+          </Button>
+        ) : null}
+        {!loading && tokens.length === 0 && !error ? (
+          <p className="text-muted">No minted iterations found.</p>
+        ) : null}
+      </div>
     </div>
   )
 }

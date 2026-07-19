@@ -1,6 +1,22 @@
 @import "tailwindcss";
 @import "@whitehash/ui/theme.css";
 
+@font-face {
+  font-family: "Geist Sans";
+  src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 100 900;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("../node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 100 900;
+}
+
 /* The design system is consumed as built JS, so scan its source for the class
  * names Tailwind must generate. */
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
@@ -17,6 +33,124 @@
   body {
     @apply bg-canvas text-fg font-sans antialiased;
   }
+  ::selection {
+    color: var(--color-primary-fg);
+    background: var(--color-primary);
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .brand-mark {
+    filter: contrast(1.08);
+  }
+  .brand-hero {
+    position: relative;
+    isolation: isolate;
+    min-height: clamp(27rem, 45vw, 34rem);
+    border-bottom: 1px solid var(--color-line);
+    overflow: hidden;
+  }
+  .brand-hero::before {
+    position: absolute;
+    z-index: -1;
+    width: 28rem;
+    height: 28rem;
+    right: 11%;
+    top: 48%;
+    border-radius: 9999px;
+    background: rgb(244 231 216 / 0.07);
+    filter: blur(96px);
+    content: "";
+    transform: translateY(-50%);
+  }
+  .brand-hero-copy {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: clamp(2.5rem, 5vw, 4.5rem);
+  }
+  .brand-hero-title {
+    display: flex;
+    align-items: baseline;
+    font-size: clamp(5.5rem, 13.4vw, 10rem);
+    font-weight: 600;
+    line-height: 0.76;
+    letter-spacing: -0.085em;
+    white-space: nowrap;
+  }
+  .brand-hero-description {
+    width: min(24rem, 62%);
+    margin-top: clamp(2.25rem, 4vw, 3.5rem);
+    color: var(--color-muted);
+    font-size: 1rem;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+  }
+  .brand-hero-logo {
+    position: absolute;
+    z-index: 2;
+    width: clamp(20rem, 38vw, 29rem);
+    height: auto;
+    right: 4%;
+    top: 47%;
+    transform: translateY(-50%) rotate(2deg);
+    filter: contrast(1.08) saturate(0.72) drop-shadow(0 24px 32px rgb(0 0 0 / 0.42));
+    animation: hero-object-in 700ms cubic-bezier(.16, 1, .3, 1) both;
+  }
+  @keyframes hero-object-in {
+    from { opacity: 0; transform: translateY(-47%) scale(.96) rotate(0deg); }
+    to { opacity: 1; transform: translateY(-50%) scale(1) rotate(2deg); }
+  }
+}
+
+@media (max-width: 600px) {
+  .brand-hero {
+    min-height: 34rem;
+  }
+  .brand-hero-copy {
+    z-index: 3;
+    justify-content: space-between;
+    padding: 3.75rem 0 2rem;
+  }
+  .brand-hero-title {
+    display: block;
+    font-size: clamp(4.8rem, 24vw, 6rem);
+    line-height: .7;
+    white-space: normal;
+  }
+  .brand-hero-title span {
+    display: block;
+  }
+  .brand-hero-description {
+    width: 18rem;
+    margin-top: 0;
+  }
+  .brand-hero-logo {
+    width: 21rem;
+    right: 50%;
+    top: 55%;
+    transform: translate(50%, -50%) rotate(2deg);
+  }
+  @keyframes hero-object-in {
+    from { opacity: 0; transform: translate(50%, -47%) scale(.96) rotate(0deg); }
+    to { opacity: 1; transform: translate(50%, -50%) scale(1) rotate(2deg); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 /* Diagonal-hatch placeholder for missing/loading media. */
@@ -24,8 +158,8 @@
   background: repeating-linear-gradient(
     45deg,
     var(--color-surface-2),
-    var(--color-surface-2) 10px,
-    var(--color-surface) 10px,
-    var(--color-surface) 20px
+    var(--color-surface-2) 8px,
+    var(--color-elevated) 8px,
+    var(--color-elevated) 10px
   );
 }

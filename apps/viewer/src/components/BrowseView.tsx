@@ -8,7 +8,7 @@ import {
   type ListOrder,
   type WhitehashProject,
 } from "@whitehash/chain-reader"
-import { Badge, Button, Card, ToggleGroup } from "@whitehash/ui"
+import { Badge, Button, Card, Skeleton, ToggleGroup } from "@whitehash/ui"
 import { resolverConfigFrom, type Settings } from "../settings.js"
 import { useEvmProjectCard, useProjects } from "../useBrowse.js"
 import { GatewayImage } from "./GatewayImage.js"
@@ -54,8 +54,10 @@ function ProjectCard({
 
   return (
     <Button variant="card" onClick={onOpen}>
-      <Card.Media className="p-5">
-        <GatewayImage uri={thumbUri} chain={project.chain} resolver={resolver} alt={name ?? ""} lazy />
+      <Card.Media className="bg-canvas">
+        <div className="absolute inset-3">
+          <GatewayImage uri={thumbUri} chain={project.chain} resolver={resolver} alt={name ?? ""} lazy />
+        </div>
       </Card.Media>
       <Card.Body>
         <Card.Title>{name}</Card.Title>
@@ -63,6 +65,24 @@ function ProjectCard({
       </Card.Body>
     </Button>
   )
+}
+
+function ProjectGridSkeleton() {
+  return Array.from({ length: 8 }, (_, index) => (
+    <Card.Root
+      key={index}
+      aria-hidden
+      className="shadow-[0_1px_2px_rgba(0,0,0,.16)]"
+    >
+      <Card.Media className="bg-canvas">
+        <Skeleton className="absolute inset-5" />
+      </Card.Media>
+      <Card.Body>
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="h-4 w-14" />
+      </Card.Body>
+    </Card.Root>
+  ))
 }
 
 export function SortToggle({
@@ -97,11 +117,31 @@ export function BrowseView({
     order,
     settings,
   )
+  const initialLoading = loading && projects.length === 0
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-4 py-5">
-        <h2 className="text-lg font-semibold tracking-tight">Browse projects</h2>
+      <section className="brand-hero">
+        <div className="brand-hero-copy">
+          <h1 className="brand-hero-title font-display text-primary">
+            <span>white</span><span>hash</span>
+          </h1>
+          <p className="brand-hero-description">
+            View generative art directly from Tezos, Ethereum, and Base.
+          </p>
+        </div>
+        <img
+          className="brand-hero-logo"
+          src="./logo.png"
+          alt="Whitehash"
+          width="1024"
+          height="1024"
+          fetchPriority="high"
+        />
+      </section>
+
+      <div className="flex flex-wrap items-center gap-4 border-b border-line py-10">
+        <h2 className="mr-auto font-display text-2xl font-semibold leading-8 tracking-[-0.04em]">Browse Projects</h2>
         <ToggleGroup value={chain} onValueChange={v => setChain(v as ChainId)} aria-label="Chain">
           {chains.map(c => (
             <ToggleGroup.Item key={c} value={c}>
@@ -123,26 +163,33 @@ export function BrowseView({
 
       {error ? <p className="text-sm text-danger">{error}</p> : null}
 
-      <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
-        {projects.map(p => (
-          <ProjectCard
-            key={`${p.chain}/${p.ref}`}
-            project={p}
-            settings={settings}
-            onOpen={() => onOpenProject(p.chain, p.ref)}
-          />
-        ))}
+      <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
+        {initialLoading ? (
+          <ProjectGridSkeleton />
+        ) : (
+          projects.map(p => (
+            <ProjectCard
+              key={`${p.chain}/${p.ref}`}
+              project={p}
+              settings={settings}
+              onOpen={() => onOpenProject(p.chain, p.ref)}
+            />
+          ))
+        )}
       </div>
 
-      {loading ? <p className="mt-4 text-muted">Loading projects…</p> : null}
-      {!loading && hasMore ? (
-        <Button variant="link" className="mt-4" onClick={loadMore}>
-          load more ↓
-        </Button>
-      ) : null}
-      {!loading && projects.length === 0 && !error ? (
-        <p className="mt-4 text-muted">No projects found.</p>
-      ) : null}
+      <div className="mt-4 flex min-h-10 items-start" aria-live="polite">
+        {initialLoading ? <span className="sr-only">Loading projects</span> : null}
+        {loading && projects.length > 0 ? <p className="text-muted">Loading more projects…</p> : null}
+        {!loading && hasMore ? (
+          <Button variant="link" onClick={loadMore}>
+            Load More
+          </Button>
+        ) : null}
+        {!loading && projects.length === 0 && !error ? (
+          <p className="text-muted">No projects found.</p>
+        ) : null}
+      </div>
     </div>
   )
 }
