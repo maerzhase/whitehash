@@ -653,6 +653,61 @@ code + a line in the M14 changeset):**
    convenience layer — the middle bespoke tier is what goes. One concept = one component
    family: `Card` is the shell, `Artwork` is the art, blocks are the shortcuts.
 
+### 4.9 Sharpen the offer (M15): one value proposition, radical transparency, one language
+
+whitehash's offer, stated once and repeated everywhere: **we make fxhash tokens easy to
+access and display — anywhere.** Between a developer and a rendered token stand a pile
+of hoops: two chains with different indexing stories, three token-contract generations
+with different metadata quirks (gentk-v1's separate seed), IPFS vs onchfs storage, the
+unrevealed-placeholder lifecycle, stale indexer caches, flaky gateways, seed/param URL
+construction. whitehash's entire job is jumping those hoops behind one clean, consistent
+API. Everything in the repo — README first line, docs hero, package READMEs — leads with
+that; preservation/self-hosting is the supporting story, not the headline.
+
+**A. Make the hoops visible (transparency as the trust argument).** A first-class docs
+page "What whitehash handles for you": a table of every hoop — what goes wrong if you do
+it naively → what whitehash does (we hold all of this knowledge already: v1 seeds,
+Blockscout mint-time placeholder staleness, eth_getLogs 10k caps, onchfs resolution,
+gateway fallback, TzKT vs tokenURI paths). This doubles as the honest pitch.
+
+**B. Three "understand" pages — the currently-unclear things, made explicit:**
+1. **The data model** — one reference page: `WhitehashToken`, `WhitehashProject`,
+   `ProjectRef`/`TokenRef` as annotated type listings, field by field: where each field
+   comes from on-chain, when it is null, per-generation quirks. THE page everything
+   else links to.
+2. **Where the data comes from** — provenance: every fact traced to its source
+   (ownership ← TzKT / Blockscout; metadata ← `token_metadata` big map / `tokenURI`;
+   contract addresses ← vendored from fxhash's deployments, with the actual addresses
+   listed, links to explorers, and "how to verify these yourself on-chain"; what the
+   snapshots are). No magic constants: every address in `networks.ts` appears here.
+3. **How URLs are built** — anatomy: artifactUri dissected
+   (`ipfs://{cid}/?fxhash=…&fxiteration=…#0x{params}`), who adds the v1 seed, how
+   `resolveUri` maps `ipfs://`→gateway and `onchfs://`→service-worker/proxy, gateway
+   fallback order. Ideally interactive: paste any token/URL/CID (powered by
+   `resolveInput` + the semantics helpers) and watch each construction step.
+
+**C. One language, oriented on fxhash's.** fxhash's packages already have a workable
+vocabulary — align with it rather than inventing: **project** (their GenerativeToken),
+**token** (their gentk/objkt = one iteration), **iteration** (the number), **seed**
+(iterationHash), **artifact / display / thumbnail** (their URI names, already adopted).
+Ship a glossary page mapping whitehash term ↔ fxhash term ↔ on-chain reality, and
+enforce ONE word per concept across API + docs + READMEs (no drifting between
+collection/project, piece/artwork/token). Grep-audit for banned synonyms.
+
+**D. De-noise the docs.** The IA gets four top-level groups: **Start** (quickstart, 5
+scenarios), **Understand** (the pages in A+B + glossary), **API** (per-export pages on
+ONE strict template: one-line purpose → minimal example → props/params table →
+provenance footnote linking to B), **Guides/Showcase** (everything else, demoted).
+Landing page: value prop, the hoops table teaser, quickstart — cut anything that
+repeats or sells instead of shows.
+
+**Acceptance:** (1) the three-questions test — "where does the image URL come from?",
+"where do the contract addresses come from?", "what's the difference between a project
+and a token?" — each answerable within ONE click from the docs home; (2) vocabulary
+grep passes (no banned synonyms in public API/docs); (3) a fresh agent shown only the
+landing page states the value proposition back in one sentence that mentions "easy" and
+"display/render tokens"; (4) gates green, static export intact.
+
 **Framework-agnostic embed (stretch, post-M13):** a web component
 (`<whitehash-artwork chain contract token-id>`) wrapping layer 0 + a minimal renderer,
 for non-React sites and blog embeds.
@@ -741,7 +796,13 @@ folds into M12.
   Acceptance: the five quickstart scenarios each read naturally in ≤15 lines; a fresh
   agent reproduces them from the quickstart page alone; no public export carries a chain
   name or internal fxhash jargon; docs updated to the new surface; all gates green.
-- **Stretch (post-M14)** — `<whitehash-artwork>` web component for non-React sites.
+- **M15 — sharpen the offer** (§4.9): reposition everything around "easy to access and
+  display fxhash tokens"; add the hoops table + the three Understand pages (data model,
+  provenance, URL anatomy — interactive if feasible) + glossary; enforce the
+  fxhash-aligned vocabulary across API/docs/READMEs; restructure docs IA into
+  Start / Understand / API / Guides; de-noise the landing. Acceptance in §4.9.
+  Like M14, M15 gates the first publish — the first impression ships once.
+- **Stretch (post-M15)** — `<whitehash-artwork>` web component for non-React sites.
 
 ## 6. Open items the executor must resolve (and record in code/docs)
 

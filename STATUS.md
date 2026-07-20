@@ -1,6 +1,20 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 12).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 13).
+
+## Next up: M15 — sharpen the offer (gates first publish, like M14)
+
+Added 2026-07-20 (PLAN §4.9): reposition everything around the core value proposition —
+**whitehash makes fxhash tokens easy to access and display, anywhere** — with radical
+transparency about the hoops it jumps. Deliverables: a "what whitehash handles for you"
+hoops table; three Understand pages (data-model reference with field-level provenance;
+where the data/contract addresses come from — every `networks.ts` address listed and
+verifiable; how URLs are constructed — interactive anatomy via `resolveInput` if
+feasible); a glossary enforcing one fxhash-aligned vocabulary (project / token /
+iteration / seed / artifact); docs IA restructured into Start / Understand / API /
+Guides with a strict per-API page template; landing de-noised. Acceptance: the
+three-questions one-click test, vocabulary grep, fresh-agent value-prop readback,
+gates green.
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
