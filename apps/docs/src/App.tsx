@@ -21,6 +21,7 @@ import {
   WhitehashProvider,
 } from "@whitehash/ui"
 import { API_ENTRIES, ApiDocPage, GuidePage, SAMPLE_TOKEN } from "./docs-content"
+import { UNDERSTAND_ENTRIES, UnderstandPage } from "./understand-content"
 import { Callout, CodeBlock, DocsPage, DocsShell, SiteHeader, type DocsNavItem } from "./components/docs-chrome"
 import { SettingsPage } from "./settings-page"
 import { chainReaderConfigFrom, defaultSettings, loadSettings, type Settings } from "./settings"
@@ -30,6 +31,7 @@ type Route =
   | { name: "home" }
   | { name: "api"; slug: string }
   | { name: "guide"; slug: string }
+  | { name: "understand"; slug: string }
   | { name: "settings" }
   | { name: "project"; ref: ProjectRef }
   | { name: "wallet"; address: string }
@@ -40,6 +42,7 @@ function parsePath(pathname: string, search: URLSearchParams): Route {
   const parts = pathname.split("/").filter(Boolean).map(decodeURIComponent)
   if (parts[0] === "docs" && parts[1]) return { name: "api", slug: parts[1] }
   if (parts[0] === "guide" && parts[1]) return { name: "guide", slug: parts[1] }
+  if (parts[0] === "understand" && parts[1]) return { name: "understand", slug: parts[1] }
   if (parts[0] === "settings") return { name: "settings" }
   if (parts[0] === "p" && parts[1] && parts[2]) return { name: "project", ref: { type: "project", chain: parts[1] as ProjectRef["chain"], id: parts[2] } }
   if (parts[0] === "w" && parts[1]) {
@@ -69,15 +72,20 @@ const directTokenPath = (ref: TokenRef) => `/?tokenRef=${segment(formatRef(ref))
 const tokenPath = (token: WhitehashToken, address: string) => `/?wallet=${segment(address)}&token=${segment(tokenKey(token))}`
 
 const DOC_NAV: DocsNavItem[] = [
-  { label: "Getting started", href: "/guide/getting-started", group: "Guide" },
-  { label: "How it works", href: "/guide/how-it-works", group: "Guide" },
-  { label: "Configuration", href: "/guide/configuration", group: "Guide" },
-  { label: "onchfs in the browser", href: "/guide/onchfs", group: "Guide" },
-  { label: "Theming", href: "/guide/theming", group: "Guide" },
-  { label: "Explore variations", href: "/guide/variations", group: "Guide" },
-  { label: "Next.js", href: "/guide/next", group: "Deploy" },
-  { label: "onchfs server fallback", href: "/guide/proxy", group: "Deploy" },
+  // Start
+  { label: "Getting started", href: "/guide/getting-started", group: "Start" },
+  { label: "How it works", href: "/guide/how-it-works", group: "Start" },
+  // Understand — the transparency layer
+  ...UNDERSTAND_ENTRIES.map(entry => ({ label: entry.title, href: `/understand/${entry.slug}`, group: "Understand" })),
+  // API — grouped by React hooks / Primitives / Domain / Blocks
   ...API_ENTRIES.map(entry => ({ label: entry.name, href: `/docs/${entry.slug}`, group: entry.group })),
+  // Guides
+  { label: "Configuration", href: "/guide/configuration", group: "Guides" },
+  { label: "Theming", href: "/guide/theming", group: "Guides" },
+  { label: "Explore variations", href: "/guide/variations", group: "Guides" },
+  { label: "onchfs in the browser", href: "/guide/onchfs", group: "Guides" },
+  { label: "Next.js", href: "/guide/next", group: "Guides" },
+  { label: "onchfs server fallback", href: "/guide/proxy", group: "Guides" },
 ]
 
 export function App() {
@@ -113,7 +121,7 @@ function DocsApp({ settings, onSettingsChange }: { settings: Settings; onSetting
   const wallet = useWalletTokens(address)
   useEffect(() => { if (address) pushRecent(address) }, [address])
 
-  const docsRoute = route.name === "api" || route.name === "guide"
+  const docsRoute = route.name === "api" || route.name === "guide" || route.name === "understand"
   return (
     <div className="min-h-screen bg-canvas text-fg">
       <SiteHeader actions={<>
@@ -125,7 +133,9 @@ function DocsApp({ settings, onSettingsChange }: { settings: Settings; onSetting
 
       {docsRoute ? (
         <DocsShell items={DOC_NAV} currentHref={pathname}>
-          {route.name === "api" ? <ApiDocPage entry={API_ENTRIES.find(entry => entry.slug === route.slug) ?? API_ENTRIES[0]!} /> : <><GuidePage slug={route.slug} />{route.slug === "variations" ? <DocsPage><Variations token={VARIATION_SAMPLE_TOKEN} /></DocsPage> : null}</>}
+          {route.name === "api" ? <ApiDocPage entry={API_ENTRIES.find(entry => entry.slug === route.slug) ?? API_ENTRIES[0]!} />
+            : route.name === "understand" ? <UnderstandPage slug={route.slug} />
+            : <><GuidePage slug={route.slug} />{route.slug === "variations" ? <DocsPage><Variations token={VARIATION_SAMPLE_TOKEN} /></DocsPage> : null}</>}
         </DocsShell>
       ) : (
         <main>
@@ -163,8 +173,8 @@ function HomePage({ onSearch }: { onSearch: () => void }) {
         <div className="hero-inner relative z-10 mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-[1200px] items-center gap-14 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-20">
           <div className="hero-copy max-w-2xl">
             <div className="mb-7 flex items-center gap-2 font-mono text-xs text-muted"><span className="size-1.5 rounded-full bg-success shadow-[0_0_14px_var(--color-success)]" /> Open source · Tezos, Ethereum &amp; Base</div>
-            <h1 className="font-display text-5xl font-semibold leading-[0.96] tracking-[-0.065em] sm:text-7xl lg:text-[5.25rem]">Generative art,<br /><span className="text-muted">without the platform.</span></h1>
-            <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">Read wallets from public chains, resolve content-addressed media, and render live artwork with composable React APIs.</p>
+            <h1 className="font-display text-5xl font-semibold leading-[0.96] tracking-[-0.065em] sm:text-7xl lg:text-[5.25rem]">Display any fxhash token.<br /><span className="text-muted">The easy way.</span></h1>
+            <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">One clean API to read and render fxhash generative art from any wallet — across two chains, three token generations, IPFS and onchfs. whitehash jumps every hoop so you just show the art.</p>
             <div className="mt-8 flex flex-wrap gap-2"><Button render={<a href="/guide/getting-started" />}>Get started</Button><Button variant="secondary" onClick={onSearch}>Try a wallet</Button></div>
           </div>
           <div className="hero-visual">
@@ -178,6 +188,26 @@ function HomePage({ onSearch }: { onSearch: () => void }) {
         <div className="mx-auto grid max-w-[1200px] divide-y divide-line px-4 sm:px-6 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
           {[['01', 'Detect', 'A tz address selects Tezos mainnet or Ghostnet; a 0x address selects Ethereum and Base.'], ['02', 'Read', 'Known contracts are queried directly through TzKT or JSON-RPC and normalized into one token shape.'], ['03', 'Render', 'IPFS gateways fall back in order; onchfs code resolves in-browser through the same-origin service worker.']].map(([number, title, copy]) => <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0"><div className="font-mono text-[11px] text-faint">{number}</div><h2 className="mt-4 text-lg font-medium">{title}</h2><p className="mt-2 text-sm leading-6 text-muted">{copy}</p></div>)}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-[1200px] px-4 py-24 sm:px-6 lg:py-28">
+        <div className="section-kicker">No black box</div>
+        <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Every value traced to its source.</h2>
+        <p className="mt-5 max-w-xl leading-7 text-muted">whitehash hides the hoops, not the truth. The three things every integrator asks — answered directly:</p>
+        <div className="mt-8 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
+          {[
+            ["Where does the image URL come from?", "Anatomy of an artifact URI and how resolveUri builds a fetchable URL.", "/understand/urls"],
+            ["Where do the contract addresses come from?", "Every fxhash contract whitehash trusts, listed and verifiable on-chain.", "/understand/sources"],
+            ["Project vs. token?", "The two data shapes, field by field, with the vocabulary to match.", "/understand/data-model"],
+          ].map(([q, a, href]) => (
+            <a key={href} href={href} className="group flex flex-col bg-canvas p-6 transition-colors hover:bg-surface">
+              <h3 className="text-base font-medium">{q}</h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-muted">{a}</p>
+              <span className="mt-4 text-sm text-primary">Understand →</span>
+            </a>
+          ))}
+        </div>
+        <a className="docs-text-link mt-6 inline-block" href="/understand/overview">See everything whitehash handles for you →</a>
       </section>
 
       <section className="mx-auto grid max-w-[1200px] gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.8fr_1.2fr] lg:py-32">

@@ -2,7 +2,27 @@
 
 Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 13).
 
-## Next up: M15 — sharpen the offer (gates first publish, like M14)
+## M15 complete — the offer, sharpened
+
+Done 2026-07-20 (PLAN §4.9). The docs now lead with the value proposition and expose a
+transparency layer:
+- **Positioning**: home hero is "Display any fxhash token. The easy way." + "jumps every
+  hoop so you just show the art." A home teaser answers the three integrator questions,
+  each one click from the landing (`/understand/urls`, `/understand/sources`,
+  `/understand/data-model`).
+- **Understand section** (`apps/docs/src/understand-content.tsx`, 5 static routes): a
+  "What whitehash handles for you" hoops table; a data-model reference with field-level
+  provenance + nullability; a "Where the data comes from" page listing every Tezos and
+  EVM contract address (verifiable on-chain); an interactive "How URLs are built" page
+  (runs the real `resolveUri`); and a glossary mapping whitehash ↔ fxhash ↔ on-chain.
+- **IA restructured** to Start / Understand / API (hooks·primitives·domain·blocks) /
+  Guides. Verified: nav renders the new groups, all 5 understand routes prerender (45
+  static pages total), banned-synonym/jargon grep clean, gates green.
+
+The full plan (M0–M15) is now implemented. Remaining is the maintainer publish decision
+(still gated) and the post-M15 web-component stretch.
+
+<details><summary>Original M15 brief</summary>
 
 Added 2026-07-20 (PLAN §4.9): reposition everything around the core value proposition —
 **whitehash makes fxhash tokens easy to access and display, anywhere** — with radical
@@ -15,6 +35,8 @@ iteration / seed / artifact); docs IA restructured into Start / Understand / API
 Guides with a strict per-API page template; landing de-noised. Acceptance: the
 three-questions one-click test, vocabulary grep, fresh-agent value-prop readback,
 gates green.
+
+</details>
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
