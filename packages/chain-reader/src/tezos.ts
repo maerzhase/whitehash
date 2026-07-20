@@ -131,6 +131,9 @@ export async function getTezosWalletTokens(
       const tokenId = bal.token?.tokenId
       if (!contract || tokenId === undefined) continue
 
+      // PLAN §6 closeout (2026-07-20): the 133-token mainnet fixture had inline
+      // metadata on 133/133 balances. Keep the big-map path as a correctness
+      // fallback for index lag, but avoid its extra request in the normal case.
       let rawMeta: Record<string, unknown> | null = bal.token?.metadata ?? null
       if (!rawMeta) {
         rawMeta = await fetchMetadataViaBigMap(chain, config, contract, tokenId, fetchImpl)

@@ -1,6 +1,6 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 11).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 12).
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
@@ -193,13 +193,23 @@ Layer-0 packages, slot in when convenient:
 
 - **EVM snapshots are empty bootstraps** (`packages/chain-reader/snapshots/*.json`,
   `collections: []`). Only matters for the **RPC fallback** path now that Blockscout is the
-  default — Blockscout reads full factory history directly. If hardening the RPC path,
-  populate via `pnpm --filter @whitehash/chain-reader snapshot:update` (offline) + CI cron.
+  default. A weekly/manual CI matrix now refreshes each network serially and attaches the
+  reviewed JSON for 14 days; it deliberately has read-only repository permissions and
+  never auto-commits generated chain data.
 - **Gateway hangs** (vs. errors) aren't caught by `Artwork.Image`/card media; a fetch-with-timeout →
   blob approach would cover them. Low priority.
 - Docs bundle ~635 kB minified / 200 kB gzip (mostly viem); code-splitting the EVM path would speed Tezos-only
   first loads.
 - No git remote configured — repo is local-only; push when ready.
+
+## PLAN §6 findings closed
+
+- The configured keyless RPC fallbacks are browser-compatible. Empirical provider limits
+  remain near 10,000 blocks, so `eth_getLogs` starts at 9,000, halves adaptively on range
+  or result-size errors, and batches contract address arrays at 1,000. Blockscout avoids
+  this full-history cost in the default path.
+- TzKT returned inline metadata for all 133 balances in the known mainnet fixture on
+  2026-07-20. The big-map lookup remains only for index lag/missing metadata.
 
 ## Where things live (for a picking-up agent)
 

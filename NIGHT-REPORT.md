@@ -8,19 +8,19 @@ Run date: 2026-07-19 (Europe/Lisbon)
   build uses `output: "export"`, unoptimized images, trailing slashes, 40 prerendered
   routes, and app-local docs chrome. A plain static server returned HTTP 200 for `/`,
   `/guide/getting-started/`, `/docs/use-wallet-tokens/`, and `/settings/`.
-- Phase 1 / M14: redesigned the public first-glimpse API around chain-neutral
+- Phase 1 / M14 (`4ac2f08`): redesigned the public first-glimpse API around chain-neutral
   `ProjectRef`/`TokenRef` values, universal client methods, progressively hydrated
   project lists, and composable `Card` + `Artwork` token recipes. Removed the public
   `useEvmProjectCard` and `TokenCard` seams, updated every docs/app/package call site,
   and added a five-scenario quickstart.
-- Phase 2 / M6: added `@whitehash/runtime` as a framework-free attributed extraction
+- Phase 2 / M6 (`4cdb273`): added `@whitehash/runtime` as a framework-free attributed extraction
   with an optional `/react` entry, caller-injected content resolution, parameter codecs,
   runtime controls, and iframe synchronization. Token details now have an Explore tab,
   and the static docs include a live variations guide.
-- Phase 2 / M9: added `@whitehash/onchfs-sw`, made the resolver's chain-scoped
+- Phase 2 / M9 (`4134600`): added `@whitehash/onchfs-sw`, made the resolver's chain-scoped
   same-origin service-worker mode the docs default, retained explicit proxy/disabled
   modes, and wired the static docs to copy and register the worker assets.
-- Phase 2 / M7: added the `@whitehash/archive` CLI for wallet discovery, raw metadata and
+- Phase 2 / M7 (`e271919`): added the `@whitehash/archive` CLI for wallet discovery, raw metadata and
   preview preservation, verified CAR/UnixFS extraction, direct onchfs reads, local replay
   wrappers, a static gallery, and SHA-256 integrity manifests.
 
@@ -116,10 +116,25 @@ Run date: 2026-07-19 (Europe/Lisbon)
 
 ## Parked or incomplete
 
-- Closeout remains at this checkpoint.
+- No requested implementation phase is parked. Snapshot JSON remains maintainer-reviewed
+  generated data: the new read-only weekly workflow attaches refreshed files instead of
+  auto-committing or pushing them.
+
+## Closeout
+
+- Added a weekly/manual, serialized four-network EVM snapshot refresh matrix. It uses
+  read-only repository permissions, emits a run summary, and retains each refreshed JSON
+  artifact for 14 days.
+- Closed PLAN §6: the existing 9,000-block adaptive RPC scan and 1,000-address batches
+  match measured public-provider limits; Blockscout remains the default. A fresh TzKT
+  measurement found inline metadata on 133/133 fixture balances, so the big-map path
+  remains a fallback.
+- Final gate: the new workflow parsed as YAML; `pnpm build && pnpm check-types && pnpm
+  test` finished green with 9/9 build tasks, 15/15 type tasks, 15/15 test tasks, 80
+  passing tests, and 2 opt-in live tests skipped.
 
 ## Morning: look at these first
 
 1. M14 API decisions and the five-scenario quickstart.
-2. Milestone verification/partial status below once later phases finish.
-3. Any parked risk findings, especially M9 service-worker behavior.
+2. M9's worker asset-hosting contract and proxy fallback.
+3. M7's fail-closed CAR/UnixFS boundary and its `--verify` acceptance evidence.

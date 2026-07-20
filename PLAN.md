@@ -745,8 +745,10 @@ folds into M12.
 
 ## 6. Open items the executor must resolve (and record in code/docs)
 
-1. Default public RPC choice per network (keyless, CORS-friendly from browsers — verify
-   `eth_getLogs` range/address-array limits empirically and tune the adaptive-range
-   defaults in §3.7).
-2. Whether TzKT's inline `token.metadata` is complete enough in practice or the big-map
-   fallback (§3.6) is frequently needed — measure during M2 and tune.
+1. ✅ Default public RPC choice per network: browser/live checks confirmed the configured
+   keyless endpoints. Public providers commonly cap `eth_getLogs` near 10,000 blocks, so
+   the default remains 9,000 with adaptive halving; address arrays are batched at 1,000.
+   Blockscout remains the fast default and this is the trustless fallback path.
+2. ✅ TzKT inline metadata: the 2026-07-20 mainnet fixture returned complete inline
+   `token.metadata` for 133/133 balances. The big-map resolver remains a correctness
+   fallback for index lag, not the common path.

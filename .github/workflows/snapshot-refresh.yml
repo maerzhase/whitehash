@@ -1,0 +1,59 @@
+name: EVM snapshot refresh
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evm-snapshot-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Refresh ${{ matrix.chain }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - chain: eip155:1
+            file: eip155-1.json
+          - chain: eip155:11155111
+            file: eip155-11155111.json
+          - chain: eip155:8453
+            file: eip155-8453.json
+          - chain: eip155:84532
+            file: eip155-84532.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @whitehash/chain-reader snapshot:update ${{ matrix.chain }}
+      - name: Summarize refresh
+        shell: bash
+        run: |
+          snapshot="packages/chain-reader/snapshots/${{ matrix.file }}"
+          if git diff --quiet -- "$snapshot"; then
+            echo "No snapshot change for ${{ matrix.chain }}." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "A refreshed ${{ matrix.chain }} snapshot is attached to this run for review." >> "$GITHUB_STEP_SUMMARY"
+            git diff --stat -- "$snapshot" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evm-snapshot-${{ strategy.job-index }}
+          path: packages/chain-reader/snapshots/${{ matrix.file }}
+          if-no-files-found: error
+          retention-days: 14
