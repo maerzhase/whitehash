@@ -72,10 +72,11 @@ const DOC_NAV: DocsNavItem[] = [
   { label: "Getting started", href: "/guide/getting-started", group: "Guide" },
   { label: "How it works", href: "/guide/how-it-works", group: "Guide" },
   { label: "Configuration", href: "/guide/configuration", group: "Guide" },
+  { label: "onchfs in the browser", href: "/guide/onchfs", group: "Guide" },
   { label: "Theming", href: "/guide/theming", group: "Guide" },
   { label: "Explore variations", href: "/guide/variations", group: "Guide" },
   { label: "Next.js", href: "/guide/next", group: "Deploy" },
-  { label: "onchfs proxy", href: "/guide/proxy", group: "Deploy" },
+  { label: "onchfs server fallback", href: "/guide/proxy", group: "Deploy" },
   ...API_ENTRIES.map(entry => ({ label: entry.name, href: `/docs/${entry.slug}`, group: entry.group })),
 ]
 
@@ -191,6 +192,26 @@ wallet.loading         // true while live reads are running
 wallet.refresh()       // bypass IndexedDB and read again`} />
       </section>
 
+      <section className="border-t border-line bg-surface">
+        <div className="mx-auto grid max-w-[1200px] gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1.2fr_.8fr] lg:py-32">
+          <CodeBlock className="lg:order-1" language="tsx" code={`const projects = useProjects({
+  chain: "eip155:1",
+  order: "newest",
+})
+
+const projectRef = {
+  type: "project",
+  chain: "eip155:1",
+  id: "0xBb47F0ED4A7E3BffcA75660dFa3B053FB7FcE78E",
+} satisfies ProjectRef
+
+const project = useProject(projectRef)
+project.tokens           // minted iterations
+project.loadMore()       // fetch the next page`} />
+          <div className="lg:order-2"><div className="section-kicker">One project vocabulary</div><h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Discover broadly.<br />Read precisely.</h2><p className="mt-5 max-w-md leading-7 text-muted"><code>useProjects</code> lists projects on one chain. Every result includes a <code>ProjectRef</code> you can pass to <code>useProject</code>. On EVM chains its <code>id</code> is the project’s ERC-721 contract address; on Tezos it identifies an issuer ledger entry.</p><div className="mt-6 flex flex-wrap gap-x-5 gap-y-2"><a className="docs-text-link inline-block" href="/docs/use-projects">Browse projects →</a><a className="docs-text-link inline-block" href="/docs/use-project">Understand ProjectRef →</a></div></div>
+        </div>
+      </section>
+
       <section className="border-t border-line">
         <div className="mx-auto grid max-w-[1200px] gap-12 px-4 py-24 sm:px-6 lg:grid-cols-2 lg:py-32">
           <div><div className="section-kicker">Components are the showcase</div><h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Use the full block.<br />Replace any layer.</h2><p className="mt-5 max-w-md leading-7 text-muted">Start with a wallet gallery or compose the artwork, image fallback, live frame, and status parts yourself.</p></div>
@@ -255,21 +276,7 @@ function tokenRuntimeState(token: WhitehashToken): ProjectState {
 }
 
 const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-const VARIATION_SAMPLE_TOKEN: WhitehashToken = {
-  ...SAMPLE_TOKEN,
-  generatorUri: SAMPLE_TOKEN.artifactUri,
-  raw: {
-    snippetVersion: "3.3.0",
-    params: [{
-      id: "density",
-      name: "Density",
-      type: "number",
-      default: 1,
-      value: 1,
-      options: { min: 1, max: 10, step: 1 },
-    }],
-  },
-}
+const VARIATION_SAMPLE_TOKEN: WhitehashToken = SAMPLE_TOKEN
 
 function freshHash(previous: string): string {
   if (previous.startsWith("0x")) {
@@ -294,13 +301,15 @@ function Variations({ token }: { token: WhitehashToken }) {
   const value = useRuntimeController({ state, options: { connector, autoRefresh: true } })
   const definitions = value.runtime.definition.params ?? []
   const hash = value.runtime.state.hash ?? ""
+  const supportsSeedVariation = Boolean(token.generatorUri)
   return <div className="mt-5 grid gap-8 md:grid-cols-[1.4fr_1fr]">
     <ArtworkIframe ref={value.ref} title={`Variation of ${token.name ?? token.tokenId}`} className="aspect-square w-full rounded-lg border border-line bg-black" />
     <div>
       <h2 className="font-display text-3xl font-semibold tracking-[-0.04em]">Explore variations</h2>
       <p className="mt-2 text-sm leading-6 text-muted">Everything runs in your browser. Change the seed or declared fx(params); the controller rebuilds the content-addressed generator URL and reloads only this iframe.</p>
       <Field.Root className="mt-5"><Field.Label>Hash</Field.Label><Field.Control render={<Input value={hash} onChange={event => value.controller.runtime().updateState({ hash: event.target.value })} />} /></Field.Root>
-      <Button className="mt-2" variant="secondary" onClick={() => value.controller.runtime().updateState({ hash: freshHash(hash) })}>New hash</Button>
+      <Button className="mt-2" variant="secondary" disabled={!supportsSeedVariation} onClick={() => value.controller.runtime().updateState({ hash: freshHash(hash) })}>New hash</Button>
+      {!supportsSeedVariation ? <Callout className="mt-4">This token record does not include its project’s reusable <code>generatorUri</code>. Its minted <code>artifactUri</code> may have the original seed embedded, so it is not safe to use as a variation generator.</Callout> : null}
       {definitions.length ? <div className="mt-6 space-y-4">{definitions.map(definition => <Field.Root key={definition.id}>
         <Field.Label>{definition.name ?? definition.id}</Field.Label>
         <Field.Control render={<Input defaultValue={String(value.controls.params.values[definition.id] ?? definition.value ?? definition.default)} onChange={event => value.controller.controls().update({ [definition.id]: coerceParam(event.target.value, definition) }, definitions, { forceRefresh: true })} />} />
