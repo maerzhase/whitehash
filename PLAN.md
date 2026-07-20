@@ -687,7 +687,7 @@ folds into M12.
 - **M6 — runtime extraction + explore mode** ✅ (§4.5; ships as layer-0 `@whitehash/runtime`
   with a `/react` subpath). Acceptance: for a params token, editing a param re-renders
   live; new-hash button produces a different variation.
-- **M7 — archive-cli**. Acceptance: archive a wallet, disconnect network, open the
+- **M7 — archive-cli** ✅. Acceptance: archive a wallet, disconnect network, open the
   folder's `index.html` — artworks replay offline.
 - **M8 — deploy & release hygiene** (folds into M12): deploy guides (docs site → GitHub
   Pages/IPFS, proxy → Vercel button), snapshot-refresh CI cron, `changeset version` flow.

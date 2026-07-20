@@ -20,6 +20,9 @@ Run date: 2026-07-19 (Europe/Lisbon)
 - Phase 2 / M9: added `@whitehash/onchfs-sw`, made the resolver's chain-scoped
   same-origin service-worker mode the docs default, retained explicit proxy/disabled
   modes, and wired the static docs to copy and register the worker assets.
+- Phase 2 / M7: added the `@whitehash/archive` CLI for wallet discovery, raw metadata and
+  preview preservation, verified CAR/UnixFS extraction, direct onchfs reads, local replay
+  wrappers, a static gallery, and SHA-256 integrity manifests.
 
 ## Decisions
 
@@ -57,6 +60,13 @@ Run date: 2026-07-19 (Europe/Lisbon)
 - M9 cache identity: exclude render query parameters from Cache API keys because onchfs
   file bytes are content-addressed and immutable; preserve those parameters when the
   artwork executes so each token/variation still receives its own runtime state.
+- M7 CAR boundary: implement the small CAR-v1/CID/UnixFS verification boundary locally.
+  No CAR/IPLD library was already installed and the unattended network authority excludes
+  npm; rejecting unsupported codecs/HAMT nodes is safer than silently extracting bytes
+  without validating their content hashes.
+- M7 output safety: never delete the destination. Owned files are replaced, unrelated
+  files remain, all path segments and CAR links are checked against traversal, and
+  `--verify` re-hashes the finished archive and resolves every static local dependency.
 
 ## Verification evidence
 
@@ -93,10 +103,20 @@ Run date: 2026-07-19 (Europe/Lisbon)
   the immutable service-worker cache.
 - M9 repository gate: `pnpm build && pnpm check-types && pnpm test` — green across all
   8 workspaces; 78 tests passed and 2 opt-in live tests skipped.
+- M7 CAR tests: a valid raw CAR block extracted as `index.html`; flipping one content byte
+  produced a multihash mismatch and failed closed.
+- M7 live acceptance: `@whitehash/archive` read 133 holdings for
+  `tz1c3hFmjFSwunjLHECnYyjr42KRt5YiHrGX`, archived contrapuntos #136 with `--limit 1`,
+  verified 11 CAR blocks from `ipfs.io`, and extracted six generator files plus metadata,
+  thumbnail, and display image. `--verify` passed 10 file hashes and every wrapper/artifact
+  reference. A loopback static server requested only local files and the artwork rendered
+  successfully in a sandboxed browser iframe.
+- M7 repository gate: 9/9 build tasks, 15/15 type tasks, and 15/15 test tasks passed;
+  80 tests passed and 2 opt-in live tests skipped.
 
 ## Parked or incomplete
 
-- M7 and closeout remain at this checkpoint.
+- Closeout remains at this checkpoint.
 
 ## Morning: look at these first
 

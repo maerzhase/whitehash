@@ -1,6 +1,6 @@
 # Build status
 
-Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 10).
+Progress against [PLAN.md](./PLAN.md). Updated 2026-07-20 (rev 11).
 
 ## ⤴ Reframe: whitehash is a toolkit, the app is its docs
 
@@ -18,7 +18,7 @@ policy, and app→package extraction inventory: **PLAN §4.7**; sequencing: **M1
 hooks) → M11 (ui = full design system) → M12 (docs app) → M13 (publish readiness)**.
 The data layer (resolve/chain-reader/proxy) is unchanged by this.
 
-`pnpm build && pnpm check-types && pnpm test` all green (8 workspaces, 78 tests + 2
+`pnpm build && pnpm check-types && pnpm test` all green (9 workspaces, 80 tests + 2
 opt-in live). Live/network tests:
 `WHITEHASH_LIVE_TEST=1 pnpm --filter @whitehash/chain-reader test`.
 
@@ -39,6 +39,7 @@ opt-in live). Live/network tests:
 | M14 API ergonomics | ✅ | Five-scenario quickstart independently built; typed refs/universal client surface; chain-named/card seams removed |
 | M6 runtime | ✅ | Framework-free core + `/react`; injected resolution; live params/new-hash variations acceptance passed |
 | M9 client-side onchfs | ✅ | Same-origin worker; Genomes rendered from ETH with no proxy, then reloaded from Cache API with the server stopped |
+| M7 archive CLI | ✅ | Known wallet archived through verified IPFS CAR; all local refs/hashes passed and artwork rendered from the output folder |
 
 ## M10 complete — the headless React layer
 
@@ -183,7 +184,10 @@ Layer-0 packages, slot in when convenient:
   assets. The default resolver creates chain-scoped virtual paths, decompresses gzip
   responses, and caches immutable files. Genomes #2953 rendered with no proxy and
   reloaded after the static server was stopped.
-- **M7** `apps/archive-cli` — wallet → self-contained offline folder (PLAN §4.6).
+- **M7 complete** — `@whitehash/archive` discovers wallet tokens, persists raw metadata
+  and previews, verifies trustless-gateway CAR block hashes before UnixFS extraction,
+  reads onchfs directly, and emits local wrappers/gallery/integrity manifests. A known
+  Tezos wallet token replayed entirely from the generated folder.
 
 ## Known follow-ups / smaller items
 
