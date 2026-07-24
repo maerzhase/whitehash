@@ -18,6 +18,26 @@ export const TESTNET_CHAINS: ChainId[] = [
   "eip155:84532",
 ]
 
+export type ProjectCaptureMode = "CANVAS" | "VIEWPORT" | "CUSTOM"
+export type ProjectCaptureTriggerMode =
+  | "DELAY"
+  | "FN_TRIGGER"
+  | "FN_TRIGGER_GIF"
+
+/** Normalized fxhash project capture configuration. */
+export interface ProjectCaptureSettings {
+  mode: ProjectCaptureMode
+  triggerMode?: ProjectCaptureTriggerMode
+  gpu?: boolean
+  resolution?: { x: number; y: number }
+  delay?: number
+  canvasSelector?: string
+  gif?: boolean
+  frameCount?: number
+  captureInterval?: number
+  playbackFps?: number
+}
+
 /** A normalized token, uniform across chains. */
 export interface WhitehashToken {
   chain: ChainId

@@ -17,13 +17,13 @@ import {
   buildEvmTokensRefreshingStale,
   discoverEvmCollectionsViaBlockscout,
 } from "./blockscout.js"
-import { normalizeMetadata } from "./metadata.js"
+import { normalizeCaptureSettings, normalizeMetadata } from "./metadata.js"
 import { EVM_NETWORKS, TEZOS_NETWORKS } from "./networks.js"
 import { hexToUtf8 } from "./tezos.js"
-import type { ProjectRef } from "./refs.js"
 import type {
   ChainId,
   ChainReaderConfig,
+  ProjectCaptureSettings,
   ProgressCallback,
   WhitehashToken,
 } from "./types.js"
@@ -34,8 +34,8 @@ type EvmChain = Extract<ChainId, `eip155:${string}`>
 /** A generative project (collection), uniform across chains. */
 export interface WhitehashProject {
   chain: ChainId
-  /** Stable, serializable reference used by clients, hooks, components, and routes. */
-  ref: ProjectRef
+  /** Chain-native project identifier: EVM collection contract or Tezos version:id. */
+  id: string
   name: string | null
   description: string | null
   displayUri: string | null
@@ -44,6 +44,8 @@ export interface WhitehashProject {
   editions: number | null
   /** Iterations actually minted so far, when known. */
   minted: number | null
+  /** Capture configuration published with project metadata, when available. */
+  captureSettings: ProjectCaptureSettings | null
   raw: unknown
 }
 
@@ -154,7 +156,7 @@ export async function listTezosProjects(
         const counts = tezosEditionCounts(k.value)
         projects[i] = {
           chain,
-          ref: { type: "project", chain, id: `${version}:${k.key}` },
+          id: `${version}:${k.key}`,
           name: typeof meta?.["name"] === "string" ? (meta["name"] as string) : null,
           description:
             typeof meta?.["description"] === "string"
@@ -168,6 +170,7 @@ export async function listTezosProjects(
               : null,
           editions: counts.editions,
           minted: counts.minted,
+          captureSettings: normalizeCaptureSettings(meta),
           raw: meta,
         }
       }
@@ -194,12 +197,19 @@ export async function getTezosProject(
   const url = `${tzktBase(chain, config)}/v1/contracts/${issuer.address}/bigmaps/ledger/keys/${projectId}`
   const res = await fetchImpl(url)
   if (!res.ok) return null
-  const key = (await res.json()) as TzktLedgerKey
+  const body = await res.text()
+  if (!body) return null
+  let key: TzktLedgerKey
+  try {
+    key = JSON.parse(body) as TzktLedgerKey
+  } catch {
+    return null
+  }
   const meta = await fetchProjectMetadata(key.value?.metadata, config, fetchImpl)
   const counts = tezosEditionCounts(key.value)
   return {
     chain,
-    ref: { type: "project", chain, id: ref },
+    id: ref,
     name: typeof meta?.["name"] === "string" ? (meta["name"] as string) : null,
     description:
       typeof meta?.["description"] === "string" ? (meta["description"] as string) : null,
@@ -209,6 +219,7 @@ export async function getTezosProject(
       typeof meta?.["thumbnailUri"] === "string" ? (meta["thumbnailUri"] as string) : null,
     editions: counts.editions,
     minted: counts.minted,
+    captureSettings: normalizeCaptureSettings(meta),
     raw: meta,
   }
 }
@@ -302,13 +313,14 @@ export async function listEvmProjects(
   return {
     projects: page.map(c => ({
       chain,
-      ref: { type: "project", chain, id: c.address },
+      id: c.address,
       name: null, // filled lazily via getEvmProjectInfo
       description: null,
       displayUri: null,
       thumbnailUri: null,
       editions: null, // EVM cap isn't exposed via standard ERC-721
       minted: null, // filled lazily via getEvmProjectInfo
+      captureSettings: null,
       raw: c,
     })),
     cursor: offset + limit < ordered.length ? String(offset + limit) : null,

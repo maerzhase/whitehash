@@ -41,7 +41,7 @@ function Root({ token, className, children, ...props }: ArtworkRootProps) {
     <ArtworkContext.Provider value={{ token, ...frame }}>
       <div
         className={cn(
-          "relative aspect-square overflow-hidden rounded-card border border-line bg-surface",
+          "relative aspect-square overflow-hidden bg-surface",
           className,
         )}
         {...props}

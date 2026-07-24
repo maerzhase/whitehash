@@ -35,9 +35,9 @@ Retheme either path by overriding semantic variables such as `--color-primary`,
 | `Field.*`, `Input`, `Textarea` | form primitives | Form-library-independent labelled controls |
 | `Spinner`, `Skeleton`, `Separator` | feedback/layout | Loading and structural feedback |
 | `Artwork.*` | compound domain | Resilient still, sandboxed live iframe, play control, status |
-| `TokenGrid`, `TokenDetails` | token domain | Responsive layout/loading utility and full detail view |
+| `TokenDetails` | token domain | Full artwork, provenance, and feature detail view |
 | `WalletGallery` | block | Cache-first wallet lookup and token grid (`.Content` accepts loaded state) |
-| `ProjectBrowser`, `ProjectGallery` | blocks | Projects and minted iterations with typed refs and delegated navigation |
+| `ProjectBrowser`, `ProjectGallery` | blocks | Projects and minted iterations from `{ chain, id }`, with delegated navigation |
 | `AddressSearch`, `WalletSearch` | search | Validated form core and spotlight dialog composition |
 Behavioral parts expose slots only where props, refs, focus, or accessibility wiring must
 merge. Presentational leaves use ordinary elements and `className`. Compound roots own

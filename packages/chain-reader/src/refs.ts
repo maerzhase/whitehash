@@ -13,6 +13,12 @@ export interface TokenRef {
   tokenId: string
 }
 
+/** Project identity accepted by read APIs; `type` is only needed for mixed refs/routes. */
+export type ProjectInput = ProjectRef | Pick<ProjectRef, "chain" | "id">
+
+/** Token identity accepted by read APIs; matches the identity fields on WhitehashToken. */
+export type TokenInput = TokenRef | Pick<TokenRef, "chain" | "contract" | "tokenId">
+
 export interface AddressInput {
   type: "address"
   address: string
@@ -62,13 +68,17 @@ export function tokenRef(token: Pick<WhitehashToken, "chain" | "contract" | "tok
   return { type: "token", chain: token.chain, contract: token.contract, tokenId: token.tokenId }
 }
 
+export function projectRef(project: ProjectInput): ProjectRef {
+  return { type: "project", chain: project.chain, id: project.id }
+}
+
 export function shortAddress(address: string, start = 8, end = 4): string {
   if (address.length <= start + end + 1) return address
   return `${address.slice(0, start)}…${address.slice(-end)}`
 }
 
-export function projectLabel(project: { name: string | null; ref: ProjectRef }): string {
-  return project.name ?? (project.ref.id.startsWith("0x") ? shortAddress(project.ref.id) : project.ref.id)
+export function projectLabel(project: { name: string | null; id: string }): string {
+  return project.name ?? (project.id.startsWith("0x") ? shortAddress(project.id) : project.id)
 }
 
 function addressInput(value: string): AddressInput | null {

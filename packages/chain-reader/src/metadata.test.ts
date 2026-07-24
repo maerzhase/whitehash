@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { isAssigned, normalizeMetadata } from "./metadata.js"
+import {
+  isAssigned,
+  normalizeCaptureSettings,
+  normalizeMetadata,
+} from "./metadata.js"
 
 // Real signed gentk_v2 #589146 metadata (TzKT, July 2026).
 const signed = {
@@ -94,5 +98,52 @@ describe("normalizeMetadata", () => {
     expect(normalizeMetadata(null).assigned).toBe(false)
     expect(normalizeMetadata(undefined).attributes).toEqual([])
     expect(normalizeMetadata("nope").name).toBeNull()
+  })
+})
+
+describe("normalizeCaptureSettings", () => {
+  it("normalizes viewport project metadata", () => {
+    expect(normalizeCaptureSettings({
+      capture: {
+        mode: "viewport",
+        triggerMode: "delay",
+        gpu: false,
+        resolution: { x: "800", y: 800 },
+        delay: "2000",
+      },
+    })).toEqual({
+      mode: "VIEWPORT",
+      triggerMode: "DELAY",
+      gpu: false,
+      resolution: { x: 800, y: 800 },
+      delay: 2000,
+    })
+  })
+
+  it("normalizes canvas and GIF fields", () => {
+    expect(normalizeCaptureSettings({
+      captureSettings: {
+        mode: "CANVAS",
+        triggerMode: "FN_TRIGGER_GIF",
+        canvasSelector: "#art",
+        gif: "true",
+        frameCount: "12",
+        captureInterval: 100,
+        playbackFps: "24",
+      },
+    })).toEqual({
+      mode: "CANVAS",
+      triggerMode: "FN_TRIGGER_GIF",
+      canvasSelector: "#art",
+      gif: true,
+      frameCount: 12,
+      captureInterval: 100,
+      playbackFps: 24,
+    })
+  })
+
+  it("returns null without a supported capture mode", () => {
+    expect(normalizeCaptureSettings(null)).toBeNull()
+    expect(normalizeCaptureSettings({ capture: { mode: "VIDEO" } })).toBeNull()
   })
 })

@@ -1,8 +1,37 @@
 import { buildEvmTokensRefreshingStale } from "./blockscout.js"
 import { normalizeMetadata } from "./metadata.js"
 import { isEvmChain, isTezosChain, TEZOS_NETWORKS } from "./networks.js"
-import type { TokenRef } from "./refs.js"
+import type { ProjectRef, TokenRef } from "./refs.js"
 import type { ChainReaderConfig, WhitehashToken } from "./types.js"
+
+/**
+ * Recover candidate Tezos issuer projects from the gentk token_data big map.
+ * Project IDs overlap across issuer versions, so callers should confirm the
+ * candidate against the token/project name.
+ */
+export async function getTezosTokenProjectRefs(
+  token: WhitehashToken,
+  config: ChainReaderConfig,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ProjectRef[]> {
+  if (!isTezosChain(token.chain)) return []
+  const network = TEZOS_NETWORKS[token.chain]
+  if (!network.gentkContracts.includes(token.contract)) return []
+  const base = (config.tzkt?.[token.chain] ?? network.defaultTzktBaseUrl).replace(/\/+$/, "")
+  const url =
+    `${base}/v1/contracts/${token.contract}/bigmaps/token_data/keys/` +
+    encodeURIComponent(token.tokenId)
+  const response = await fetchImpl(url)
+  if (!response.ok) return []
+  const value = await response.json() as { value?: { issuer_id?: string | number } }
+  const issuerId = value.value?.issuer_id
+  if (issuerId === undefined || issuerId === null) return []
+  return network.issuerContracts.map(issuer => ({
+    type: "project" as const,
+    chain: token.chain,
+    id: `${issuer.version}:${String(issuerId)}`,
+  }))
+}
 
 /** Universal direct token read used by typed refs and paste-anything navigation. */
 export async function getToken(ref: TokenRef, config: ChainReaderConfig): Promise<WhitehashToken | null> {

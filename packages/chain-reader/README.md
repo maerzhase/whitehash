@@ -30,10 +30,10 @@ that is `false` for unrevealed "waiting to be signed" placeholders.
 | --- | --- |
 | `createWhitehashClient(config)` | Bind wallet/project/resolver/render operations once |
 | `client.getWalletTokens(address, options?)` | Address-aware ownership reads; mainnet by default |
-| `client.listProjects(options)`, `client.getProject(ref)` | Discover and inspect projects without chain-specific methods |
-| `client.listProjectTokens(ref, options?)` | Paginated minted iterations on any supported chain |
-| `client.getToken(ref)` | Read one normalized token directly from a typed token ref |
-| `ProjectRef`, `TokenRef`, `parseRef()`, `formatRef()` | Stable references shared by clients, hooks, components, and routes |
+| `client.listProjects(options)`, `client.getProject(project)` | Discover projects and inspect one from `{ chain, id }` |
+| `client.listProjectTokens(project, options?)` | Paginated minted iterations from `{ chain, id }` |
+| `client.getToken(token)` | Read one normalized token from `{ chain, contract, tokenId }` |
+| `projectRef()`, `tokenRef()`, `parseRef()`, `formatRef()` | Optional serialization helpers for routes and mixed input |
 | `resolveInput()` | Classify pasted refs, artwork URLs, CIDs, and addresses |
 | `shortAddress()`, `projectLabel()` | Consistent human-readable labels |
 | `renderArtifactUri()`, `artworkUrl()` | Correct live URL, including gentk-v1 separate seeds |
@@ -64,20 +64,97 @@ Two interchangeable sources, selected via `evm.ownershipSource`:
 Beyond wallet lookups, the library can enumerate everything published on the contracts:
 
 ```ts
-import { createWhitehashClient, parseRef } from "@whitehash/chain-reader"
+import { createWhitehashClient } from "@whitehash/chain-reader"
 
 const client = createWhitehashClient(config)
 const page = await client.listProjects({ chain: "tezos:mainnet", version: "v3" })
-// → [{ ref: { type: "project", chain: "tezos:mainnet", id: "v3:31804" }, … }]
+// → [{ chain: "tezos:mainnet", id: "v3:31804", name: "…", … }]
 
-const ref = parseRef("project/tezos%3Amainnet/v3%3A31804", "project")
-const iterations = await client.listProjectTokens(ref)
+const iterations = await client.listProjectTokens(page.projects[0])
 ```
 
 Tezos projects come from their project-contract big maps (all versions v0–v3);
 iterations are matched by fxhash's universal "{project name} #{n}" naming convention.
 EVM projects are the factory's `ProjectCreated` history; iterations via Blockscout token
 instances.
+
+## Portable project indexes
+
+Collapse every discovery page into a versioned, JSON-ready index:
+
+```ts
+import {
+  buildProjectIndex,
+} from "@whitehash/chain-reader"
+
+const index = await buildProjectIndex(client, {
+  chain: "tezos:mainnet",
+  id: "v2:13944",
+})
+
+const token = index.iterations[24]?.token
+```
+
+The index contains a normalized `project` summary plus normalized tokens with their
+original metadata, while omitting the project reader's provider envelope.
+Published fxhash `capture` metadata is normalized as `project.captureSettings`,
+including mode, trigger, GPU requirement, resolution, delay, canvas selector,
+and GIF timing fields.
+`parseProjectIndex()` validates untrusted JSON. Its return value is an ordinary
+object: access `index.project` and `index.iterations` directly.
+
+For fxhash EVM collections, `discoverEvmProjectTokenRefsViaRpc()` probes the deployed
+contract's supply and token-ID boundaries and enumerates the verified range directly.
+Non-sequential contracts fall back to mint-event discovery.
+
+## Portable token indexes
+
+Package one known token into a smaller versioned JSON file:
+
+```ts
+import {
+  buildTokenIndex,
+  parseTokenIndex,
+} from "@whitehash/chain-reader"
+
+const index = await buildTokenIndex(client, {
+  chain: "tezos:mainnet",
+  contract: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
+  tokenId: "16333",
+})
+
+const { project, token } = parseTokenIndex(index)
+```
+
+The `whitehash-token-index@1` file contains the complete normalized token,
+including its original metadata, and the same normalized `project` summary used
+by project indexes. EVM collection contracts resolve directly to full project
+metadata when public infrastructure exposes it. Tezos gentk `token_data`
+resolves the parent issuer project directly, including its normalized capture
+settings. Fields unavailable from public project/token metadata remain
+explicitly `null`. Access `project` and `token` directly on the parsed object;
+use the existing `tokenRef(token)` helper only when a canonical identity is
+needed for a fresh chain read.
+
+## Curated real-world examples
+
+`CURATED_PROJECT_EXAMPLES` contains ten stable mainnet project refs selected to cover
+different chains, storage schemes, runtimes, and artwork behaviors. The `ref` is ready for
+`useProject`, `client.getProject`, and the UI `ProjectGallery`; current project/token
+metadata is still read from chain instead of being copied into the package.
+
+```tsx
+import { CURATED_PROJECT_EXAMPLES } from "@whitehash/chain-reader"
+import { ProjectGallery } from "@whitehash/ui"
+
+const example = CURATED_PROJECT_EXAMPLES.find(item => item.slug === "dom2")!
+return <ProjectGallery project={example.ref} />
+```
+
+Each entry also classifies generator/metadata storage, capture mode, project kind, and
+searchable behaviors such as audio, GPU rendering, plotting, cross-chain interaction, or
+open-form minting. This keeps demos and visual QA intentional without pinning mutable
+marketplace values or individual token metadata.
 
 ## Attribution
 

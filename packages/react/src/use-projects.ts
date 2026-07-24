@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
   formatRef,
+  projectRef,
   type ChainId,
   type ListOrder,
-  type ProjectRef,
+  type ProjectInput,
   type WhitehashClient,
   type WhitehashProject,
   type WhitehashToken,
@@ -31,10 +32,10 @@ export function useProjects(options: UseProjectsOptions) {
   const runId = useRef(0)
 
   const hydrate = useCallback((project: WhitehashProject, id: number) => {
-    void client.getProject(project.ref).then(value => {
+    void client.getProject(project).then(value => {
       if (!value || runId.current !== id) return
       setProjects(previous => previous.map(item =>
-        formatRef(item.ref) === formatRef(value.ref) ? value : item,
+        item.chain === value.chain && item.id === value.id ? value : item,
       ))
     }).catch(() => {
       // Preview enrichment is best-effort; the discovered project stays usable.
@@ -79,7 +80,8 @@ export interface UseProjectOptions {
 }
 
 /** Read one project and its minted iterations; refs carry their own chain. */
-export function useProject(ref: ProjectRef, options: UseProjectOptions = {}) {
+export function useProject(input: ProjectInput, options: UseProjectOptions = {}) {
+  const ref = projectRef(input)
   const context = useWhitehash()
   const client = options.client ?? context.client
   const order = options.order ?? "oldest"

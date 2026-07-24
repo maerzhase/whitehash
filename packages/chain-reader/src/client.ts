@@ -19,8 +19,8 @@ import {
   liveViewStatus,
   type LiveViewStatus,
 } from "./semantics.js"
-import type { ProjectRef, TokenRef } from "./refs.js"
-import { getToken } from "./token.js"
+import { projectRef, tokenRef, type ProjectInput, type TokenInput } from "./refs.js"
+import { getTezosTokenProjectRefs, getToken } from "./token.js"
 import type {
   ChainId,
   ChainReaderConfig,
@@ -61,6 +61,26 @@ function addressChains(address: string, mode: NetworkMode): ChainId[] {
 /** A framework-free whitehash API with configuration bound once. */
 export function createWhitehashClient(config: ChainReaderConfig) {
   const resolver = createResolver(config.resolver)
+  const getProject = async (input: ProjectInput) => {
+    const ref = projectRef(input)
+    const { chain } = ref
+    if (isTezosChain(chain)) return getTezosProject(chain, ref.id, config)
+    if (!isEvmChain(chain)) return null
+    const info = await getEvmProjectInfo(chain, ref.id, config)
+    const preview = await getEvmProjectPreview(chain, ref.id, config)
+    return {
+      chain,
+      id: ref.id,
+      name: info.name ?? null,
+      description: null,
+      displayUri: preview,
+      thumbnailUri: preview,
+      editions: null,
+      minted: info.minted ?? null,
+      captureSettings: null,
+      raw: info,
+    }
+  }
 
   return {
     config,
@@ -89,29 +109,28 @@ export function createWhitehashClient(config: ChainReaderConfig) {
       limit: options.limit,
       order: options.order,
     }, onProgress),
-    getProject: async (ref: ProjectRef) => {
-      const { chain } = ref
-      if (isTezosChain(chain)) return getTezosProject(chain, ref.id, config)
-      if (!isEvmChain(chain)) return null
-      const info = await getEvmProjectInfo(chain, ref.id, config)
-      const preview = await getEvmProjectPreview(chain, ref.id, config)
-      return {
-        chain,
-        ref,
-        name: info.name ?? null,
-        description: null,
-        displayUri: preview,
-        thumbnailUri: preview,
-        editions: null,
-        minted: info.minted ?? null,
-        raw: info,
+    getProject,
+    getToken: (input: TokenInput) => getToken(tokenRef(input), config),
+    getTokenProject: async (token: WhitehashToken) => {
+      if (isEvmChain(token.chain)) {
+        return getProject({ chain: token.chain, id: token.contract })
       }
+      if (!isTezosChain(token.chain)) return null
+      const projectName = token.name?.replace(/\s+#\d+\s*$/u, "") ?? null
+      let first: Awaited<ReturnType<typeof getProject>> = null
+      for (const ref of await getTezosTokenProjectRefs(token, config)) {
+        const project = await getProject(ref)
+        if (!project) continue
+        first ??= project
+        if (!projectName || project.name === projectName) return project
+      }
+      return first
     },
-    getToken: (ref: TokenRef) => getToken(ref, config),
     listProjectTokens: async (
-      ref: ProjectRef,
+      input: ProjectInput,
       options: ListProjectTokensOptions = {},
     ) => {
+      const ref = projectRef(input)
       const { chain } = ref
       if (isTezosChain(chain)) {
         const project = await getTezosProject(chain, ref.id, config)

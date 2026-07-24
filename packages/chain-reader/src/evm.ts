@@ -15,6 +15,7 @@ import {
   getAddress,
   http,
   isAddress,
+  zeroAddress,
   type Address,
   type PublicClient,
 } from "viem"
@@ -146,6 +147,181 @@ function chunked<T>(arr: T[], size: number): T[][] {
   const out: T[][] = []
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
   return out
+}
+
+async function findContractDeploymentBlock(
+  client: PublicClient,
+  address: Address,
+  fromBlock: bigint,
+  toBlock: bigint,
+): Promise<bigint> {
+  const headCode = await client.getBytecode({ address, blockNumber: toBlock })
+  if (!headCode || headCode === "0x") {
+    throw new Error(`No contract code found for ${address} at block ${toBlock}`)
+  }
+  let low = fromBlock
+  let high = toBlock
+  while (low < high) {
+    const middle = (low + high) / 2n
+    const code = await client.getBytecode({ address, blockNumber: middle })
+    if (code && code !== "0x") high = middle
+    else low = middle + 1n
+  }
+  return low
+}
+
+/**
+ * Discover a collection's canonical token identities using only JSON-RPC.
+ *
+ * FxGenArt721 is not ERC721Enumerable, but deployed fxhash collections expose
+ * a monotonic totalSupply. We probe the zero/one-based boundary and enumerate
+ * that verified range. Non-sequential contracts fall back to canonical ERC-721
+ * mint logs; a bytecode binary search bounds that historical scan.
+ */
+export async function discoverEvmProjectTokenRefsViaRpc(
+  chain: EvmChain,
+  contract: string,
+  config: ChainReaderConfig,
+  publicClient?: PublicClient,
+): Promise<{
+  tokens: { contract: string; tokenId: string }[]
+  strategy: "sequential-supply" | "mint-logs"
+  deploymentBlock: number | null
+  scannedToBlock: number
+}> {
+  if (!isAddress(contract)) throw new Error(`Not an EVM contract address: ${contract}`)
+  const address = getAddress(contract)
+  const network = EVM_NETWORKS[chain]
+  const client = publicClient ?? makeClient(chain, config)
+  const head = config.evm?.maxBlock !== undefined
+    ? BigInt(config.evm.maxBlock)
+    : await client.getBlockNumber()
+
+  // FxGenArt721 deployments use a monotonic one-based token counter. Probe
+  // both possible ERC-721 starts instead of assuming that convention. This
+  // turns discovery into a handful of reads plus batched tokenURI calls.
+  try {
+    const supply = await client.readContract({
+      address,
+      abi: genArtAbi,
+      functionName: "totalSupply",
+    })
+    const count = Number(supply)
+    if (Number.isSafeInteger(count) && count >= 0) {
+      if (count === 0) {
+        return {
+          tokens: [],
+          strategy: "sequential-supply",
+          deploymentBlock: null,
+          scannedToBlock: Number(head),
+        }
+      }
+      const exists = async (tokenId: number): Promise<boolean> => {
+        try {
+          await client.readContract({
+            address,
+            abi: genArtAbi,
+            functionName: "ownerOf",
+            args: [BigInt(tokenId)],
+          })
+          return true
+        } catch {
+          return false
+        }
+      }
+      const [zeroExists, oneExists, supplyExists] = await Promise.all([
+        exists(0),
+        exists(1),
+        exists(count),
+      ])
+      const start = zeroExists && !supplyExists
+        ? 0
+        : !zeroExists && oneExists && supplyExists
+          ? 1
+          : null
+      if (start !== null) {
+        return {
+          tokens: Array.from({ length: count }, (_, index) => ({
+            contract: address,
+            tokenId: String(start + index),
+          })),
+          strategy: "sequential-supply",
+          deploymentBlock: null,
+          scannedToBlock: Number(head),
+        }
+      }
+    }
+  } catch {
+    // Non-standard deployment or RPC without the historical methods needed
+    // below: fall through to canonical mint-event discovery.
+  }
+
+  const deployment = await findContractDeploymentBlock(
+    client,
+    address,
+    BigInt(network.deployBlock),
+    head,
+  )
+  const initialChunk = BigInt(
+    config.evm?.logChunkSize ?? Number(head - deployment + 1n),
+  )
+  const logs = await getLogsAdaptive(
+    (from, to) =>
+      client.getLogs({
+        address,
+        event: genArtAbi[0],
+        args: { from: zeroAddress },
+        fromBlock: from,
+        toBlock: to,
+      }),
+    deployment,
+    head,
+    initialChunk,
+  )
+  logs.sort((a, b) => {
+    const block = Number((a.blockNumber ?? 0n) - (b.blockNumber ?? 0n))
+    if (block !== 0) return block
+    return Number((a.logIndex ?? 0) - (b.logIndex ?? 0))
+  })
+  const tokens = new Map<string, { contract: string; tokenId: string }>()
+  for (const log of logs) {
+    if (log.args.tokenId === undefined) continue
+    const tokenId = log.args.tokenId.toString()
+    tokens.set(tokenId, { contract: address, tokenId })
+  }
+  return {
+    tokens: [...tokens.values()],
+    strategy: "mint-logs",
+    deploymentBlock: Number(deployment),
+    scannedToBlock: Number(head),
+  }
+}
+
+/** Discover and hydrate every minted iteration of one EVM project via RPC. */
+export async function getEvmProjectTokensViaRpc(
+  chain: EvmChain,
+  contract: string,
+  config: ChainReaderConfig,
+  onProgress?: ProgressCallback,
+): Promise<WhitehashToken[]> {
+  onProgress?.({ chain, phase: "discover", message: "Discovering token identities from contract" })
+  const discovered = await discoverEvmProjectTokenRefsViaRpc(chain, contract, config)
+  onProgress?.({
+    chain,
+    phase: "metadata",
+    message: `Discovered ${discovered.tokens.length} mint event(s); fetching metadata`,
+    found: discovered.tokens.length,
+  })
+  const { buildEvmTokensRefreshingStale } = await import("./blockscout.js")
+  const tokens = await buildEvmTokensRefreshingStale(
+    chain,
+    config,
+    discovered.tokens.map(token => ({ ...token, metadata: null })),
+    onProgress,
+  )
+  const existing = tokens.filter(token => token.metadataUri !== null)
+  onProgress?.({ chain, phase: "done", message: "Done", found: existing.length })
+  return existing
 }
 
 /**

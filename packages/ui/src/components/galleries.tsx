@@ -2,11 +2,12 @@ import { useEffect, useState, type ComponentProps } from "react"
 import {
   MAINNET_CHAINS,
   TESTNET_CHAINS,
-  formatRef,
   projectLabel,
+  projectRef,
   tokenKey,
   type ChainId,
   type ListOrder,
+  type ProjectInput,
   type ProjectRef,
   type WhitehashProject,
   type WhitehashToken,
@@ -261,9 +262,9 @@ export function ProjectBrowser({
       <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
         {initialLoading ? <ProjectGridSkeleton /> : projects.map(project => (
           <ProjectCard
-            key={formatRef(project.ref)}
+            key={`${project.chain}:${project.id}`}
             project={project}
-            onOpen={onOpenProject ? () => onOpenProject(project.ref) : undefined}
+            onOpen={onOpenProject ? () => onOpenProject(projectRef(project)) : undefined}
           />
         ))}
       </div>
@@ -278,7 +279,7 @@ export function ProjectBrowser({
 }
 
 export interface ProjectGalleryProps extends ComponentProps<"section"> {
-  project: ProjectRef
+  project: ProjectInput
   onOpenToken?: (token: WhitehashToken) => void
   onBack?: () => void
 }

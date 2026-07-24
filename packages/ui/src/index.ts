@@ -20,11 +20,11 @@ export {
   type ArtworkImageProps,
   type ArtworkPlayButtonProps,
 } from "./components/artwork.js"
-export {
-  TokenGrid,
-  TokenGridSkeleton,
-  type TokenGridProps,
-} from "./components/token-grid.js"
+// TokenGrid/TokenGridSkeleton are deliberately NOT exported: a token card is a
+// Card + Artwork composition and a grid is layout — simple parts integrators
+// own. They remain internal helpers for the gallery blocks. The toolkit's job
+// is making the hard parts easy (reading chains, rendering art), not shipping
+// trivial layout.
 export {
   WalletGallery,
   ProjectBrowser,

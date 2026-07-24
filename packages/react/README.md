@@ -5,14 +5,18 @@ cache-first reads, progress, gateway fallback, and secure iframe state—without
 CSS or rendering visual components.
 
 ```tsx
-import { WhitehashProvider, useWalletTokens } from "@whitehash/react"
+import { WhitehashProvider, useToken } from "@whitehash/react"
 
-function Wallet({ address }: { address: string }) {
-  const { state, loading, refresh } = useWalletTokens(address)
-  return <button onClick={refresh}>{loading ? "Loading…" : `${state?.tokens.length ?? 0} tokens`}</button>
+function Token() {
+  const result = useToken({
+    chain: "tezos:mainnet",
+    contract: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
+    tokenId: "16333",
+  })
+  return <p>{result.loading ? "Loading…" : result.token?.name ?? result.error}</p>
 }
 
-root.render(<WhitehashProvider config={config}><Wallet address="tz1…" /></WhitehashProvider>)
+root.render(<WhitehashProvider><Token /></WhitehashProvider>)
 ```
 
 ## API
@@ -20,9 +24,10 @@ root.render(<WhitehashProvider config={config}><Wallet address="tz1…" /></Whit
 | Export | Purpose |
 | --- | --- |
 | `WhitehashProvider`, `useWhitehash` | Provide/read the bound client, cache, and network mode |
+| `useToken({ chain, contract, tokenId }, options?)` | One normalized token, loading/error state, and refresh |
 | `useWalletTokens(address, options?)` | Cache-first multi-chain wallet tokens, progress, loading state, and refresh |
 | `useProjects({ chain, version?, order?, limit? })` | Paginated discovery with progressive preview hydration on every chain |
-| `useProject(ref, options?)` | Project metadata, iterations, pagination, and sort; the typed ref carries its chain |
+| `useProject(project, options?)` | Project metadata, iterations, pagination, and sort from `{ chain, id }` |
 | `useGatewayImage(uri, chain)` | Ordered gateway URL with an `onError` fallback handler |
 | `useArtworkFrame(token)` | Live-view status, play/stop state, and sandboxed iframe props |
 | `createIndexedDbCache()` | Browser-persistent `WhitehashCache` implementation |

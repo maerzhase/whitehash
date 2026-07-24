@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest"
 import { defaultResolverConfig } from "@whitehash/resolve"
-import { listTezosProjects, listTezosProjectTokens } from "./browse.js"
+import {
+  getTezosProject,
+  listTezosProjects,
+  listTezosProjectTokens,
+} from "./browse.js"
 import type { ChainReaderConfig } from "./types.js"
 
 const config: ChainReaderConfig = { resolver: defaultResolverConfig() }
@@ -33,6 +37,12 @@ describe("listTezosProjects", () => {
             description: "a project",
             displayUri: "ipfs://QmDisp",
             thumbnailUri: "ipfs://QmThumb",
+            capture: {
+              mode: "VIEWPORT",
+              triggerMode: "DELAY",
+              resolution: { x: 800, y: 800 },
+              delay: 2_000,
+            },
           }),
         )
       throw new Error(`unexpected fetch ${u}`)
@@ -41,11 +51,17 @@ describe("listTezosProjects", () => {
     const page = await listTezosProjects("tezos:mainnet", config, {}, fetchImpl)
     expect(page.projects).toHaveLength(1)
     const p = page.projects[0]!
-    expect(p.ref).toEqual({ type: "project", chain: "tezos:mainnet", id: "v3:31804" })
+    expect({ chain: p.chain, id: p.id }).toEqual({ chain: "tezos:mainnet", id: "v3:31804" })
     expect(p.name).toBe("Scale")
     expect(p.editions).toBe(500) // cap
     expect(p.minted).toBe(5) // iterations_count wins over supply-balance
     expect(p.thumbnailUri).toBe("ipfs://QmThumb")
+    expect(p.captureSettings).toEqual({
+      mode: "VIEWPORT",
+      triggerMode: "DELAY",
+      resolution: { x: 800, y: 800 },
+      delay: 2_000,
+    })
     expect(page.cursor).toBeNull() // fewer than limit → no next page
 
     // default order is newest-first
@@ -62,6 +78,15 @@ describe("listTezosProjects", () => {
     expect(String((fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls[0]![0])).toContain(
       "sort.asc=id",
     )
+  })
+})
+
+describe("getTezosProject", () => {
+  it("treats an empty missing-key response as no project", async () => {
+    const fetchImpl = vi.fn(async () => new Response("")) as unknown as typeof fetch
+    await expect(
+      getTezosProject("tezos:mainnet", "v0:999999", config, fetchImpl),
+    ).resolves.toBeNull()
   })
 })
 

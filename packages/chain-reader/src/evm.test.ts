@@ -1,7 +1,12 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { defaultResolverConfig } from "@whitehash/resolve"
-import { getEvmWalletTokens, isEvmAddress } from "./evm.js"
+import {
+  discoverEvmProjectTokenRefsViaRpc,
+  getEvmWalletTokens,
+  isEvmAddress,
+} from "./evm.js"
 import type { ChainReaderConfig } from "./types.js"
+import type { PublicClient } from "viem"
 
 describe("isEvmAddress", () => {
   it("accepts checksummed and lowercase 0x addresses", () => {
@@ -11,6 +16,64 @@ describe("isEvmAddress", () => {
   it("rejects Tezos and junk", () => {
     expect(isEvmAddress("KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE")).toBe(false)
     expect(isEvmAddress("0x123")).toBe(false)
+  })
+})
+
+describe("discoverEvmProjectTokenRefsViaRpc", () => {
+  it("enumerates a probed sequential FxGenArt721 supply without scanning logs", async () => {
+    const contract = "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632"
+    const readContract = vi.fn(async ({ functionName, args }: {
+      functionName: string
+      args?: readonly bigint[]
+    }) => {
+      if (functionName === "totalSupply") return 3n
+      const tokenId = args?.[0]
+      if (tokenId && tokenId >= 1n && tokenId <= 3n) return contract
+      throw new Error("missing")
+    })
+    const client = {
+      getBlockNumber: vi.fn().mockResolvedValue(20_000_000n),
+      readContract,
+    } as unknown as PublicClient
+
+    const result = await discoverEvmProjectTokenRefsViaRpc(
+      "eip155:8453",
+      contract,
+      { resolver: defaultResolverConfig() },
+      client,
+    )
+
+    expect(result.strategy).toBe("sequential-supply")
+    expect(result.tokens.map(token => token.tokenId)).toEqual(["1", "2", "3"])
+  })
+
+  it("finds deployment and orders token ids by mint log", async () => {
+    const deployment = 10_786_145n
+    const contract = "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632"
+    const getBytecode = vi.fn(async ({ blockNumber }: { blockNumber?: bigint }) =>
+      (blockNumber ?? 0n) >= deployment ? "0x1234" : undefined
+    )
+    const getLogs = vi.fn(async () => [
+      { address: contract, blockNumber: deployment + 2n, logIndex: 1, args: { tokenId: 9n } },
+      { address: contract, blockNumber: deployment + 1n, logIndex: 3, args: { tokenId: 4n } },
+    ])
+    const client = { getBytecode, getLogs } as unknown as PublicClient
+    const config: ChainReaderConfig = {
+      resolver: defaultResolverConfig(),
+      evm: { maxBlock: 10_786_150 },
+    }
+
+    const result = await discoverEvmProjectTokenRefsViaRpc(
+      "eip155:8453",
+      contract,
+      config,
+      client,
+    )
+
+    expect(result.deploymentBlock).toBe(Number(deployment))
+    expect(result.strategy).toBe("mint-logs")
+    expect(result.tokens.map(token => token.tokenId)).toEqual(["4", "9"])
+    expect(getLogs).toHaveBeenCalledOnce()
   })
 })
 

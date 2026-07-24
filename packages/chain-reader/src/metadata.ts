@@ -3,6 +3,11 @@
  * into whitehash's uniform shape, and detect unrevealed placeholder tokens.
  * See PLAN.md §3.4/§3.5.
  */
+import type {
+  ProjectCaptureMode,
+  ProjectCaptureSettings,
+  ProjectCaptureTriggerMode,
+} from "./types.js"
 
 interface RawAttribute {
   name?: unknown
@@ -24,6 +29,73 @@ export interface NormalizedMetadata {
 
 function str(v: unknown): string | null {
   return typeof v === "string" && v.length > 0 ? v : null
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null
+}
+
+function finiteNumber(value: unknown): number | undefined {
+  const number = typeof value === "string" && value.trim() !== "" ? Number(value) : value
+  return typeof number === "number" && Number.isFinite(number) ? number : undefined
+}
+
+function optionalBoolean(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value
+  if (value === "true") return true
+  if (value === "false") return false
+  return undefined
+}
+
+/**
+ * Normalize the capture object published in fxhash project metadata.
+ * Unknown or malformed fields are ignored; an unsupported/missing mode means
+ * the project has no usable capture configuration.
+ */
+export function normalizeCaptureSettings(raw: unknown): ProjectCaptureSettings | null {
+  const metadata = record(raw)
+  const source = record(metadata?.["capture"] ?? metadata?.["captureSettings"] ?? raw)
+  if (!source) return null
+
+  const modeValue = typeof source["mode"] === "string"
+    ? source["mode"].toUpperCase()
+    : ""
+  if (!["CANVAS", "VIEWPORT", "CUSTOM"].includes(modeValue)) return null
+  const mode = modeValue as ProjectCaptureMode
+
+  const triggerValue = typeof source["triggerMode"] === "string"
+    ? source["triggerMode"].toUpperCase()
+    : ""
+  const triggerMode = ["DELAY", "FN_TRIGGER", "FN_TRIGGER_GIF"].includes(triggerValue)
+    ? triggerValue as ProjectCaptureTriggerMode
+    : undefined
+
+  const resolution = record(source["resolution"])
+  const x = finiteNumber(resolution?.["x"])
+  const y = finiteNumber(resolution?.["y"])
+  const normalized: ProjectCaptureSettings = { mode }
+  if (triggerMode) normalized.triggerMode = triggerMode
+  const gpu = optionalBoolean(source["gpu"])
+  if (gpu !== undefined) normalized.gpu = gpu
+  if (x !== undefined && y !== undefined) normalized.resolution = { x, y }
+
+  const delay = finiteNumber(source["delay"])
+  if (delay !== undefined) {
+    normalized.delay = delay
+    normalized.triggerMode ??= "DELAY"
+  }
+  if (typeof source["canvasSelector"] === "string" && source["canvasSelector"]) {
+    normalized.canvasSelector = source["canvasSelector"]
+  }
+  const gif = optionalBoolean(source["gif"])
+  if (gif !== undefined) normalized.gif = gif
+  for (const key of ["frameCount", "captureInterval", "playbackFps"] as const) {
+    const value = finiteNumber(source[key])
+    if (value !== undefined) normalized[key] = value
+  }
+  return normalized
 }
 
 /** Known markers of the shared "waiting to be signed" placeholder document. */

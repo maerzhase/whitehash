@@ -10,6 +10,9 @@ import {
   TESTNET_CHAINS,
   type ChainId,
   type NetworkMode,
+  type ProjectCaptureMode,
+  type ProjectCaptureSettings,
+  type ProjectCaptureTriggerMode,
 } from "./types.js"
 
 export {
@@ -22,6 +25,14 @@ export {
   type ProgressEvent,
   type ProgressCallback,
 } from "./types.js"
+export { DEFAULT_NETWORK_MODE, defaultChainReaderConfig } from "./config.js"
+export {
+  TEZOS_NETWORKS,
+  EVM_NETWORKS,
+  type TezosNetworkConfig,
+  type EvmNetworkConfig,
+} from "./networks.js"
+export { DEFAULT_IPFS_GATEWAYS, defaultResolverConfig } from "@whitehash/resolve"
 export {
   renderArtifactUri,
   artworkUrl,
@@ -43,22 +54,55 @@ export {
   formatRef,
   parseRef,
   resolveInput,
+  projectRef,
   tokenRef,
   shortAddress,
   projectLabel,
   type ProjectRef,
+  type ProjectInput,
   type TokenRef,
+  type TokenInput,
   type WhitehashRef,
   type ResolvedInput,
   type AddressInput,
   type ContentInput,
 } from "./refs.js"
-export { normalizeMetadata, isAssigned } from "./metadata.js"
+export { normalizeCaptureSettings, normalizeMetadata, isAssigned } from "./metadata.js"
+export {
+  discoverEvmProjectTokenRefsViaRpc,
+  getEvmProjectTokensViaRpc,
+} from "./evm.js"
+export {
+  CURATED_PROJECT_EXAMPLES,
+  curatedProjectExample,
+  type CuratedProjectExample,
+  type ExampleCaptureMode,
+  type ExampleGeneratorStorage,
+  type ExampleMetadataStorage,
+  type ExampleProjectKind,
+} from "./examples.js"
 export {
   type WhitehashProject,
   type ProjectPage,
   type ListOrder,
 } from "./browse.js"
+export {
+  PROJECT_INDEX_FORMAT,
+  buildProjectIndex,
+  parseProjectIndex,
+  type IndexedIteration,
+  type IndexedProject,
+  type ProjectIndex,
+  type ProjectIndexReader,
+  type BuildProjectIndexOptions,
+} from "./project-index.js"
+export {
+  TOKEN_INDEX_FORMAT,
+  buildTokenIndex,
+  parseTokenIndex,
+  type TokenIndex,
+  type TokenIndexReader,
+} from "./token-index.js"
 
 function looksLikeEvmAddress(address: string): boolean {
   return /^0x[0-9a-fA-F]{40}$/.test(address)

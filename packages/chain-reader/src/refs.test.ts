@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { formatRef, parseRef, resolveInput, shortAddress, tokenRef } from "./refs.js"
+import { formatRef, parseRef, projectRef, resolveInput, shortAddress, tokenRef } from "./refs.js"
 
 describe("whitehash refs", () => {
   it("round-trips project and token refs", () => {
-    const project = { type: "project", chain: "tezos:mainnet", id: "v3:13623" } as const
+    const project = projectRef({ chain: "tezos:mainnet", id: "v3:13623" })
     expect(parseRef(formatRef(project), "project")).toEqual(project)
     const token = tokenRef({ chain: "eip155:8453", contract: "0xabc", tokenId: "42" })
     expect(parseRef(formatRef(token), "token")).toEqual(token)
