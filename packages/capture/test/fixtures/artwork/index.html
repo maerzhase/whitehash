@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html, body { margin: 0; background: #102030; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <canvas id="art" width="320" height="256"></canvas>
+    <script>
+      const query = new URLSearchParams(location.search)
+      const canvas = document.querySelector("#art")
+      const context = canvas.getContext("2d")
+      context.fillStyle = "#12b8a6"
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      context.fillStyle = "#ffffff"
+      context.fillRect(40, 40, 80, 80)
+      window.$fx = { _features: { Color: "teal", Count: 2, Nested: { drop: true } } }
+      if (query.get("trigger") === "event") {
+        window.dispatchEvent(new Event("fxhash-preview"))
+      } else if (query.get("trigger") === "console") {
+        console.log("FXPREVIEW")
+      }
+    </script>
+  </body>
+</html>
