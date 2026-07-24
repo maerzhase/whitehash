@@ -1,5 +1,11 @@
 # @whitehash/chain-reader
 
+## 0.1.0
+
+### Minor Changes
+
+- 915d5a9: Add Dragons to the curated mainnet project examples.
+
 ## 0.0.1
 
 ### Patch Changes

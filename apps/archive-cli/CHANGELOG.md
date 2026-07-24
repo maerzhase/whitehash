@@ -1,5 +1,12 @@
 # @whitehash/archive
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [915d5a9]
+  - @whitehash/chain-reader@0.1.0
+
 ## 0.0.1
 
 ### Patch Changes
