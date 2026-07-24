@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/archive",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Archive fxhash artwork from public chains into a self-contained offline folder.",
   "license": "MIT",
   "type": "module",

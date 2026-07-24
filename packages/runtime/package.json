@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/runtime",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Framework-free fxhash artwork runtime controls with an optional React adapter.",
   "license": "MIT",
   "type": "module",
