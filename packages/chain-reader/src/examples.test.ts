@@ -3,8 +3,8 @@ import { CURATED_PROJECT_EXAMPLES, curatedProjectExample } from "./examples.js"
 
 describe("curated project examples", () => {
   it("keeps the requested projects unique and directly loadable", () => {
-    expect(CURATED_PROJECT_EXAMPLES).toHaveLength(10)
-    expect(new Set(CURATED_PROJECT_EXAMPLES.map(example => example.slug)).size).toBe(10)
+    expect(CURATED_PROJECT_EXAMPLES).toHaveLength(11)
+    expect(new Set(CURATED_PROJECT_EXAMPLES.map(example => example.slug)).size).toBe(11)
 
     for (const example of CURATED_PROJECT_EXAMPLES) {
       expect(example.ref.type).toBe("project")
@@ -29,6 +29,11 @@ describe("curated project examples", () => {
   })
 
   it("looks up examples without inventing a fallback", () => {
+    expect(curatedProjectExample("dragons")?.ref).toEqual({
+      type: "project",
+      chain: "tezos:mainnet",
+      id: "v2:2613",
+    })
     expect(curatedProjectExample("dom2")?.ref.chain).toBe("eip155:8453")
     expect(curatedProjectExample("not-a-project")).toBeUndefined()
   })

@@ -90,6 +90,16 @@ export const CURATED_PROJECT_EXAMPLES = [
     covers: ["animated", "non-looping", "gentk-v1-artifact", "legacy-runtime"],
   },
   {
+    slug: "dragons",
+    name: "Dragons",
+    ref: { type: "project", chain: "tezos:mainnet", id: "v2:2613" },
+    kind: "tezos-issuer-v2",
+    generatorStorage: "ipfs",
+    metadataStorage: "ipfs",
+    captureMode: "viewport",
+    covers: ["slow-render", "gentk-v1-artifact", "legacy-runtime", "fixed-editions"],
+  },
+  {
     slug: "blokkendoos",
     name: "Blokkendoos",
     ref: {

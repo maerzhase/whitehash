@@ -138,7 +138,7 @@ needed for a fresh chain read.
 
 ## Curated real-world examples
 
-`CURATED_PROJECT_EXAMPLES` contains ten stable mainnet project refs selected to cover
+`CURATED_PROJECT_EXAMPLES` contains eleven stable mainnet project refs selected to cover
 different chains, storage schemes, runtimes, and artwork behaviors. The `ref` is ready for
 `useProject`, `client.getProject`, and the UI `ProjectGallery`; current project/token
 metadata is still read from chain instead of being copied into the package.
