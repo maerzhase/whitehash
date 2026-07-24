@@ -1,9 +1,9 @@
 ---
-"@whitehash/onchfs-sw": major
-"@whitehash/resolve": major
-"@whitehash/chain-reader": major
-"@whitehash/react": minor
-"@whitehash/ui": minor
+"@whitehash/onchfs-sw": patch
+"@whitehash/resolve": patch
+"@whitehash/chain-reader": patch
+"@whitehash/react": patch
+"@whitehash/ui": patch
 ---
 
 Add same-origin, proxy-free onchfs resolution through a browser service worker and make

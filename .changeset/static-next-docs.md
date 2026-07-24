@@ -1,6 +1,6 @@
 ---
 "@whitehash/resolve": patch
-"@whitehash/ui": minor
+"@whitehash/ui": patch
 ---
 
 Finish the docs migration to a statically exported Next.js app. Documentation-only

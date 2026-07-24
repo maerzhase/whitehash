@@ -1,6 +1,6 @@
 ---
-"@whitehash/chain-reader": minor
-"@whitehash/docs": minor
+"@whitehash/chain-reader": patch
+"@whitehash/docs": patch
 ---
 
 EVM ownership now defaults to Blockscout (open-source public-good indexer — the EVM

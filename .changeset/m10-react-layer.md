@@ -1,7 +1,7 @@
 ---
-"@whitehash/chain-reader": minor
-"@whitehash/react": minor
-"@whitehash/docs": minor
+"@whitehash/chain-reader": patch
+"@whitehash/react": patch
+"@whitehash/docs": patch
 ---
 
 Add the framework-free `createWhitehashClient` facade and move token rendering

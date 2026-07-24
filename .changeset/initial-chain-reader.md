@@ -1,5 +1,5 @@
 ---
-"@whitehash/chain-reader": minor
+"@whitehash/chain-reader": patch
 ---
 
 Add `@whitehash/chain-reader`: read fxhash tokens owned by a wallet directly from Tezos

@@ -1,5 +1,5 @@
 ---
-"@whitehash/core": minor
+"@whitehash/core": patch
 "@whitehash/capture": patch
 "@whitehash/chain-reader": patch
 "@whitehash/onchfs-sw": patch

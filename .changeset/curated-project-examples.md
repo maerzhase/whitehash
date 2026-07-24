@@ -1,6 +1,6 @@
 ---
-"@whitehash/chain-reader": minor
-"@whitehash/docs": minor
+"@whitehash/chain-reader": patch
+"@whitehash/docs": patch
 ---
 
 Add a curated registry of ten real mainnet fxhash project references for demos,

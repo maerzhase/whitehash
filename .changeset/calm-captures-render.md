@@ -1,5 +1,5 @@
 ---
-"@whitehash/capture": minor
+"@whitehash/capture": patch
 ---
 
 Add a reusable fxhash-compatible Chromium capture engine with browser providers, PNG/GIF

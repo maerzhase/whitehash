@@ -1,5 +1,5 @@
 ---
-"@whitehash/runtime": major
+"@whitehash/runtime": patch
 ---
 
 Add the framework-free artwork runtime and optional React subpath. The public connector

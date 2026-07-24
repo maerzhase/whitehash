@@ -1,9 +1,9 @@
 ---
-"@whitehash/chain-reader": minor
-"@whitehash/archive": minor
-"@whitehash/react": minor
-"@whitehash/ui": major
-"@whitehash/docs": minor
+"@whitehash/chain-reader": patch
+"@whitehash/archive": patch
+"@whitehash/react": patch
+"@whitehash/ui": patch
+"@whitehash/docs": patch
 ---
 
 Add portable, versioned project iteration and single-token indexes with normalized

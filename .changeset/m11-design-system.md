@@ -1,5 +1,5 @@
 ---
-"@whitehash/ui": minor
+"@whitehash/ui": patch
 "@whitehash/docs": patch
 ---
 

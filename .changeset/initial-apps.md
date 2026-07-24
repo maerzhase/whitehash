@@ -1,6 +1,6 @@
 ---
-"@whitehash/docs": minor
-"@whitehash/onchfs-proxy": minor
+"@whitehash/docs": patch
+"@whitehash/onchfs-proxy": patch
 ---
 
 Add the static wallet viewer (address → owned tokens → live sandboxed rendering, with

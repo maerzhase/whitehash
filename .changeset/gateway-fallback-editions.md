@@ -1,6 +1,6 @@
 ---
-"@whitehash/chain-reader": minor
-"@whitehash/docs": minor
+"@whitehash/chain-reader": patch
+"@whitehash/docs": patch
 ---
 
 Images now fall back across all configured IPFS gateways: a new `<GatewayImage>`
