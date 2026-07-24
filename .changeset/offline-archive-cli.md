@@ -1,5 +1,5 @@
 ---
-"@whitehash/archive": major
+"@whitehash/archive": patch
 ---
 
 Add the wallet-to-offline-folder archive CLI. It discovers normalized tokens through the

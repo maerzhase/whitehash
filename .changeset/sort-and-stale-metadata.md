@@ -1,6 +1,6 @@
 ---
-"@whitehash/chain-reader": minor
-"@whitehash/docs": minor
+"@whitehash/chain-reader": patch
+"@whitehash/docs": patch
 ---
 
 Add newest/oldest sort ordering to project and iteration listings (Tezos via TzKT sort

@@ -1,6 +1,6 @@
 ---
-"@whitehash/ui": minor
-"@whitehash/docs": minor
+"@whitehash/ui": patch
+"@whitehash/docs": patch
 ---
 
 Rework navigation: the project browser is now the home page, and wallet lookup is a

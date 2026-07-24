@@ -1,6 +1,6 @@
 ---
-"@whitehash/ui": minor
-"@whitehash/docs": minor
+"@whitehash/ui": patch
+"@whitehash/docs": patch
 ---
 
 Add the package-owned documentation chrome and convert the viewer into a fully static,

@@ -1,7 +1,7 @@
 ---
-"@whitehash/chain-reader": major
-"@whitehash/react": major
-"@whitehash/ui": major
+"@whitehash/chain-reader": patch
+"@whitehash/react": patch
+"@whitehash/ui": patch
 ---
 
 Redesign the pre-release API around five first-glimpse quickstarts.

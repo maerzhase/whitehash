@@ -1,5 +1,5 @@
 ---
-"@whitehash/resolve": minor
+"@whitehash/resolve": patch
 ---
 
 Add `@whitehash/resolve`: dependency-free URI resolution for IPFS, onchfs, and inline
