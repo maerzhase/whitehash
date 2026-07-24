@@ -1,7 +1,5 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
-import Link from "next/link"
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
 import {
@@ -33,6 +31,8 @@ import {
   WalletGallery,
   WalletSearch,
 } from "@whitehash/ui"
+import Link from "next/link"
+import { type ReactNode, useEffect, useState } from "react"
 import {
   Callout,
   CodeBlock,
@@ -185,6 +185,30 @@ export const API_ENTRIES: ApiEntry[] = [
 export const SAMPLE_TOKEN: WhitehashToken = {
   chain: "tezos:mainnet",
   contract: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
+  tokenId: "14840",
+  name: "Reading a book #1",
+  description:
+    "The formal structure of a book is beautiful by itself, but its aesthetic is the tacit atmosphere within which events take place in a story.",
+  iterationHash: "oogKC72UnsYRx4BCL8H9fEU8qsiEpgEqAeM6hWfE95VVXmwhRdE",
+  artifactUri: "ipfs://Qmf7gmvgm4A9tKRNCePq4yghxU3VmusV2Cgc5Vqkdvpc8M",
+  displayUri: "ipfs://QmYHgcyVhzVEKmUfjMsSJDuBbijBcEdFXCGKsZApLRmwrj",
+  thumbnailUri: "ipfs://QmUGAYj2osqjvkpR6zforQixypxEbW2YUeZUdPYBAqDkWw",
+  // Canonical project-level generativeUri from fxhash v2 project 86.
+  generatorUri: "ipfs://QmSgkdmpqwGLrCtH8qCYQGYNqeKvt47SgasZisGCQrpzKE",
+  attributes: [
+    { name: "Color Style", value: "Small Palette" },
+    { name: "Number of Colors", value: "5" },
+    { name: "Columns", value: "14" },
+    { name: "Rows", value: "5" },
+  ],
+  assigned: true,
+  metadataUri: null,
+  raw: null,
+}
+
+export const CONTRAPUNTOS_TOKEN: WhitehashToken = {
+  chain: "tezos:mainnet",
+  contract: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
   tokenId: "16333",
   name: "contrapuntos #136",
   description: "A known gentk-v1 fixture used to demonstrate the toolkit API.",
@@ -192,7 +216,6 @@ export const SAMPLE_TOKEN: WhitehashToken = {
   artifactUri: "ipfs://QmSYxhg1TWP9pMeSYAPDj23cf4MAo3nA4iF3kErq611KRG",
   displayUri: "ipfs://QmeWLdf4WeY2sc5iTjv7gJhEvjVtTCPyZM6grNTSx7kTym",
   thumbnailUri: "ipfs://QmaWnpxNQyM1bNjQyCzRQsjCEoQEi5KFwhN5UmMQi6FgNQ",
-  // Canonical project-level generativeUri from fxhash v0 project 65.
   generatorUri: "ipfs://QmfTQFEgcgYDohPJLJWWnrKeRMBYrRP8JF79k6kveuXEv2",
   attributes: [{ name: "Network", value: "Tezos" }],
   assigned: true,
@@ -1535,7 +1558,7 @@ npx @whitehash/archive verify ./whitehash-archive`}
             <p>
               That distinction matters for early gentk tokens: their minted <code>artifactUri</code>{" "}
               can be an iteration-specific capture with the original hash embedded in its HTML. The
-              contrapuntos demo below uses project v0:65’s canonical immutable generator, so{" "}
+              Reading a book demo below uses project v2:86&rsquo;s canonical immutable generator, so{" "}
               <strong>New hash</strong> drives the original artwork rather than a replacement
               fixture.
             </p>

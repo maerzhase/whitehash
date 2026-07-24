@@ -1,7 +1,7 @@
-import type { Metadata } from "next"
-import Link from "next/link"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
+import type { Metadata } from "next"
+import Link from "next/link"
 import {
   Callout,
   CodeBlock,
@@ -9,12 +9,13 @@ import {
   DocsPage,
   DocsSection,
 } from "../../../src/components/docs-chrome"
+import { pageMetadata } from "../../../src/seo"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/llms", {
   title: "LLM guide",
   description:
     "A machine-readable map of the Whitehash toolkit, architecture, domain semantics, and documentation.",
-}
+})
 
 export default async function LlmsPage() {
   const content = await readFile(join(process.cwd(), "public", "llms.txt"), "utf8")

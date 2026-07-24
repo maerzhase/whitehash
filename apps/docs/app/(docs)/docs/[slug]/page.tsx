@@ -1,4 +1,6 @@
+import type { Metadata } from "next"
 import { DocsRoutePage } from "../../../../src/docs-route-page"
+import { apiSeo, pageMetadata } from "../../../../src/seo"
 
 const SLUGS = [
   "whitehash-provider",
@@ -35,6 +37,15 @@ export function generateStaticParams() {
 }
 
 export const dynamicParams = false
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  return pageMetadata(`/docs/${slug}`, apiSeo(slug))
+}
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
