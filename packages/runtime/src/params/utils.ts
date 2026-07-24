@@ -433,13 +433,13 @@ export function deserializeParams(
 export function consolidateParams(params: any, data: any): any[] {
   if (!params) return []
 
-  const rtn = [...params]
+  const rtn = params.map((param: any) => ({ ...param }))
 
   for (const p in rtn) {
     const definition = rtn[p]
     const { id, type, default: def } = definition
     // biome-ignore lint/suspicious/noPrototypeBuiltins: ok
-    if (data?.hasOwnProperty(data, id)) {
+    if (data?.hasOwnProperty(id)) {
       rtn[p].value = data[id]
     } else {
       const processor = ParameterProcessors[
