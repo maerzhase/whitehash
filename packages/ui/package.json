@@ -30,7 +30,7 @@
     "src"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --external react,react-dom && tailwindcss -i src/styles.css -o dist/styles.css --minify",
+    "build": "tsdown src/index.ts --format esm --dts --clean --deps.never-bundle react --deps.never-bundle react-dom && tailwindcss -i src/styles.css -o dist/styles.css --minify",
     "check-types": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
@@ -54,7 +54,6 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "tailwindcss": "4.3.3",
-    "tsup": "8.5.0",
     "typescript": "5.9.3",
     "vitest": "3.2.4"
   }

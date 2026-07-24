@@ -1,6 +1,6 @@
 import { readFile, rename, writeFile } from "node:fs/promises"
 
-await rename("dist/worker.global.js", "dist/worker.js")
+await rename("dist/worker.iife.js", "dist/worker.js")
 const source = await readFile("node_modules/onchfs/dist/index.global.js", "utf8")
 const browserExport = `if (typeof window !== "undefined") {
     ;

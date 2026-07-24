@@ -22,7 +22,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean && tsup src/worker.ts --format iife --platform browser --out-dir dist --minify && node scripts/prepare-worker.mjs",
+    "build": "tsdown src/index.ts --format esm --dts --clean && tsdown --config tsdown.worker.config.ts && node scripts/prepare-worker.mjs",
     "check-types": "tsc --noEmit",
     "test": "vitest run"
   },
@@ -31,7 +31,6 @@
     "onchfs": "0.1.0"
   },
   "devDependencies": {
-    "tsup": "8.5.0",
     "typescript": "5.9.3",
     "vitest": "3.2.4"
   }

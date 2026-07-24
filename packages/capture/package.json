@@ -102,7 +102,7 @@
     "@whitehash/core": "workspace:*"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/browser/{local,remote,sparticuz}.ts src/postprocess/index.ts src/store/{memory,fs,s3,r2}.ts src/lock/{memory,redis}.ts src/adapters/{next,hono,express}.ts --format esm,cjs --dts --clean --external puppeteer-core --external @sparticuz/chromium-min --external sharp --external gifenc --external @aws-sdk/client-s3",
+    "build": "tsdown src/index.ts src/browser/{local,remote,sparticuz}.ts src/postprocess/index.ts src/store/{memory,fs,s3,r2}.ts src/lock/{memory,redis}.ts src/adapters/{next,hono,express}.ts --format esm --format cjs --dts --clean --deps.never-bundle puppeteer-core --deps.never-bundle @sparticuz/chromium-min --deps.never-bundle sharp --deps.never-bundle gifenc --deps.never-bundle @aws-sdk/client-s3",
     "check-types": "tsc --noEmit",
     "test": "vitest run"
   },
@@ -134,7 +134,6 @@
     "gifenc": "1.0.3",
     "puppeteer-core": "25.3.0",
     "sharp": "0.35.3",
-    "tsup": "8.5.1",
     "typescript": "5.9.3",
     "vitest": "3.2.4"
   }

@@ -20,10 +20,10 @@
     "snapshots"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
+    "build": "tsdown src/index.ts --format esm --dts --clean",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "dev": "tsdown src/index.ts --format esm --dts --watch",
     "snapshot:update": "tsx scripts/update-snapshot.ts"
   },
   "dependencies": {
@@ -33,7 +33,6 @@
   },
   "devDependencies": {
     "@types/node": "20.19.0",
-    "tsup": "8.5.0",
     "tsx": "4.20.6",
     "typescript": "5.9.3",
     "vitest": "3.2.4"
