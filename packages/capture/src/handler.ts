@@ -1,7 +1,7 @@
 import type { Browser } from "puppeteer-core"
 import type { BrowserProvider } from "./browser/provider.js"
 import { capture } from "./capture.js"
-import { asCaptureError, CaptureError } from "./errors.js"
+import { CaptureError, asCaptureError } from "./errors.js"
 import type { CaptureLock } from "./lock/lock.js"
 import type { CaptureStore, StoredCapture } from "./store/store.js"
 import type {

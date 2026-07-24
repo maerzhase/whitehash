@@ -1,9 +1,9 @@
+import type { ComponentProps, ReactNode } from "react"
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import { useWhitehash } from "@whitehash/react"
-import type { ComponentProps, ReactNode } from "react"
-import { cn } from "../lib/cn.js"
 import { Artwork } from "./artwork.js"
 import { Button } from "./button.js"
+import { cn } from "../lib/cn.js"
 
 function Row({ label, children, mono }: { label: string; children: ReactNode; mono?: boolean }) {
   return (

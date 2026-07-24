@@ -1,12 +1,12 @@
+import { createContext, useContext, useMemo, type ReactNode } from "react"
 import {
-  type ChainReaderConfig,
   createWhitehashClient,
   DEFAULT_NETWORK_MODE,
   defaultChainReaderConfig,
+  type ChainReaderConfig,
   type NetworkMode,
   type WhitehashClient,
 } from "@whitehash/chain-reader"
-import { createContext, type ReactNode, useContext, useMemo } from "react"
 import { createDefaultCache, type WhitehashCache } from "./cache.js"
 
 export interface WhitehashProviderConfig extends Omit<ChainReaderConfig, "resolver"> {

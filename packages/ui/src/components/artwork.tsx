@@ -1,9 +1,9 @@
+import { createContext, useContext, type ComponentProps, type ReactNode } from "react"
 import { imageSourceUri, type LiveViewStatus, type WhitehashToken } from "@whitehash/chain-reader"
 import { useArtworkFrame, useGatewayImage } from "@whitehash/react"
-import { type ComponentProps, createContext, type ReactNode, useContext } from "react"
-import { cn } from "../lib/cn.js"
 import { Badge, type BadgeProps } from "./badge.js"
 import { Button, type ButtonProps } from "./button.js"
+import { cn } from "../lib/cn.js"
 
 interface ArtworkContextValue {
   token: WhitehashToken

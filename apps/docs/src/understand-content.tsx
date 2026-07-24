@@ -1,9 +1,9 @@
 "use client"
 
+import { useState } from "react"
+import Link from "next/link"
 import { useWhitehash } from "@whitehash/react"
 import { Badge, Input } from "@whitehash/ui"
-import Link from "next/link"
-import { useState } from "react"
 import { Callout, CodeBlock, DocsHeading, DocsPage, DocsSection } from "./components/docs-chrome"
 
 /**

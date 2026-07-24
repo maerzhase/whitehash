@@ -5,8 +5,8 @@
  */
 "use client"
 
-import { ARTWORK_IFRAME_ALLOW, ARTWORK_IFRAME_SANDBOX } from "@whitehash/core"
 import clsx from "clsx"
+import { ARTWORK_IFRAME_ALLOW, ARTWORK_IFRAME_SANDBOX } from "@whitehash/core"
 import { forwardRef, useEffect } from "react"
 
 export interface ArtworkIframeProps extends React.IframeHTMLAttributes<HTMLIFrameElement> {
@@ -26,7 +26,6 @@ export const ArtworkIframe = forwardRef<HTMLIFrameElement, ArtworkIframeProps>(
       ...rest
     } = props
 
-    // biome-ignore lint/correctness/useExhaustiveDependencies: onMount should only run once on mount
     useEffect(() => {
       onMount?.()
     }, [])

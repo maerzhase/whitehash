@@ -1,5 +1,6 @@
-import type { ResolverConfig } from "@whitehash/resolve"
 import { describe, expect, it } from "vitest"
+import type { ResolverConfig } from "@whitehash/resolve"
+import type { WhitehashToken } from "./types.js"
 import {
   artworkUrl,
   imageSourceUri,
@@ -7,7 +8,6 @@ import {
   renderArtifactUri,
   tokenKey,
 } from "./semantics.js"
-import type { WhitehashToken } from "./types.js"
 
 const resolver: ResolverConfig = {
   ipfsGateways: ["https://ipfs.io"],

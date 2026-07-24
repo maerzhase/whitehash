@@ -3,10 +3,11 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-
-import { type IRuntimeContext, RuntimeContextEventEmitter } from "./interfaces.js"
 import { jsonStringifyBigint, serializeParamsOrNull, sumBytesParams } from "./params/index.js"
 import { BlockchainType } from "./shared.js"
+import type { DeepPartial } from "./vendor/index.js"
+import { cloneDeep } from "./vendor/object.js"
+import { type IRuntimeContext, RuntimeContextEventEmitter } from "./interfaces.js"
 import type {
   RuntimeDefinition,
   RuntimeDetails,
@@ -21,8 +22,6 @@ import {
   mergeWithKeepingUint8ArrayType,
   quickHash,
 } from "./utils.js"
-import type { DeepPartial } from "./vendor/index.js"
-import { cloneDeep } from "./vendor/object.js"
 
 const DEFAULT_RUNTIME_STATE: RuntimeState = Object.freeze({
   hash: "",

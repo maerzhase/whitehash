@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useState, type ReactNode } from "react"
+import Link from "next/link"
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
 import {
@@ -31,8 +33,6 @@ import {
   WalletGallery,
   WalletSearch,
 } from "@whitehash/ui"
-import Link from "next/link"
-import { type ReactNode, useEffect, useState } from "react"
 import {
   Callout,
   CodeBlock,

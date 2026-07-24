@@ -1,7 +1,7 @@
-import { readFile } from "node:fs/promises"
-import { join } from "node:path"
 import type { Metadata } from "next"
 import Link from "next/link"
+import { readFile } from "node:fs/promises"
+import { join } from "node:path"
 import {
   Callout,
   CodeBlock,

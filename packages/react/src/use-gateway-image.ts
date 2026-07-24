@@ -1,5 +1,5 @@
-import type { ChainId, WhitehashClient } from "@whitehash/chain-reader"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import type { ChainId, WhitehashClient } from "@whitehash/chain-reader"
 import { useWhitehash } from "./context.js"
 
 export interface UseGatewayImageOptions {

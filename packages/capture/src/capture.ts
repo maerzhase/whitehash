@@ -1,7 +1,7 @@
 import type { Browser, Page } from "puppeteer-core"
 import { assertUrlAllowed } from "./allowlist.js"
 import { isBrowserProvider } from "./browser/provider.js"
-import { asCaptureError, CaptureError } from "./errors.js"
+import { CaptureError, asCaptureError } from "./errors.js"
 import { extractFeatures } from "./features.js"
 import { captureCanvas } from "./strategies/canvas.js"
 import { captureGif } from "./strategies/gif.js"

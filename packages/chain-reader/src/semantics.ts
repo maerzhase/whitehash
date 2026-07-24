@@ -1,4 +1,4 @@
-import { type ResolverConfig, resolveUri } from "@whitehash/resolve"
+import { resolveUri, type ResolverConfig } from "@whitehash/resolve"
 import type { WhitehashToken } from "./types.js"
 
 /**

@@ -1,5 +1,5 @@
-import { defaultResolverConfig } from "@whitehash/resolve"
 import { describe, expect, it, vi } from "vitest"
+import { defaultResolverConfig } from "@whitehash/resolve"
 import { getTezosProject, listTezosProjects, listTezosProjectTokens } from "./browse.js"
 import type { ChainReaderConfig } from "./types.js"
 

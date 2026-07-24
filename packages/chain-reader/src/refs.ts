@@ -1,4 +1,4 @@
-import { type ChainId, isChainId, type WhitehashToken } from "@whitehash/core"
+import { isChainId, type ChainId, type WhitehashToken } from "@whitehash/core"
 
 export interface ProjectRef {
   type: "project"

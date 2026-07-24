@@ -9,18 +9,18 @@
  * so ownership is derived from `Transfer` logs and confirmed with `ownerOf`.
  */
 import {
-  type Address,
   createPublicClient,
   fallback,
   getAddress,
   http,
   isAddress,
-  type PublicClient,
   zeroAddress,
+  type Address,
+  type PublicClient,
 } from "viem"
 import { genArtAbi, issuerFactoryAbi } from "./abis.js"
-import { normalizeMetadata } from "./metadata.js"
 import { EVM_NETWORKS } from "./networks.js"
+import { normalizeMetadata } from "./metadata.js"
 import type {
   ChainId,
   ChainReaderConfig,

@@ -1,12 +1,12 @@
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
-  type ChainId,
   detectAddressChains,
+  type ChainId,
   type NetworkMode,
   type ProgressEvent,
   type WhitehashClient,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
-import { useCallback, useEffect, useRef, useState } from "react"
 import type { WhitehashCache } from "./cache.js"
 import { useWhitehash } from "./context.js"
 

@@ -3,8 +3,7 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-
-import semver from "semver"
+// biome-ignore-all lint/suspicious/noExplicitAny: upstream runtime utilities operate on dynamic project data
 import {
   type FxParamDefinition,
   type FxParamDefinitions,
@@ -12,9 +11,10 @@ import {
   type FxParamType,
   jsonStringifyBigint,
 } from "./params/index.js"
-import type { RuntimeDefinition, RuntimeState, RuntimeWholeState } from "./types.js"
 import { float2hex, xorshiftString } from "./vendor/index.js"
 import { mergeRuntime } from "./vendor/object.js"
+import semver from "semver"
+import type { RuntimeDefinition, RuntimeState, RuntimeWholeState } from "./types.js"
 
 /**
  * Returns a boolean based on the provided snippet version. The boolean

@@ -1,5 +1,5 @@
-import { Dialog as BaseDialog } from "@base-ui-components/react/dialog"
 import type { ComponentProps, ReactNode } from "react"
+import { Dialog as BaseDialog } from "@base-ui-components/react/dialog"
 import { cn } from "../lib/cn.js"
 
 /**

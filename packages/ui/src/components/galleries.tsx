@@ -1,34 +1,34 @@
+import { useEffect, useState, type ComponentProps } from "react"
 import {
-  type ChainId,
-  type ListOrder,
   MAINNET_CHAINS,
-  type ProjectInput,
-  type ProjectRef,
+  TESTNET_CHAINS,
   projectLabel,
   projectRef,
-  TESTNET_CHAINS,
   tokenKey,
+  type ChainId,
+  type ListOrder,
+  type ProjectInput,
+  type ProjectRef,
   type WhitehashProject,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
 import { chainLabel as coreChainLabel, isTezosChain } from "@whitehash/core"
 import {
-  type ChainState,
   useGatewayImage,
   useProject,
   useProjects,
   useWalletTokens,
   useWhitehash,
+  type ChainState,
 } from "@whitehash/react"
-import { type ComponentProps, useEffect, useState } from "react"
-import { cn } from "../lib/cn.js"
-import { Artwork } from "./artwork.js"
 import { Badge, type BadgeProps } from "./badge.js"
+import { Artwork } from "./artwork.js"
 import { Button } from "./button.js"
 import { Card } from "./card.js"
 import { Skeleton } from "./feedback.js"
 import { ToggleGroup } from "./toggle-group.js"
 import { TokenGrid } from "./token-grid.js"
+import { cn } from "../lib/cn.js"
 
 const ISSUER_VERSIONS = ["v3", "v2", "v1", "v0"]
 export function editionsLabel(minted: number | null, editions: number | null): string {

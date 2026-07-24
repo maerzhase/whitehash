@@ -23,8 +23,8 @@ import { hexToUtf8 } from "./tezos.js"
 import type {
   ChainId,
   ChainReaderConfig,
-  ProgressCallback,
   ProjectCaptureSettings,
+  ProgressCallback,
   WhitehashToken,
 } from "./types.js"
 

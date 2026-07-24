@@ -3,8 +3,6 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-
-import { type RefCallback, useCallback, useEffect, useMemo, useState } from "react"
 import {
   type ControlState,
   type ControlsChangedEventPayload,
@@ -14,6 +12,7 @@ import {
   type ProjectState,
   type RuntimeWholeState,
 } from "../index.js"
+import { type RefCallback, useCallback, useEffect, useMemo, useState } from "react"
 
 export interface IUseRuntimeControllerReturn {
   controller: IRuntimeController
@@ -29,7 +28,6 @@ export type UseRuntimeController = (params: {
 }) => IUseRuntimeControllerReturn
 
 export const useRuntimeController: UseRuntimeController = ({ state, options }) => {
-  // biome-ignore lint/correctness/useExhaustiveDependencies: ok
   const controller = useMemo<IRuntimeController>(
     () =>
       createRuntimeController({

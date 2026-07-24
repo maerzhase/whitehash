@@ -1,14 +1,14 @@
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
-  type ChainId,
   formatRef,
+  projectRef,
+  type ChainId,
   type ListOrder,
   type ProjectInput,
-  projectRef,
   type WhitehashClient,
   type WhitehashProject,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
-import { useCallback, useEffect, useRef, useState } from "react"
 import { useWhitehash } from "./context.js"
 
 export interface UseProjectsOptions {

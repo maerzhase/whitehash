@@ -3,7 +3,7 @@
  * by @whitehash/resolve's chainSlug) to onchfs-js blockchain ids and RPC lists.
  * RPCs are overridable via environment variables (comma-separated).
  */
-import { CHAIN_DEFINITIONS, type ChainId, chainDefinition } from "@whitehash/core"
+import { CHAIN_DEFINITIONS, chainDefinition, type ChainId } from "@whitehash/core"
 
 export interface ProxyNetwork {
   /** URL path slug, e.g. "eip155-8453". */

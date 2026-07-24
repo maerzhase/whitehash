@@ -2,13 +2,13 @@ import { mkdir, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import {
   buildProjectIndex,
-  type ChainId,
   createWhitehashClient,
   getEvmProjectTokensViaRpc,
-  type ProjectIndex,
-  type ProjectIndexReader,
-  type ProjectRef,
   parseRef,
+  type ChainId,
+  type ProjectIndexReader,
+  type ProjectIndex,
+  type ProjectRef,
 } from "@whitehash/chain-reader"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"
 

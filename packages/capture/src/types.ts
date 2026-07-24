@@ -1,14 +1,14 @@
+import type { Browser } from "puppeteer-core"
 import {
-  type ArtworkAttribute,
   CaptureMode,
-  type CaptureSettings,
   CaptureTriggerMode,
+  type ArtworkAttribute,
+  type CaptureSettings,
   type WireCaptureSettings,
 } from "@whitehash/core"
-import type { Browser } from "puppeteer-core"
 import type { BrowserProvider } from "./browser/provider.js"
 
-export { CaptureMode, type CaptureSettings, CaptureTriggerMode, type WireCaptureSettings }
+export { CaptureMode, CaptureTriggerMode, type CaptureSettings, type WireCaptureSettings }
 
 export type CaptureFeature = ArtworkAttribute<string | number | boolean>
 

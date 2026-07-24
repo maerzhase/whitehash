@@ -1,12 +1,12 @@
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   formatRef,
   parseRef,
-  type TokenInput,
   tokenRef,
+  type TokenInput,
   type WhitehashClient,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
-import { useCallback, useEffect, useRef, useState } from "react"
 import { useWhitehash } from "./context.js"
 
 export interface UseTokenOptions {

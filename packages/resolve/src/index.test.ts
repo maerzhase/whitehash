@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from "vitest"
 import {
   createResolver,
   fetchWithGatewayFallback,
-  type ResolverConfig,
   resolveUri,
   resolveUriAll,
+  type ResolverConfig,
 } from "./index.js"
 
 const config: ResolverConfig = {

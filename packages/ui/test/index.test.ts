@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
-import { isWalletAddress } from "../src/components/address-search.js"
-import { badgeVariants } from "../src/components/badge.js"
-import { buttonVariants } from "../src/components/button.js"
 import { cn } from "../src/lib/cn.js"
+import { buttonVariants } from "../src/components/button.js"
+import { badgeVariants } from "../src/components/badge.js"
+import { isWalletAddress } from "../src/components/address-search.js"
 
 describe("cn", () => {
   it("merges and dedupes conflicting Tailwind classes (last wins)", () => {

@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import type { WhitehashToken } from "@whitehash/chain-reader"
 import { useWhitehash } from "@whitehash/react"
 import {
@@ -12,7 +13,6 @@ import {
 } from "@whitehash/runtime"
 import { ArtworkIframe, useRuntimeController } from "@whitehash/runtime/react"
 import { Button, Field, Input } from "@whitehash/ui"
-import { useMemo } from "react"
 import { Callout } from "./components/docs-chrome"
 
 function tokenRuntimeState(token: WhitehashToken): ProjectState {

@@ -1,8 +1,8 @@
-import { defaultResolverConfig } from "@whitehash/resolve"
-import type { PublicClient } from "viem"
 import { describe, expect, it, vi } from "vitest"
+import { defaultResolverConfig } from "@whitehash/resolve"
 import { discoverEvmProjectTokenRefsViaRpc, getEvmWalletTokens, isEvmAddress } from "./evm.js"
 import type { ChainReaderConfig } from "./types.js"
+import type { PublicClient } from "viem"
 
 describe("isEvmAddress", () => {
   it("accepts checksummed and lowercase 0x addresses", () => {

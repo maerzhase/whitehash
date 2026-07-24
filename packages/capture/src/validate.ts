@@ -1,5 +1,5 @@
 import { CaptureError } from "./errors.js"
-import { CaptureMode, type CaptureSettings, CaptureTriggerMode } from "./types.js"
+import { CaptureMode, CaptureTriggerMode, type CaptureSettings } from "./types.js"
 
 function requiredNumber(
   value: unknown,

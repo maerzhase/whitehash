@@ -1,7 +1,7 @@
 import type { Page } from "puppeteer-core"
 import { CaptureError } from "../errors.js"
+import { CaptureMode, CaptureTriggerMode, type CaptureSettings } from "../types.js"
 import type { TriggerController } from "../triggers.js"
-import { CaptureMode, type CaptureSettings, CaptureTriggerMode } from "../types.js"
 
 interface RgbaFrame {
   pixels: Uint8Array

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import type { WhitehashProject } from "./browse.js"
 import { buildTokenIndex, parseTokenIndex, type TokenIndexReader } from "./token-index.js"
+import type { WhitehashProject } from "./browse.js"
 import type { WhitehashToken } from "./types.js"
 
 const token: WhitehashToken = {

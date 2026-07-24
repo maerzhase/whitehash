@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto"
-import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises"
-import { dirname, extname, join, relative, resolve, sep } from "node:path"
 import { gunzipSync } from "node:zlib"
-import { type ChainId, createWhitehashClient, type WhitehashToken } from "@whitehash/chain-reader"
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises"
+import { dirname, extname, join, relative, resolve, sep } from "node:path"
+import onchfs from "onchfs"
+import { createWhitehashClient, type ChainId, type WhitehashToken } from "@whitehash/chain-reader"
 import { ARTWORK_IFRAME_SANDBOX, chainSlug, type OnchfsResponse } from "@whitehash/core"
 import { ONCHFS_WORKER_NETWORKS } from "@whitehash/onchfs-sw"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"
-import onchfs from "onchfs"
 import { extractCar, writeExtractedCar } from "./car.js"
 
 export interface ArchiveOptions {

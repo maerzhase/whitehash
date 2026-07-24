@@ -1,8 +1,8 @@
 "use client"
 
-import { DocsPage } from "./components/docs-chrome"
 import { API_ENTRIES, ApiDocPage, GuidePage, SAMPLE_TOKEN } from "./docs-content"
 import { UNDERSTAND_ENTRIES, UnderstandPage } from "./understand-content"
+import { DocsPage } from "./components/docs-chrome"
 import { Variations } from "./variations-demo"
 
 export function DocsRoutePage({

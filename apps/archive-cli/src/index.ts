@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import { pathToFileURL } from "node:url"
-import { type ChainId, parseRef } from "@whitehash/chain-reader"
-import { resolveChainId } from "@whitehash/core"
 import { archiveWallets, verifyArchive } from "./archive.js"
 import { writeProjectIndex } from "./project-index.js"
 import { writeTokenIndex } from "./token-index.js"
+import { parseRef, type ChainId } from "@whitehash/chain-reader"
+import { resolveChainId } from "@whitehash/core"
+import { pathToFileURL } from "node:url"
 
 const HELP = `whitehash archive
 Create portable indexes and preserve wallet collections from public chain data.

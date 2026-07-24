@@ -4,7 +4,7 @@
  * Addresses are copied from the fxhash monorepo config (MIT) and verified
  * against the production indexer configuration (July 2026).
  */
-import { type ChainId, chainDefinition, isEvmChain, isTezosChain } from "@whitehash/core"
+import { chainDefinition, isEvmChain, isTezosChain, type ChainId } from "@whitehash/core"
 
 export interface TezosNetworkConfig {
   chainId: Extract<ChainId, `tezos:${string}`>

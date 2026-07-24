@@ -1,5 +1,5 @@
-import { defaultResolverConfig } from "@whitehash/resolve"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { defaultResolverConfig } from "@whitehash/resolve"
 import { getTezosTokenProjectRefs, getToken } from "./token.js"
 
 afterEach(() => vi.unstubAllGlobals())

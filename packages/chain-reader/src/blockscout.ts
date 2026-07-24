@@ -11,9 +11,9 @@
  * re-read tokenURI from chain and fetch the real JSON.
  */
 import { getAddress } from "viem"
-import { fetchEvmMetadata, readTokenUris } from "./evm.js"
 import { normalizeMetadata } from "./metadata.js"
 import { EVM_NETWORKS } from "./networks.js"
+import { fetchEvmMetadata, readTokenUris } from "./evm.js"
 import type {
   ChainId,
   ChainReaderConfig,
@@ -56,7 +56,9 @@ async function bsFetch<T>(url: string, fetchImpl: typeof fetch): Promise<T> {
     } catch (err) {
       lastError = err
     }
-    await new Promise(r => setTimeout(r, 400 * 2 ** attempt))
+    await new Promise(r => {
+      setTimeout(r, 400 * 2 ** attempt)
+    })
   }
   throw new Error(`Blockscout request failed after retries: ${url} (${String(lastError)})`)
 }

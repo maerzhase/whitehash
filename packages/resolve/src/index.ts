@@ -11,7 +11,7 @@
  * (fxhash monorepo `packages/config/src/utils/ipfs.ts`, MIT), with all
  * fxhash-hosted default endpoints removed.
  */
-import { type ChainId, isChainId, chainSlug as sharedChainSlug } from "@whitehash/core"
+import { chainSlug as sharedChainSlug, isChainId, type ChainId } from "@whitehash/core"
 
 export interface ResolverConfig {
   /**

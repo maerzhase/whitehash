@@ -2,8 +2,8 @@ import { mkdir, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import {
   buildTokenIndex,
-  type ChainId,
   createWhitehashClient,
+  type ChainId,
   type TokenIndex,
 } from "@whitehash/chain-reader"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"

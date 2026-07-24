@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
-  CHAIN_DEFINITIONS,
   CHAINS,
+  CHAIN_DEFINITIONS,
   chainDefinition,
   chainFromSlug,
   resolveChainId,

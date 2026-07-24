@@ -1,8 +1,8 @@
-import { type ComponentProps, useEffect, useState } from "react"
-import { cn } from "../lib/cn.js"
+import { useEffect, useState, type ComponentProps } from "react"
 import { Button } from "./button.js"
 import { Dialog, type DialogProps } from "./dialog.js"
 import { Input } from "./field.js"
+import { cn } from "../lib/cn.js"
 
 export function isWalletAddress(value: string): boolean {
   return /^tz[1-4][1-9A-HJ-NP-Za-km-z]{33}$/.test(value) || /^0x[0-9a-fA-F]{40}$/.test(value)

@@ -3,21 +3,20 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-
-import {
-  type IRuntimeControls,
-  RuntimeControlsEventEmitter,
-  type RuntimeControlsUpdateOptions,
-} from "./interfaces.js"
 import {
   type FxParamDefinitions,
   type FxParamsData,
   serializeParamsOrNull,
 } from "./params/index.js"
-import type { ControlState } from "./types.js"
-import { mergeWithKeepingUint8ArrayType } from "./utils.js"
 import { invariant } from "./vendor/index.js"
 import { cloneDeep } from "./vendor/object.js"
+import {
+  type IRuntimeControls,
+  RuntimeControlsEventEmitter,
+  type RuntimeControlsUpdateOptions,
+} from "./interfaces.js"
+import type { ControlState } from "./types.js"
+import { mergeWithKeepingUint8ArrayType } from "./utils.js"
 
 const DEFAULT_CONTROL_STATE: ControlState = Object.freeze({
   params: {

@@ -1,6 +1,6 @@
-import type { DocsNavItem } from "./components/docs-chrome"
 import { API_ENTRIES } from "./docs-content"
 import { UNDERSTAND_ENTRIES } from "./understand-content"
+import type { DocsNavItem } from "./components/docs-chrome"
 
 export const DOC_NAV: DocsNavItem[] = [
   { label: "Getting started", href: "/guide/getting-started", group: "Start" },

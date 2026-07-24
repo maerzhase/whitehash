@@ -1,11 +1,11 @@
-import type { CaptureMode, CaptureSettings, CaptureTriggerMode, ChainId } from "@whitehash/core"
 import type { ResolverConfig } from "@whitehash/resolve"
+import type { CaptureMode, CaptureSettings, CaptureTriggerMode, ChainId } from "@whitehash/core"
 
 export {
-  type ChainId,
   MAINNET_CHAINS,
-  type NetworkMode,
   TESTNET_CHAINS,
+  type ChainId,
+  type NetworkMode,
   type WhitehashToken,
 } from "@whitehash/core"
 

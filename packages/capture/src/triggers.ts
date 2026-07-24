@@ -1,6 +1,6 @@
 import type { ConsoleMessage, Page } from "puppeteer-core"
 import { CaptureError } from "./errors.js"
-import { type CaptureSettings, CaptureTriggerMode, type CaptureTriggerSource } from "./types.js"
+import { CaptureTriggerMode, type CaptureSettings, type CaptureTriggerSource } from "./types.js"
 
 type Signal = "event" | "console"
 type Waiter = (signal: Signal) => void

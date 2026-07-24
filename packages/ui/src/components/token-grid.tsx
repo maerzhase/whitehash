@@ -1,7 +1,7 @@
 import { Children, type ComponentProps, type ReactNode } from "react"
-import { cn } from "../lib/cn.js"
 import { Card } from "./card.js"
 import { Skeleton } from "./feedback.js"
+import { cn } from "../lib/cn.js"
 
 export interface TokenGridProps extends ComponentProps<"div"> {
   loading?: boolean

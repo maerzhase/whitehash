@@ -3,21 +3,8 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-
-import { directRuntimeConnector } from "./connectors.js"
-import { runtimeContext } from "./context.js"
-import { runtimeControls } from "./controls.js"
-import {
-  type ControlsChangedEventPayload,
-  type IRuntimeConnector,
-  type IRuntimeContext,
-  type IRuntimeController,
-  RuntimeControllerEventEmitter,
-} from "./interfaces.js"
+// biome-ignore-all lint/suspicious/noExplicitAny: upstream runtime contracts use dynamic project data
 import { buildParamsObject, deserializeParams, type FxParamsData } from "./params/index.js"
-import type { ControlState, ProjectState, RuntimeWholeState } from "./types.js"
-import { addVersionToParamsDefinition } from "./utils.js"
-import { debounce } from "./vendor/debounce.js"
 import {
   cleanup,
   intialization,
@@ -25,6 +12,19 @@ import {
   mockBlockchainAddress,
   mockTransactionHash,
 } from "./vendor/index.js"
+import { debounce } from "./vendor/debounce.js"
+import {
+  type ControlsChangedEventPayload,
+  type IRuntimeConnector,
+  type IRuntimeContext,
+  type IRuntimeController,
+  RuntimeControllerEventEmitter,
+} from "./interfaces.js"
+import type { ControlState, ProjectState, RuntimeWholeState } from "./types.js"
+import { directRuntimeConnector } from "./connectors.js"
+import { runtimeContext } from "./context.js"
+import { runtimeControls } from "./controls.js"
+import { addVersionToParamsDefinition } from "./utils.js"
 
 /**
  * This function is used to handle old snippet events for projects

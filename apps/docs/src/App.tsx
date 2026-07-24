@@ -1,16 +1,19 @@
 "use client"
 
+import { useEffect, useRef, useState, type CSSProperties } from "react"
+import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   CURATED_PROJECT_EXAMPLES,
+  parseRef,
+  tokenKey,
   type CuratedProjectExample,
   type ProjectRef,
-  parseRef,
   type TokenRef,
-  tokenKey,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
-import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
 import { useProject, useWalletTokens, useWhitehash } from "@whitehash/react"
+import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
 import {
   Artwork,
   Button,
@@ -21,13 +24,10 @@ import {
   WalletGallery,
   WhitehashProvider,
 } from "@whitehash/ui"
-import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { type CSSProperties, useEffect, useRef, useState } from "react"
-import { CodeBlock, DocsPage, DocsShell, SiteHeader } from "./components/docs-chrome"
 import { API_ENTRIES, ApiDocPage, GuidePage, SAMPLE_TOKEN } from "./docs-content"
-import { DOC_NAV } from "./docs-navigation"
 import { UnderstandPage } from "./understand-content"
+import { CodeBlock, DocsPage, DocsShell, SiteHeader } from "./components/docs-chrome"
+import { DOC_NAV } from "./docs-navigation"
 import { Variations } from "./variations-demo"
 
 type Route =

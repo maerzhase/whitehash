@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs"
 import { delimiter, join } from "node:path"
 import puppeteer, { type Browser, type LaunchOptions } from "puppeteer-core"
-import { type BrowserProvider, CONTAINER_CHROME_ARGS } from "./provider.js"
+import { CONTAINER_CHROME_ARGS, type BrowserProvider } from "./provider.js"
 
 const PLATFORM_PATHS: Record<NodeJS.Platform, string[]> = {
   darwin: [

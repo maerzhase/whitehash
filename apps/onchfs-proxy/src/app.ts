@@ -12,12 +12,11 @@
  *
  * Adapted from the fxhash onchfs http-proxy example (MIT).
  */
-
-import type { OnchfsResponse } from "@whitehash/core"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import onchfs from "onchfs"
-import { DEFAULT_NETWORK_SLUG, PROXY_NETWORKS, type ProxyNetwork, rpcsFor } from "./networks.js"
+import type { OnchfsResponse } from "@whitehash/core"
+import { DEFAULT_NETWORK_SLUG, PROXY_NETWORKS, rpcsFor, type ProxyNetwork } from "./networks.js"
 
 type ResolveFn = (uri: string) => Promise<OnchfsResponse>
 

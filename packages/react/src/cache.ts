@@ -1,5 +1,5 @@
-import type { ChainId, WhitehashToken } from "@whitehash/chain-reader"
 import { del, get, set } from "idb-keyval"
+import type { ChainId, WhitehashToken } from "@whitehash/chain-reader"
 
 const CACHE_VERSION = "v1"
 

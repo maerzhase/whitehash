@@ -11,8 +11,8 @@
  * blocks at load time.
  */
 import { writeFileSync } from "node:fs"
-import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
+import { dirname, join } from "node:path"
 import { defaultResolverConfig } from "@whitehash/resolve"
 import { discoverEvmCollections } from "../src/evm.js"
 import { EVM_NETWORKS } from "../src/networks.js"
