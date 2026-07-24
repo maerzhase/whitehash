@@ -84,6 +84,10 @@ Changesets record every meaningful package change. Package publication remains d
 until the maintainer explicitly approves scope ownership, initial versions, and public
 access.
 
+Pushes to `main` create or update a Changesets release pull request through
+`.github/workflows/release.yml`. Merging that pull request applies package versions and
+changelogs; npm publication remains a separate, explicitly approved step.
+
 ## Versioning policy
 
 Whitehash follows semantic versioning: patches fix behavior without changing supported
