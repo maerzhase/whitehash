@@ -1,4 +1,4 @@
-import type { ChainId, WhitehashToken } from "./types.js"
+import { isChainId, type ChainId, type WhitehashToken } from "@whitehash/core"
 
 export interface ProjectRef {
   type: "project"
@@ -32,11 +32,6 @@ export interface ContentInput {
 export type WhitehashRef = ProjectRef | TokenRef
 export type ResolvedInput = WhitehashRef | AddressInput | ContentInput
 
-const CHAINS = new Set<ChainId>([
-  "tezos:mainnet", "tezos:ghostnet", "eip155:1", "eip155:11155111",
-  "eip155:8453", "eip155:84532",
-])
-
 const decode = (value: string) => decodeURIComponent(value)
 const encode = (value: string) => encodeURIComponent(value)
 
@@ -51,15 +46,15 @@ export function parseRef(value: string, expected?: WhitehashRef["type"]): Whiteh
 export function parseRef(value: string, expected?: WhitehashRef["type"]): WhitehashRef {
   const parts = value.trim().replace(/^whitehash:\/\//, "").replace(/^\/+/, "").split("/").map(decode)
   const [type, chain] = parts
-  if ((type !== "project" && type !== "token") || !chain || !CHAINS.has(chain as ChainId)) {
+  if ((type !== "project" && type !== "token") || !chain || !isChainId(chain)) {
     throw new Error(`Invalid whitehash ref: ${value}`)
   }
   if (expected && type !== expected) throw new Error(`Expected a ${expected} ref`)
   if (type === "project" && parts.length === 3 && parts[2]) {
-    return { type, chain: chain as ChainId, id: parts[2] }
+    return { type, chain, id: parts[2] }
   }
   if (type === "token" && parts.length === 4 && parts[2] && parts[3]) {
-    return { type, chain: chain as ChainId, contract: parts[2], tokenId: parts[3] }
+    return { type, chain, contract: parts[2], tokenId: parts[3] }
   }
   throw new Error(`Invalid whitehash ref: ${value}`)
 }

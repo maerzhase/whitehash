@@ -2,6 +2,7 @@
  * Browser service worker adapted from the fxhash onchfs HTTP proxy example (MIT).
  * It uses only caller-visible public RPCs and a same-origin virtual path.
  */
+import type { OnchfsResponse } from "@whitehash/core"
 import { ONCHFS_CACHE, parseOnchfsRequest, responseFromOnchfs } from "./core.js"
 import { ONCHFS_WORKER_NETWORKS } from "./networks.js"
 
@@ -24,8 +25,7 @@ const onchfs = (globalThis as typeof globalThis & {
   Onchfs: { resolver: { create(config: unknown[]): unknown } }
 }).Onchfs
 
-type ResolveResult = { status: number; content: Uint8Array; headers: Record<string, string> }
-type ResolveFn = (uri: string) => Promise<ResolveResult>
+type ResolveFn = (uri: string) => Promise<OnchfsResponse>
 const resolvers = new Map<string, ResolveFn>()
 
 function resolverFor(slug: string): ResolveFn {

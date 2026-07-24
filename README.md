@@ -48,6 +48,7 @@ browser-persistent caching. Configure only what you want to change.
 
 | Layer | Package | Use it when |
 | --- | --- | --- |
+| Shared contracts | [`@whitehash/core`](./packages/core) | You only need stable types, supported-network metadata, capture contracts, or browser security defaults |
 | Framework-free | [`@whitehash/resolve`](./packages/resolve), [`@whitehash/chain-reader`](./packages/chain-reader), [`@whitehash/runtime`](./packages/runtime), [`@whitehash/onchfs-sw`](./packages/onchfs-sw) | You want plain TypeScript, direct onchfs resolution, a custom renderer, interactive variations, or non-React integration |
 | Headless React | [`@whitehash/react`](./packages/react) | You want hooks for fetching, caching, gateway fallback, and iframe state |
 | Complete UI | [`@whitehash/ui`](./packages/ui) | You want composable artwork, token, gallery, and search components |

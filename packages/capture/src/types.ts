@@ -1,40 +1,21 @@
 import type { Browser } from "puppeteer-core"
+import {
+  CaptureMode,
+  CaptureTriggerMode,
+  type ArtworkAttribute,
+  type CaptureSettings,
+  type WireCaptureSettings,
+} from "@whitehash/core"
 import type { BrowserProvider } from "./browser/provider.js"
 
-export enum CaptureMode {
-  CANVAS = "CANVAS",
-  VIEWPORT = "VIEWPORT",
-  CUSTOM = "CUSTOM",
+export {
+  CaptureMode,
+  CaptureTriggerMode,
+  type CaptureSettings,
+  type WireCaptureSettings,
 }
 
-export enum CaptureTriggerMode {
-  DELAY = "DELAY",
-  FN_TRIGGER = "FN_TRIGGER",
-  FN_TRIGGER_GIF = "FN_TRIGGER_GIF",
-}
-
-export interface CaptureSettings {
-  mode: CaptureMode
-  triggerMode?: CaptureTriggerMode
-  resolution?: { x: number; y: number }
-  delay?: number
-  canvasSelector?: string
-  gif?: boolean
-  frameCount?: number
-  captureInterval?: number
-  playbackFps?: number
-}
-
-export type WireCaptureSettings = {
-  [K in keyof CaptureSettings]?: K extends "resolution"
-    ? { x: number | string; y: number | string }
-    : CaptureSettings[K] | string
-}
-
-export interface CaptureFeature {
-  name: string
-  value: string | number | boolean
-}
+export type CaptureFeature = ArtworkAttribute<string | number | boolean>
 
 export type CaptureTriggerSource =
   | "delay"

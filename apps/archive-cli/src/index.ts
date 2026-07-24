@@ -2,25 +2,9 @@
 import { archiveWallets, verifyArchive } from "./archive.js"
 import { writeProjectIndex } from "./project-index.js"
 import { writeTokenIndex } from "./token-index.js"
-import {
-  MAINNET_CHAINS,
-  parseRef,
-  TESTNET_CHAINS,
-  type ChainId,
-} from "@whitehash/chain-reader"
+import { parseRef, type ChainId } from "@whitehash/chain-reader"
+import { resolveChainId } from "@whitehash/core"
 import { pathToFileURL } from "node:url"
-
-const CHAIN_ALIASES: Record<string, ChainId> = {
-  tezos: "tezos:mainnet",
-  ethereum: "eip155:1",
-  eth: "eip155:1",
-  base: "eip155:8453",
-  ghostnet: "tezos:ghostnet",
-  sepolia: "eip155:11155111",
-  "base-sepolia": "eip155:84532",
-}
-
-const CHAINS = new Set<ChainId>([...MAINNET_CHAINS, ...TESTNET_CHAINS])
 
 const HELP = `whitehash archive
 Create portable indexes and preserve wallet collections from public chain data.
@@ -153,11 +137,11 @@ function positiveInteger(value: string | undefined): number {
 
 function chainId(value: string | undefined): ChainId {
   if (!value) usage("Expected a chain name after the option.")
-  const resolved = CHAIN_ALIASES[value] ?? value
-  if (!CHAINS.has(resolved as ChainId)) {
+  const resolved = resolveChainId(value)
+  if (!resolved) {
     usage(`Unknown chain "${value}". Use tezos, ethereum, base, or a full chain ID.`)
   }
-  return resolved as ChainId
+  return resolved
 }
 
 function projectInput(

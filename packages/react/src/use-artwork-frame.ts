@@ -5,11 +5,13 @@ import {
   type WhitehashClient,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
+import {
+  ARTWORK_IFRAME_ALLOW,
+  ARTWORK_IFRAME_SANDBOX,
+} from "@whitehash/core"
 import { useWhitehash } from "./context.js"
 
-export const ARTWORK_IFRAME_SANDBOX = "allow-scripts allow-same-origin allow-modals"
-export const ARTWORK_IFRAME_ALLOW =
-  "accelerometer; camera; gyroscope; microphone; xr-spatial-tracking; fullscreen"
+export { ARTWORK_IFRAME_ALLOW, ARTWORK_IFRAME_SANDBOX }
 
 export interface ArtworkIframeProps {
   title: string

@@ -13,6 +13,10 @@ import {
   type WhitehashToken,
 } from "@whitehash/chain-reader"
 import {
+  chainLabel as coreChainLabel,
+  isTezosChain,
+} from "@whitehash/core"
+import {
   useGatewayImage,
   useProject,
   useProjects,
@@ -30,8 +34,6 @@ import { TokenGrid } from "./token-grid.js"
 import { cn } from "../lib/cn.js"
 
 const ISSUER_VERSIONS = ["v3", "v2", "v1", "v0"]
-const isTezosChain = (chain: ChainId) => chain.startsWith("tezos:")
-
 export function editionsLabel(minted: number | null, editions: number | null): string {
   if (minted !== null && editions !== null) return `${minted} / ${editions}`
   if (minted !== null) return `${minted} minted`
@@ -40,11 +42,7 @@ export function editionsLabel(minted: number | null, editions: number | null): s
 }
 
 export function chainLabel(chain: ChainId): string {
-  if (isTezosChain(chain)) return chain.includes("ghost") ? "Ghostnet" : "Tezos"
-  if (chain === "eip155:1") return "Ethereum"
-  if (chain === "eip155:8453") return "Base"
-  if (chain === "eip155:11155111") return "Sepolia"
-  return "Base Sepolia"
+  return coreChainLabel(chain)
 }
 
 export function SortToggle({

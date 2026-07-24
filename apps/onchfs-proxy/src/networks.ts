@@ -3,6 +3,11 @@
  * by @whitehash/resolve's chainSlug) to onchfs-js blockchain ids and RPC lists.
  * RPCs are overridable via environment variables (comma-separated).
  */
+import {
+  CHAIN_DEFINITIONS,
+  chainDefinition,
+  type ChainId,
+} from "@whitehash/core"
 
 export interface ProxyNetwork {
   /** URL path slug, e.g. "eip155-8453". */
@@ -14,51 +19,25 @@ export interface ProxyNetwork {
   defaultRpcs: string[]
 }
 
-export const PROXY_NETWORKS: ProxyNetwork[] = [
-  {
-    slug: "tezos-mainnet",
-    onchfsNetwork: "tezos:NetXdQprcVkpaWU",
-    rpcEnvVar: "ONCHFS_TEZOS_RPCS",
-    defaultRpcs: [
-      "https://mainnet.tezos.ecadinfra.com",
-      "https://mainnet.tezos.marigold.dev",
-      "https://rpc.tzbeta.net",
-    ],
-  },
-  {
-    slug: "tezos-ghostnet",
-    onchfsNetwork: "tezos:NetXnHfVqm9iesp",
-    rpcEnvVar: "ONCHFS_GHOSTNET_RPCS",
-    defaultRpcs: ["https://ghostnet.tezos.ecadinfra.com", "https://ghostnet.tezos.marigold.dev"],
-  },
-  {
-    slug: "eip155-1",
-    onchfsNetwork: "eip155:1",
-    rpcEnvVar: "ONCHFS_ETH_RPCS",
-    defaultRpcs: ["https://eth.llamarpc.com", "https://ethereum-rpc.publicnode.com"],
-  },
-  {
-    slug: "eip155-11155111",
-    onchfsNetwork: "eip155:11155111",
-    rpcEnvVar: "ONCHFS_SEPOLIA_RPCS",
-    defaultRpcs: ["https://ethereum-sepolia-rpc.publicnode.com"],
-  },
-  {
-    slug: "eip155-8453",
-    onchfsNetwork: "eip155:8453",
-    rpcEnvVar: "ONCHFS_BASE_RPCS",
-    defaultRpcs: ["https://mainnet.base.org", "https://base-rpc.publicnode.com"],
-  },
-  {
-    slug: "eip155-84532",
-    onchfsNetwork: "eip155:84532",
-    rpcEnvVar: "ONCHFS_BASE_SEPOLIA_RPCS",
-    defaultRpcs: ["https://sepolia.base.org"],
-  },
-]
+const RPC_ENV_VARS: Record<ChainId, string> = {
+  "tezos:mainnet": "ONCHFS_TEZOS_RPCS",
+  "tezos:ghostnet": "ONCHFS_GHOSTNET_RPCS",
+  "eip155:1": "ONCHFS_ETH_RPCS",
+  "eip155:11155111": "ONCHFS_SEPOLIA_RPCS",
+  "eip155:8453": "ONCHFS_BASE_RPCS",
+  "eip155:84532": "ONCHFS_BASE_SEPOLIA_RPCS",
+}
+
+export const PROXY_NETWORKS: ProxyNetwork[] = CHAIN_DEFINITIONS.map(network => ({
+  slug: network.slug,
+  onchfsNetwork: network.onchfsNetwork,
+  rpcEnvVar: RPC_ENV_VARS[network.id]!,
+  defaultRpcs: [...network.defaultRpcs],
+}))
 
 /** Default network used when a request has no recognized network prefix. */
-export const DEFAULT_NETWORK_SLUG = "tezos-mainnet"
+export const DEFAULT_NETWORK_SLUG =
+  chainDefinition("tezos:mainnet").slug
 
 export function rpcsFor(
   network: ProxyNetwork,

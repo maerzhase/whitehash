@@ -1,7 +1,7 @@
 {
-  "name": "@whitehash/chain-reader",
+  "name": "@whitehash/core",
   "version": "0.0.0",
-  "description": "Read fxhash wallets and projects from public Tezos, Ethereum, and Base infrastructure.",
+  "description": "Shared framework-free contracts, network metadata, and browser policies for whitehash packages.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -15,23 +15,14 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "snapshots"],
+  "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
     "check-types": "tsc --noEmit",
-    "test": "vitest run",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
-    "snapshot:update": "tsx scripts/update-snapshot.ts"
-  },
-  "dependencies": {
-    "@whitehash/core": "workspace:*",
-    "@whitehash/resolve": "workspace:*",
-    "viem": "2.45.0"
+    "test": "vitest run"
   },
   "devDependencies": {
-    "@types/node": "20.19.0",
     "tsup": "8.5.0",
-    "tsx": "4.20.6",
     "typescript": "5.9.3",
     "vitest": "3.2.4"
   }

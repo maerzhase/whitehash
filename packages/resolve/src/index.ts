@@ -11,6 +11,11 @@
  * (fxhash monorepo `packages/config/src/utils/ipfs.ts`, MIT), with all
  * fxhash-hosted default endpoints removed.
  */
+import {
+  chainSlug as sharedChainSlug,
+  isChainId,
+  type ChainId,
+} from "@whitehash/core"
 
 export interface ResolverConfig {
   /**
@@ -43,7 +48,7 @@ export interface ResolveOptions {
    * proxy needs to know which blockchain to resolve against, so the chain is
    * encoded as the first path segment (`:` → `-`). Ignored for other schemes.
    */
-  chain?: string
+  chain?: ChainId
 }
 
 interface SplitUri {
@@ -85,7 +90,7 @@ function joinGateway(gateway: string, rest: string): string {
 
 /** "eip155:8453" → "eip155-8453" for use as a URL path segment. */
 export function chainSlug(chain: string): string {
-  return chain.replace(/:/g, "-")
+  return isChainId(chain) ? sharedChainSlug(chain) : chain.replace(/:/g, "-")
 }
 
 /**
@@ -179,7 +184,7 @@ export interface FetchFallbackOptions extends RequestInit {
   /** Injectable fetch (for tests / non-browser runtimes). Defaults to global. */
   fetchImpl?: typeof fetch
   /** Chain hint for `onchfs://` URIs (see {@link ResolveOptions.chain}). */
-  chain?: string
+  chain?: ChainId
 }
 
 /**

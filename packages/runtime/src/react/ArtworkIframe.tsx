@@ -6,25 +6,18 @@
 "use client"
 
 import clsx from "clsx"
+import {
+  ARTWORK_IFRAME_ALLOW,
+  ARTWORK_IFRAME_SANDBOX,
+} from "@whitehash/core"
 import { forwardRef, useEffect } from "react"
 
 export interface ArtworkIframeProps extends React.IframeHTMLAttributes<HTMLIFrameElement> {
   onMount?: () => void
 }
 
-export const DEFAULT_IFRAME_ALLOW = [
-  "accelerometer *",
-  "camera *",
-  "gyroscope *",
-  "microphone *",
-  "xr-spatial-tracking *",
-].join("; ")
-
-export const DEFAULT_IFRAME_SANDBOX = [
-  "allow-scripts",
-  "allow-same-origin",
-  "allow-modals",
-].join(" ")
+export const DEFAULT_IFRAME_ALLOW = ARTWORK_IFRAME_ALLOW
+export const DEFAULT_IFRAME_SANDBOX = ARTWORK_IFRAME_SANDBOX
 
 export const ArtworkIframe = forwardRef<HTMLIFrameElement, ArtworkIframeProps>(
   function ArtworkIframe(props, ref) {

@@ -26,6 +26,9 @@ importers:
       '@whitehash/chain-reader':
         specifier: workspace:*
         version: link:../../packages/chain-reader
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@whitehash/onchfs-sw':
         specifier: workspace:*
         version: link:../../packages/onchfs-sw
@@ -109,6 +112,9 @@ importers:
       '@hono/node-server':
         specifier: 2.0.8
         version: 2.0.8(hono@4.12.29)
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       hono:
         specifier: 4.12.29
         version: 4.12.29
@@ -133,6 +139,10 @@ importers:
         version: 3.2.4(@types/node@20.19.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.20.6)
 
   packages/capture:
+    dependencies:
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: 3.1093.0
@@ -164,6 +174,9 @@ importers:
 
   packages/chain-reader:
     dependencies:
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../core
       '@whitehash/resolve':
         specifier: workspace:*
         version: link:../resolve
@@ -187,8 +200,23 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/node@20.19.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.20.6)
 
+  packages/core:
+    devDependencies:
+      tsup:
+        specifier: 8.5.0
+        version: 8.5.0(jiti@2.7.0)(postcss@8.5.17)(tsx@4.20.6)(typescript@5.9.3)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/node@20.19.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.20.6)
+
   packages/onchfs-sw:
     dependencies:
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../core
       onchfs:
         specifier: 0.1.0
         version: 0.1.0(typescript@5.9.3)(zod@3.25.76)
@@ -208,6 +236,9 @@ importers:
       '@whitehash/chain-reader':
         specifier: workspace:*
         version: link:../chain-reader
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../core
       idb-keyval:
         specifier: 6.2.2
         version: 6.2.2
@@ -229,6 +260,10 @@ importers:
         version: 3.2.4(@types/node@20.19.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.20.6)
 
   packages/resolve:
+    dependencies:
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       tsup:
         specifier: 8.5.0
@@ -242,6 +277,9 @@ importers:
 
   packages/runtime:
     dependencies:
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../core
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -273,6 +311,9 @@ importers:
       '@whitehash/chain-reader':
         specifier: workspace:*
         version: link:../chain-reader
+      '@whitehash/core':
+        specifier: workspace:*
+        version: link:../core
       '@whitehash/react':
         specifier: workspace:*
         version: link:../react

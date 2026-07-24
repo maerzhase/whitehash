@@ -8,6 +8,11 @@ import {
   type ChainId,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
+import {
+  ARTWORK_IFRAME_SANDBOX,
+  chainSlug,
+  type OnchfsResponse,
+} from "@whitehash/core"
 import { ONCHFS_WORKER_NETWORKS } from "@whitehash/onchfs-sw"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"
 import { extractCar, writeExtractedCar } from "./car.js"
@@ -122,15 +127,11 @@ function referencedPaths(content: Uint8Array, currentPath: string): string[] {
   return [...output]
 }
 
-function onchfsResolver(chain: ChainId): (uri: string) => Promise<{
-  status: number
-  content: Uint8Array
-  headers: Record<string, string>
-}> {
-  const network = ONCHFS_WORKER_NETWORKS.find(item => item.slug === chain.replace(":", "-"))
+function onchfsResolver(chain: ChainId): (uri: string) => Promise<OnchfsResponse> {
+  const network = ONCHFS_WORKER_NETWORKS.find(item => item.slug === chainSlug(chain))
   if (!network) throw new Error(`No onchfs resolver for ${chain}`)
   return onchfs.resolver.create([
-    { blockchain: network.blockchain as never, rpcs: network.rpcs },
+    { blockchain: network.blockchain as never, rpcs: [...network.rpcs] },
   ]) as unknown as ReturnType<typeof onchfsResolver>
 }
 
@@ -212,7 +213,7 @@ function tokenWrapper(token: WhitehashToken, entry: string): string {
   return `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${title}</title>
 <style>html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#000}body{overflow:hidden}</style></head>
-<body><iframe title="${title}" sandbox="allow-scripts allow-same-origin allow-modals" src="./artifact/${html(entry)}${html(renderSuffix(token))}"></iframe></body></html>\n`
+<body><iframe title="${title}" sandbox="${ARTWORK_IFRAME_SANDBOX}" src="./artifact/${html(entry)}${html(renderSuffix(token))}"></iframe></body></html>\n`
 }
 
 function gallery(manifest: ArchiveManifest): string {

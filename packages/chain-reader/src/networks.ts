@@ -4,7 +4,12 @@
  * Addresses are copied from the fxhash monorepo config (MIT) and verified
  * against the production indexer configuration (July 2026). See PLAN.md §3.2/§3.3.
  */
-import type { ChainId } from "./types.js"
+import {
+  chainDefinition,
+  isEvmChain,
+  isTezosChain,
+  type ChainId,
+} from "@whitehash/core"
 
 export interface TezosNetworkConfig {
   chainId: Extract<ChainId, `tezos:${string}`>
@@ -40,7 +45,7 @@ export const TEZOS_NETWORKS: Record<
 > = {
   "tezos:mainnet": {
     chainId: "tezos:mainnet",
-    onchfsNetwork: "tezos:NetXdQprcVkpaWU",
+    onchfsNetwork: chainDefinition("tezos:mainnet").onchfsNetwork,
     defaultTzktBaseUrl: "https://api.tzkt.io",
     gentkContracts: [
       "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE", // gentk_v1
@@ -56,7 +61,7 @@ export const TEZOS_NETWORKS: Record<
   },
   "tezos:ghostnet": {
     chainId: "tezos:ghostnet",
-    onchfsNetwork: "tezos:NetXnHfVqm9iesp",
+    onchfsNetwork: chainDefinition("tezos:ghostnet").onchfsNetwork,
     defaultTzktBaseUrl: "https://api.ghostnet.tzkt.io",
     gentkContracts: [
       "KT1ExHjELnDuat9io3HkDcrBhHmek7h8EVXG", // gentk_v1
@@ -81,8 +86,8 @@ export const EVM_NETWORKS: Record<
   "eip155:1": {
     chainId: "eip155:1",
     numericChainId: 1,
-    onchfsNetwork: "eip155:1",
-    defaultRpcs: ["https://eth.llamarpc.com", "https://ethereum-rpc.publicnode.com"],
+    onchfsNetwork: chainDefinition("eip155:1").onchfsNetwork,
+    defaultRpcs: [...chainDefinition("eip155:1").defaultRpcs],
     issuerFactory: "0x442295de8A31d65026dBc09c29d469F6854f188a",
     multicall3: MULTICALL3,
     deployBlock: 18762350,
@@ -90,11 +95,8 @@ export const EVM_NETWORKS: Record<
   "eip155:11155111": {
     chainId: "eip155:11155111",
     numericChainId: 11155111,
-    onchfsNetwork: "eip155:11155111",
-    defaultRpcs: [
-      "https://ethereum-sepolia-rpc.publicnode.com",
-      "https://rpc.sepolia.org",
-    ],
+    onchfsNetwork: chainDefinition("eip155:11155111").onchfsNetwork,
+    defaultRpcs: [...chainDefinition("eip155:11155111").defaultRpcs],
     issuerFactory: "0x4e9ef916F55B5d4a27E6406C7Ce8bcd29c2693d6",
     multicall3: MULTICALL3,
     deployBlock: 5013011,
@@ -102,8 +104,8 @@ export const EVM_NETWORKS: Record<
   "eip155:8453": {
     chainId: "eip155:8453",
     numericChainId: 8453,
-    onchfsNetwork: "eip155:8453",
-    defaultRpcs: ["https://mainnet.base.org", "https://base-rpc.publicnode.com"],
+    onchfsNetwork: chainDefinition("eip155:8453").onchfsNetwork,
+    defaultRpcs: [...chainDefinition("eip155:8453").defaultRpcs],
     issuerFactory: "0xf05636d65c7a10dF989eC2411D4F3230d3A02f3D",
     multicall3: MULTICALL3,
     deployBlock: 10786140,
@@ -111,21 +113,12 @@ export const EVM_NETWORKS: Record<
   "eip155:84532": {
     chainId: "eip155:84532",
     numericChainId: 84532,
-    onchfsNetwork: "eip155:84532",
-    defaultRpcs: [
-      "https://sepolia.base.org",
-      "https://base-sepolia-rpc.publicnode.com",
-    ],
+    onchfsNetwork: chainDefinition("eip155:84532").onchfsNetwork,
+    defaultRpcs: [...chainDefinition("eip155:84532").defaultRpcs],
     issuerFactory: "0x60cFDE3aaf6E938535767794088cf15EaaC50019",
     multicall3: MULTICALL3,
     deployBlock: 8763620,
   },
 }
 
-export function isTezosChain(chain: ChainId): chain is Extract<ChainId, `tezos:${string}`> {
-  return chain.startsWith("tezos:")
-}
-
-export function isEvmChain(chain: ChainId): chain is Extract<ChainId, `eip155:${string}`> {
-  return chain.startsWith("eip155:")
-}
+export { isEvmChain, isTezosChain }

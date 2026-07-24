@@ -20,11 +20,27 @@ export {
   TESTNET_CHAINS,
   type ChainId,
   type NetworkMode,
+  type ProjectCaptureMode,
+  type ProjectCaptureSettings,
+  type ProjectCaptureTriggerMode,
   type WhitehashToken,
   type ChainReaderConfig,
   type ProgressEvent,
   type ProgressCallback,
 } from "./types.js"
+export {
+  CHAINS,
+  CHAIN_DEFINITIONS,
+  chainDefinition,
+  chainFromSlug,
+  chainLabel,
+  chainSlug,
+  isChainId,
+  resolveChainId,
+  type ChainDefinition,
+  type EvmChainId,
+  type TezosChainId,
+} from "@whitehash/core"
 export { DEFAULT_NETWORK_MODE, defaultChainReaderConfig } from "./config.js"
 export {
   TEZOS_NETWORKS,

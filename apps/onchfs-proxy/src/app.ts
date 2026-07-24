@@ -15,6 +15,7 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import onchfs from "onchfs"
+import type { OnchfsResponse } from "@whitehash/core"
 import {
   DEFAULT_NETWORK_SLUG,
   PROXY_NETWORKS,
@@ -22,11 +23,7 @@ import {
   type ProxyNetwork,
 } from "./networks.js"
 
-type ResolveFn = (uri: string) => Promise<{
-  status: number
-  content: Uint8Array
-  headers: Record<string, string>
-}>
+type ResolveFn = (uri: string) => Promise<OnchfsResponse>
 
 export interface AppOptions {
   /** Environment for RPC overrides. Defaults to process.env when available. */

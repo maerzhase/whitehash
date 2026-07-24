@@ -1,3 +1,4 @@
+import type { OnchfsResponse } from "@whitehash/core"
 import type { OnchfsWorkerNetwork } from "./networks.js"
 
 export const ONCHFS_VIRTUAL_PATH = "/.whitehash/onchfs"
@@ -30,11 +31,7 @@ export function parseOnchfsRequest(
   }
 }
 
-export async function responseFromOnchfs(value: {
-  status: number
-  content: Uint8Array
-  headers: Record<string, string>
-}): Promise<Response> {
+export async function responseFromOnchfs(value: OnchfsResponse): Promise<Response> {
   const headers = new Headers(value.headers)
   let body: BodyInit = value.content.slice().buffer
   if (headers.get("content-encoding")?.toLowerCase() === "gzip") {

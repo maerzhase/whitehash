@@ -98,6 +98,9 @@
     "dist",
     "README.md"
   ],
+  "dependencies": {
+    "@whitehash/core": "workspace:*"
+  },
   "scripts": {
     "build": "tsup src/index.ts src/browser/{local,remote,sparticuz}.ts src/postprocess/index.ts src/store/{memory,fs,s3,r2}.ts src/lock/{memory,redis}.ts src/adapters/{next,hono,express}.ts --format esm,cjs --dts --clean --external puppeteer-core --external @sparticuz/chromium-min --external sharp --external gifenc --external @aws-sdk/client-s3",
     "check-types": "tsc --noEmit",

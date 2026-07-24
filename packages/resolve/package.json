@@ -22,6 +22,9 @@
     "test": "vitest run",
     "dev": "tsup src/index.ts --format esm --dts --watch"
   },
+  "dependencies": {
+    "@whitehash/core": "workspace:*"
+  },
   "devDependencies": {
     "tsup": "8.5.0",
     "typescript": "5.9.3",

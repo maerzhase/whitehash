@@ -24,6 +24,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@whitehash/core": "workspace:*",
     "onchfs": "0.1.0"
   },
   "devDependencies": {

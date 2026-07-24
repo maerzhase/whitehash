@@ -1,76 +1,25 @@
 import type { ResolverConfig } from "@whitehash/resolve"
+import type {
+  CaptureMode,
+  CaptureSettings,
+  CaptureTriggerMode,
+  ChainId,
+  NetworkMode,
+  WhitehashToken,
+} from "@whitehash/core"
 
-/** Network identifiers. `tezos:*` use TzKT; `eip155:*` use JSON-RPC. */
-export type ChainId =
-  | "tezos:mainnet"
-  | "tezos:ghostnet"
-  | "eip155:1" // Ethereum mainnet
-  | "eip155:11155111" // Sepolia
-  | "eip155:8453" // Base mainnet
-  | "eip155:84532" // Base Sepolia
+export {
+  MAINNET_CHAINS,
+  TESTNET_CHAINS,
+  type ChainId,
+  type NetworkMode,
+  type WhitehashToken,
+} from "@whitehash/core"
 
-export type NetworkMode = "mainnet" | "testnet"
-
-export const MAINNET_CHAINS: ChainId[] = ["tezos:mainnet", "eip155:1", "eip155:8453"]
-export const TESTNET_CHAINS: ChainId[] = [
-  "tezos:ghostnet",
-  "eip155:11155111",
-  "eip155:84532",
-]
-
-export type ProjectCaptureMode = "CANVAS" | "VIEWPORT" | "CUSTOM"
-export type ProjectCaptureTriggerMode =
-  | "DELAY"
-  | "FN_TRIGGER"
-  | "FN_TRIGGER_GIF"
-
-/** Normalized fxhash project capture configuration. */
-export interface ProjectCaptureSettings {
-  mode: ProjectCaptureMode
-  triggerMode?: ProjectCaptureTriggerMode
-  gpu?: boolean
-  resolution?: { x: number; y: number }
-  delay?: number
-  canvasSelector?: string
-  gif?: boolean
-  frameCount?: number
-  captureInterval?: number
-  playbackFps?: number
-}
-
-/** A normalized token, uniform across chains. */
-export interface WhitehashToken {
-  chain: ChainId
-  contract: string
-  tokenId: string
-  name: string | null
-  description: string | null
-  /** The token's fxhash seed (present once revealed/signed). */
-  iterationHash: string | null
-  /**
-   * Protocol-native render URL, verbatim from metadata: `ipfs://` or
-   * `onchfs://`, already carrying `?fxhash=...#0x...` render state. Prefer this
-   * over any `animation_url` (which fxhash rewrote to point at its own proxy).
-   */
-  artifactUri: string | null
-  /** High-quality preview image URI (protocol-native). */
-  displayUri: string | null
-  /** Thumbnail image URI (protocol-native). */
-  thumbnailUri: string | null
-  /** Generator code URI, without render params. */
-  generatorUri: string | null
-  /** Normalized attributes/features, both chains' shapes folded into name/value. */
-  attributes: { name: string; value: string }[]
-  /**
-   * `false` = placeholder/unrevealed ("waiting to be signed"). Such tokens have
-   * no real artwork yet; the viewer shows a badge and no live view.
-   */
-  assigned: boolean
-  /** The metadata URI (`ipfs://`/`onchfs://`) the token points at, if known. */
-  metadataUri: string | null
-  /** Untouched source metadata JSON. */
-  raw: unknown
-}
+/** Backwards-compatible chain-reader names for shared capture contracts. */
+export type ProjectCaptureMode = CaptureMode
+export type ProjectCaptureTriggerMode = CaptureTriggerMode
+export type ProjectCaptureSettings = CaptureSettings
 
 export interface EvmSnapshotCollection {
   address: string
