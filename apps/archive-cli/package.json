@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "description": "Archive fxhash artwork from public chains into a self-contained offline folder.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maerzhase/whitehash.git",
+    "directory": "apps/archive-cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "whitehash-archive": "./dist/index.js"

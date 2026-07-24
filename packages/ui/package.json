@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "description": "Complete whitehash React design system: primitives, generative-art compounds, and gallery blocks.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maerzhase/whitehash.git",
+    "directory": "packages/ui"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": [
     "**/*.css"

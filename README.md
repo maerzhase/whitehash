@@ -80,20 +80,21 @@ pnpm --filter @whitehash/docs dev
 Biome linting and formatting checks run in CI. Use `pnpm fix` for safe combined fixes,
 or `pnpm format:fix` for a formatting-only pass.
 
-Changesets record every meaningful package change. Package publication remains disabled
-until the maintainer explicitly approves scope ownership, initial versions, and public
-access.
+Changesets record every meaningful package change. Pushes to `main` create or update a
+Changesets release pull request through `.github/workflows/release.yml`. Merging that
+pull request applies package versions and changelogs, builds the workspace, publishes
+the public packages to npm, and creates GitHub releases.
 
-Pushes to `main` create or update a Changesets release pull request through
-`.github/workflows/release.yml`. Merging that pull request applies package versions and
-changelogs; npm publication remains a separate, explicitly approved step.
+The release workflow requires an `NPM_TOKEN` Actions secret with publish access to the
+`@whitehash` npm scope. The private docs and proxy applications are versioned but are
+not published.
 
 ## Versioning policy
 
 Whitehash follows semantic versioning: patches fix behavior without changing supported
 API shapes, minors add compatible APIs, and majors remove or alter public contracts.
-Until the first public release, versions stay at `0.0.0` and Changesets run in private
-mode. Publishing is intentionally a separate maintainer decision.
+The initial public release uses patch Changesets to move packages from `0.0.0` to
+`0.0.1`. Later releases follow the normal Changesets major, minor, and patch flow.
 
 ## License
 

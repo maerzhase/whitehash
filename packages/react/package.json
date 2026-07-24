@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "description": "Headless React provider, hooks, and cache adapters for whitehash.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maerzhase/whitehash.git",
+    "directory": "packages/react"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",

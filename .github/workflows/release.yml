@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
   pull-requests: write
 
 concurrency:
@@ -14,8 +15,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  version:
-    name: Version packages
+  release:
+    name: Version or publish packages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,13 +29,19 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
-      - name: Create or update release pull request
+      - name: Create release pull request or publish to npm
+        id: changesets
         uses: changesets/action@v1
         with:
           version: pnpm version-packages
+          publish: pnpm release
           title: "chore: version packages"
           commit: "chore: version packages"
           commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
