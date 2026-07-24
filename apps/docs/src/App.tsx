@@ -182,7 +182,6 @@ function HomePage() {
   return (
     <>
       <section className="home-hero">
-        <div className="home-grid" aria-hidden />
         <div className="hero-inner relative z-10 mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-[1200px] items-center gap-14 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-20">
           <div className="hero-copy max-w-2xl">
             <div className="mb-7 flex items-center gap-2 font-mono text-xs text-muted">
