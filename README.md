@@ -7,10 +7,44 @@ directly from public blockchain infrastructure and content-addressed storage.
 No `@fxhash/*` dependencies. No fxhash-hosted endpoint is used by the toolkit. The docs
 site is fully static; `apps/onchfs-proxy` is the only optional server piece.
 
-## Choose an API layer
+## Start with one artwork
 
-Start with the [five-scenario quickstart](./apps/docs/QUICKSTART.md) to see the public
-surface for one artwork, a wallet, project browsing, iterations, and plain TypeScript.
+The [quickstart](./apps/docs/QUICKSTART.md) shows the core contract: mount the
+zero-config provider, read one token by identity, and hand it to `Artwork`.
+
+```tsx
+import { useToken } from "@whitehash/react"
+import { Artwork, WhitehashProvider } from "@whitehash/ui"
+import "@whitehash/ui/styles.css"
+
+function TokenArtwork() {
+  const { token, loading, error } = useToken({
+    chain: "tezos:mainnet",
+    contract: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
+    tokenId: "16333",
+  })
+  if (loading) return <p>Loading…</p>
+  if (error || !token) return <p>{error ?? "Token not found"}</p>
+
+  return <Artwork.Root token={token}>
+    <Artwork.Image />
+    <Artwork.Live />
+    <Artwork.PlayButton />
+    <Artwork.StatusBadge />
+  </Artwork.Root>
+}
+
+root.render(
+  <WhitehashProvider>
+    <TokenArtwork />
+  </WhitehashProvider>,
+)
+```
+
+The provider defaults to mainnet, bundled public endpoints, IPFS fallback, and
+browser-persistent caching. Configure only what you want to change.
+
+## Choose an API layer
 
 | Layer | Package | Use it when |
 | --- | --- | --- |
@@ -18,30 +52,12 @@ surface for one artwork, a wallet, project browsing, iterations, and plain TypeS
 | Headless React | [`@whitehash/react`](./packages/react) | You want hooks for fetching, caching, gateway fallback, and iframe state |
 | Complete UI | [`@whitehash/ui`](./packages/ui) | You want composable artwork, token, gallery, and search components |
 
-```tsx
-import { WalletGallery, WhitehashProvider } from "@whitehash/ui"
-import "@whitehash/ui/styles.css"
-
-const config = {
-  resolver: {
-    ipfsGateways: ["https://ipfs.io", "https://dweb.link"],
-    onchfs: null,
-  },
-}
-
-root.render(
-  <WhitehashProvider config={config}>
-    <WalletGallery address="tz1…" />
-  </WhitehashProvider>,
-)
-```
-
 ## Apps
 
 | App | Purpose |
 | --- | --- |
 | [`apps/docs`](./apps/docs) | Statically exported Next.js API docs plus live wallet/project/artwork showcases |
-| [`apps/archive-cli`](./apps/archive-cli) | Wallet-to-folder preservation CLI with CAR verification and offline replay |
+| [`apps/archive-cli`](./apps/archive-cli) | Project/token index generation plus wallet-to-folder preservation with CAR verification and offline replay |
 | [`apps/onchfs-proxy`](./apps/onchfs-proxy) | Optional self-hostable HTTP bridge for `onchfs://` artwork |
 
 Supported networks are Tezos mainnet/ghostnet, Ethereum/Sepolia, and Base/Base Sepolia.

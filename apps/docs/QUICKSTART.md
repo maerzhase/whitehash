@@ -1,122 +1,82 @@
 # whitehash quickstart
 
-Start with a Vite React + TypeScript app (React 18.3–19), then install the four public
-layers used below:
+Render one fxhash token with its static preview and correctly seeded live artwork.
+You need React 18.3 or newer. You do not need an API key, backend, wallet connection,
+or fxhash dependency.
+
+## 1. Install
 
 ```bash
-pnpm add @whitehash/resolve @whitehash/chain-reader @whitehash/react @whitehash/ui
+pnpm add @whitehash/react @whitehash/ui
 ```
 
-Keep Vite's generated `src/vite-env.d.ts`; if your scaffold omits it, create it with
-`/// <reference types="vite/client" />`. Then define one complete configuration:
+## 2. Mount the provider
 
-```ts
-// src/config.ts
-import { defaultResolverConfig } from "@whitehash/resolve"
-
-export const config = {
-  mode: "mainnet" as const,
-  resolver: defaultResolverConfig(),
-}
-```
-
-Mount the provider once in the generated Vite entry (all four React scenarios render
-below it):
+Import the stylesheet and mount the provider once near the root of your app. It works
+without configuration: mainnet, bundled third-party endpoints, IPFS fallback, and
+browser-persistent caching are selected automatically.
 
 ```tsx
-// src/main.tsx
-import { createRoot } from "react-dom/client"
 import { WhitehashProvider } from "@whitehash/ui"
-import { config } from "./config"
-import { App } from "./App"
 import "@whitehash/ui/styles.css"
 
-createRoot(document.getElementById("root")!).render(
-  <WhitehashProvider config={config}><App /></WhitehashProvider>,
+root.render(
+  <WhitehashProvider>
+    <App />
+  </WhitehashProvider>,
 )
 ```
 
-The `token` prop in scenario 1 is a normalized `WhitehashToken` returned by
-`useWalletTokens`, `useProject`, or `client.getToken(tokenRef)`.
-Serialized token refs use `token/{chain}/{contract}/{tokenId}`; project refs use
-`project/{chain}/{id}`. `parseRef` accepts either form and `formatRef` creates it.
+## 3. Read and render one token
 
-## 1. Show one artwork on a blog page
-
-```tsx
-import { Artwork, Card } from "@whitehash/ui"
-import type { WhitehashToken } from "@whitehash/chain-reader"
-
-export function BlogArtwork({ token }: { token: WhitehashToken }) {
-  return <Card.Root>
-    <Card.Media><Artwork.Root token={token}>
-      <Artwork.Image /><Artwork.Live /><Artwork.PlayButton />
-    </Artwork.Root></Card.Media>
-    <Card.Body><Card.Title>{token.name}</Card.Title></Card.Body>
-  </Card.Root>
-}
-```
-
-## 2. Render a wallet gallery
+Read the token directly from its chain, contract, and token ID. `Artwork` then owns the
+distinction between a static preview and executable artwork, builds the correctly seeded
+URL, and places the live version in a restricted iframe.
 
 ```tsx
-import { WalletGallery } from "@whitehash/ui"
+import { useToken } from "@whitehash/react"
+import { Artwork } from "@whitehash/ui"
 
-export function Collection({ address }: { address: string }) {
-  return <WalletGallery address={address} onOpenToken={console.log} />
-}
-
-// <Collection address="tz1c3hFmjFSwunjLHECnYyjr42KRt5YiHrGX" />
-```
-
-## 3. Browse filtered projects
-
-```tsx
-import { useProjects } from "@whitehash/react"
-import { formatRef, projectLabel } from "@whitehash/chain-reader"
-
-export function RecentProjects() {
-  const result = useProjects({
-    chain: "tezos:mainnet", version: "v3", order: "newest", limit: 12,
+export function TokenArtwork() {
+  const { token, loading, error } = useToken({
+    chain: "tezos:mainnet",
+    contract: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
+    tokenId: "16333",
   })
-  return <>
-    {result.projects.map(project => <a key={formatRef(project.ref)}
-      href={`/projects/${formatRef(project.ref)}`}>
-      {projectLabel(project)}
-    </a>)}
-    {result.hasMore && <button onClick={result.loadMore}>More</button>}
-  </>
+
+  if (loading) return <p>Loading…</p>
+  if (error || !token) return <p>{error ?? "Token not found"}</p>
+
+  return (
+    <Artwork.Root token={token}>
+      <Artwork.Image />
+      <Artwork.Live />
+      <Artwork.PlayButton />
+      <Artwork.StatusBadge />
+    </Artwork.Root>
+  )
 }
 ```
 
-## 4. Show one project's iterations
+The preview appears first. Pressing **Run live** replaces it with the executable,
+correctly seeded artwork. Unrevealed tokens and onchfs pieces that need configuration
+get an explicit status instead of failing silently.
 
-```tsx
-import { parseRef } from "@whitehash/chain-reader"
-import { ProjectGallery } from "@whitehash/ui"
+## Where the token comes from
 
-const project = parseRef(
-  "project/tezos:mainnet/v3%3A13623",
-  "project",
-)
+Whitehash returns the same token shape from every read path:
 
-export function Iterations() {
-  return <ProjectGallery project={project} onOpenToken={console.log} />
-}
-```
+| You have | Use |
+| --- | --- |
+| A collector address | `useWalletTokens(address)` |
+| A project identity | `useProject({ chain, id })` and select one of its `tokens` |
+| Exact token identity | `useToken({ chain, contract, tokenId })` |
 
-## 5. Use whitehash without React
+Start with the read path your application already has. Refs are optional serialized
+values for routes and paste fields; normal reads use identity fields directly.
 
-```ts
-import { createWhitehashClient, resolveInput } from "@whitehash/chain-reader"
-import { config } from "./config"
+## Next
 
-const client = createWhitehashClient(config)
-
-export async function inspect(pastedText: string) {
-  const input = resolveInput(pastedText)
-  if (input.type !== "address") return input
-  const tokens = await client.getWalletTokens(input.address)
-  return tokens.map(token => client.artworkUrl(token))
-}
-```
+- Continue with **Projects and tokens** in the web docs for the data model.
+- Use the guides for configuration, onchfs artwork, and variations.
+- Install `@whitehash/chain-reader` only if you need the framework-free client.

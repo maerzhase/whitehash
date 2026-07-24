@@ -1,0 +1,108 @@
+# whitehash
+
+> Whitehash is an open-source TypeScript toolkit for reading, rendering, exploring, and preserving fxhash generative art without depending on fxhash-hosted APIs or `@fxhash/*` packages. It works across Tezos, Ethereum, and Base, and its documentation app is a static showcase built with the toolkit itself.
+
+Whitehash is a library, not a replacement marketplace or hosted data service. It offers progressively higher-level building blocks: framework-free protocol packages, headless React hooks, and a complete composable UI system. Applications remain in control of their RPCs, indexers, IPFS gateways, caches, rendering UI, and optional onchfs services.
+
+## Core idea
+
+An fxhash token spans several public systems. Ownership and project state live on a blockchain; metadata and preview images commonly live on IPFS; generator code can live on IPFS or fully on-chain through onchfs; and the artwork URI carries the deterministic seed and parameter bytes needed to reproduce one iteration. Whitehash joins those pieces into a normalized model and a safe rendering flow.
+
+The normal data path is:
+
+1. Read projects, ownership, and token identity from Tezos, Ethereum, or Base.
+2. Read token metadata from the chain or its content-addressed URI.
+3. Normalize chain-specific records into `WhitehashProject` and `WhitehashToken` objects.
+4. Resolve `ipfs://` and `onchfs://` URIs while preserving query strings and fragments.
+5. Display a resilient preview image or run the original generator in a sandboxed iframe.
+6. Optionally control the generator with a new seed and declared fx(params), or archive its assets for offline replay.
+
+The toolkit does not use an fxhash-hosted endpoint as a default or fallback. Public TzKT and Blockscout instances are supported as replaceable indexers; direct JSON-RPC is available for EVM ownership reads; IPFS gateway order is configurable; and onchfs content can be read client-side with a service worker or through the included self-hostable proxy.
+
+## Choose an integration layer
+
+- `@whitehash/resolve`: dependency-free URI resolution and gateway fallback for IPFS, onchfs, bare CIDs, and inline URIs.
+- `@whitehash/chain-reader`: framework-free project, token, wallet, metadata, provenance, and render-semantics APIs across all supported chains.
+- `@whitehash/runtime`: framework-free control of content-addressed generators, seeds, and fx(params), plus an optional React iframe binding.
+- `@whitehash/capture`: framework-neutral fxhash-compatible PNG/GIF capture orchestration over headless Chromium, with injectable browser providers, feature extraction, web-standard handlers, stores, and request locks.
+- `@whitehash/onchfs-sw`: browser service worker that resolves and caches fully on-chain artwork at same-origin virtual URLs.
+- `@whitehash/react`: headless provider, persistent cache, data hooks, gateway-image fallback, and artwork-frame state. It renders no visual UI and imports no CSS.
+- `@whitehash/ui`: the complete Whitehash design system, including primitives, artwork compounds, token details, wallet galleries, project browsing, and search. It can be consumed with precompiled CSS or as Tailwind v4 source and tokens.
+
+Use the framework-free packages for a non-React integration or custom renderer. Use `@whitehash/react` when an application already owns presentation. Use `@whitehash/ui` for the branded, composable end-to-end React experience.
+
+Use `@whitehash/capture` on a trusted server runtime when an application needs to produce preview images rather than display live artwork. The caller owns the final seeded URL and browser isolation. Public capture endpoints must use a URL allowlist.
+
+Package publication is intentionally disabled at present; the monorepo uses workspace packages and accumulates Changesets in preparation for a future public release.
+
+## Supported networks
+
+- Tezos mainnet: `tezos:mainnet`
+- Tezos ghostnet: `tezos:ghostnet`
+- Ethereum mainnet: `eip155:1`
+- Ethereum Sepolia: `eip155:11155111`
+- Base mainnet: `eip155:8453`
+- Base Sepolia: `eip155:84532`
+
+Mainnets and testnets use the same public API shapes. Network-dependent configuration, contract addresses, RPCs, indexers, and onchfs resolution are keyed by chain ID.
+
+## Important domain semantics
+
+- `artifactUri` identifies a minted iteration. It normally includes the seed and render state in its query string and fragment. Use it to reproduce a token.
+- `generatorUri` identifies a project's reusable generator. Use it to explore new hashes or parameters.
+- Never discard a URI's query string or fragment during IPFS or onchfs resolution.
+- Prefer protocol-native `artifactUri` over an EVM token's `animation_url`; some historical `animation_url` values were rewritten to an fxhash-hosted onchfs proxy.
+- Older Tezos gentk-v1 metadata can store `iterationHash` separately from `artifactUri`. Whitehash's `renderArtifactUri` and `artworkUrl` helpers append the missing seed correctly.
+- Newly minted tokens can contain shared placeholder metadata until reveal/signing. A normalized token's `assigned` field and `liveViewStatus()` distinguish unrevealed work from runnable artwork.
+- FxGenArt721 contracts are not ERC-721 Enumerable. EVM ownership is derived from `Transfer` logs or Blockscout NFT holdings and confirmed with `ownerOf`, not `tokenOfOwnerByIndex`.
+- onchfs artwork is an immutable file tree stored on-chain. Browser rendering requires the `@whitehash/onchfs-sw` assets and service-worker registration, or the optional `apps/onchfs-proxy` service.
+- Live generator code is untrusted content and should run in the sandboxed iframe configuration exposed by the React and UI packages.
+- Server-side captures run generator code in Chromium. Public endpoints must restrict target URLs, bound trigger waits and output sizes, and preferably use a separately isolated remote browser.
+
+## Normalized public model
+
+A `WhitehashToken` provides one cross-chain representation of token identity, ownership, project identity, metadata, image and generator URIs, iteration hash, parameters, reveal state, and raw source data. A `WhitehashProject` similarly normalizes a project's chain reference, name, creator, generator, supply, and discovery metadata. Structured references are represented as `{ chain, id }` for projects and `{ chain, contract, tokenId }` for tokens; helpers can parse and serialize them for URLs and mixed user input.
+
+The high-level client is created with `createWhitehashClient(config)`. Its principal reads are `getWalletTokens`, `listProjects`, `getProject`, `listProjectTokens`, and `getToken`. Resolver and rendering helpers remain available independently when an application needs lower-level control.
+
+## Apps in this repository
+
+- `apps/docs`: statically exported Next.js documentation and live showcases. It is assembled from `@whitehash/ui` and demonstrates real wallet, project, token, artwork, onchfs, and variation flows.
+- `apps/archive-cli`: writes portable project iteration or single-token indexes with one shared normalized project summary (including published capture settings), complete normalized token data, and original metadata; it also creates verified, self-contained wallet archives with previews, generator assets, integrity data, and offline replay wrappers.
+- `apps/onchfs-proxy`: optional self-hostable Hono service for resolving onchfs artwork through public Tezos and EVM RPCs. It is the project's only server component.
+
+## Guidance for code-generating LLMs
+
+- Do not add `@fxhash/*` dependencies or fxhash-hosted APIs, gateways, media URLs, or onchfs proxies.
+- Prefer a Whitehash public helper over reimplementing chain-specific discovery, reveal detection, URI rewriting, or render semantics.
+- Keep framework-free code in layer 0 packages; `@whitehash/react` may depend on those packages; `@whitehash/ui` may depend on the React layer. Dependencies must not point downward from a lower layer to a higher one.
+- Treat public indexers, RPCs, and gateways as configurable third-party dependencies, not Whitehash services.
+- Preserve testnet support whenever adding network-aware behavior.
+- Preserve vendored MIT attribution headers when modifying code derived from the fxhash runtime.
+- The docs app must remain statically exportable, and toolkit packages must remain usable without a Whitehash-hosted backend.
+- Add a Changeset for meaningful package behavior or API changes. Do not publish packages unless a maintainer explicitly enables publication.
+
+## Documentation
+
+- [LLM guide](/llms/): human-viewable documentation page containing this complete machine-readable guide.
+- [Getting started](/guide/getting-started/): render one real token with the provider, token hook, and Artwork compound.
+- [How Whitehash works](/understand/overview/): the complete architecture and responsibility boundaries.
+- [Data model](/understand/data-model/): normalized project and token concepts.
+- [Where data comes from](/understand/sources/): public indexers, RPCs, gateways, and chain-specific sources.
+- [How URLs are built](/understand/urls/): artifact state, IPFS resolution, onchfs resolution, query strings, and fragments.
+- [Glossary](/understand/glossary/): mappings between Whitehash terms, fxhash concepts, and on-chain records.
+- [Configuration](/guide/configuration/): networks, RPCs, indexers, gateways, caching, and provider options.
+- [Archive CLI](/guide/cli/): complete project/token JSON formats, their shared metadata model, loading indexed data, direct EVM discovery, and offline wallet archives.
+- [Onchfs artwork](/guide/onchfs/): resolve and render onchfs content with a service worker or self-hosted proxy.
+- [Explore variations](/guide/variations/): reusable generators, alternate seeds, and fx(params).
+- [Capture engine](/guide/capture/): viewport, canvas, and GIF captures; artwork readiness; browser providers; caching; framework adapters; and security.
+- [Theming](/guide/theming/): precompiled CSS, Tailwind v4, and semantic design tokens.
+- [Artwork API](/docs/artwork/): composable preview and live-rendering UI.
+- [WhitehashProvider API](/docs/whitehash-provider/): application-wide client, network, resolver, and cache configuration.
+- [useToken API](/docs/use-token/): fetch one normalized token by chain, contract, and token ID.
+- [useWalletTokens API](/docs/use-wallet-tokens/): cache-first multi-chain wallet discovery.
+- [useProjects API](/docs/use-projects/): paginated project discovery.
+- [useProject API](/docs/use-project/): project metadata and iteration browsing.
+- [TokenDetails API](/docs/token-details/): complete artwork, provenance, and feature presentation.
+
+Whitehash is MIT-licensed and is not affiliated with or endorsed by fxhash.

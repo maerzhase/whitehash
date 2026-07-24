@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "onchfs:assets": "node scripts/copy-onchfs-worker.mjs",
-    "dev": "pnpm onchfs:assets && next dev",
+    "dev": "pnpm onchfs:assets && next dev --webpack",
+    "dev:turbo": "pnpm onchfs:assets && next dev",
     "build": "pnpm onchfs:assets && next build",
     "preview": "npx serve out",
     "check-types": "tsc --noEmit",

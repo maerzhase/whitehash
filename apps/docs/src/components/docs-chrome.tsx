@@ -1,10 +1,18 @@
 "use client"
 
-import { useState, type ComponentProps, type ReactNode } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useState, type ComponentProps, type ReactNode } from "react"
 import { Highlight, themes, type Language } from "prism-react-renderer"
 import { Button } from "@whitehash/ui"
 
 const cx = (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(" ")
+const sectionId = (title: string) => title
+  .toLowerCase()
+  .normalize("NFKD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/(^-|-$)/g, "")
 
 export interface DocsNavItem {
   label: string
@@ -16,10 +24,10 @@ export function SiteHeader({ actions }: { actions?: ReactNode }) {
   return (
     <header className="docs-header">
       <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between px-4 sm:px-6">
-        <a href="/" className="group flex items-center gap-2.5" aria-label="Whitehash home">
+        <Link href="/" className="group flex items-center gap-2.5" aria-label="Whitehash home">
           <img src="/logo.png" alt="" className="size-7 rounded-sm object-cover" width="28" height="28" />
           <span className="font-display text-sm font-semibold tracking-[-0.025em]">whitehash</span>
-        </a>
+        </Link>
         <nav className="flex items-center gap-1" aria-label="Primary navigation">{actions}</nav>
       </div>
     </header>
@@ -27,13 +35,18 @@ export function SiteHeader({ actions }: { actions?: ReactNode }) {
 }
 
 export function DocsShell({ items, currentHref, children }: { items: DocsNavItem[]; currentHref: string; children: ReactNode }) {
+  const router = useRouter()
   const groups = new Map<string, DocsNavItem[]>()
   for (const item of items) {
     const group = item.group ?? "Guide"
     groups.set(group, [...(groups.get(group) ?? []), item])
   }
+  const currentIndex = items.findIndex(item => item.href === currentHref)
+  const previous = currentIndex > 0 ? items[currentIndex - 1] : null
+  const next = currentIndex >= 0 ? items[currentIndex + 1] : null
+
   return (
-    <div className="mx-auto grid max-w-[1440px] gap-10 px-4 pb-24 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+    <div className="mx-auto grid max-w-[1440px] gap-10 px-4 pb-24 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)] xl:gap-8 xl:grid-cols-[220px_minmax(0,1fr)_176px]">
       <aside className="hidden border-r border-line pr-6 pt-10 lg:block">
         <nav className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col gap-7 overflow-y-auto pb-6">
           {[...groups].map(([group, links]) => (
@@ -41,23 +54,98 @@ export function DocsShell({ items, currentHref, children }: { items: DocsNavItem
               <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.14em] text-faint">{group}</div>
               <div className="flex flex-col gap-0.5">
                 {links.map(item => (
-                  <a key={item.href} href={item.href} className={cx("docs-nav-link", currentHref === item.href && "docs-nav-link-active")}>{item.label}</a>
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cx("docs-nav-link", currentHref === item.href && "docs-nav-link-active")}
+                  >
+                    {item.label}
+                  </Link>
                 ))}
               </div>
             </div>
           ))}
         </nav>
       </aside>
-      <main className="min-w-0 pt-5 lg:pt-10">
+      <main data-docs-content className="min-w-0 pt-5 lg:pt-10">
         <label className="mb-7 block lg:hidden">
           <span className="sr-only">Documentation page</span>
-          <select className="h-10 w-full rounded-md border border-line bg-surface-2 px-3 text-sm text-fg" value={currentHref} onChange={event => { window.location.href = event.target.value }}>
+          <select className="h-10 w-full rounded-md border border-line bg-surface-2 px-3 text-sm text-fg" value={currentHref} onChange={event => router.push(event.target.value)}>
             {[...groups].map(([group, links]) => <optgroup key={group} label={group}>{links.map(item => <option key={item.href} value={item.href}>{item.label}</option>)}</optgroup>)}
           </select>
         </label>
         {children}
+        {(previous || next) ? (
+          <nav className="mx-auto mt-16 grid max-w-4xl gap-3 border-t border-line pt-6 sm:grid-cols-2" aria-label="Documentation pagination">
+            <div>{previous ? <Link className="block rounded-md px-3 py-3 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-fg" href={previous.href}><span className="block text-xs text-faint">Previous</span>{previous.label}</Link> : null}</div>
+            <div>{next ? <Link className="block rounded-md px-3 py-3 text-right text-sm text-muted transition-colors hover:bg-surface-2 hover:text-fg" href={next.href}><span className="block text-xs text-faint">Next</span>{next.label}</Link> : null}</div>
+          </nav>
+        ) : null}
       </main>
+      <DocsTableOfContents currentHref={currentHref} />
     </div>
+  )
+}
+
+function DocsTableOfContents({ currentHref }: { currentHref: string }) {
+  const [items, setItems] = useState<Array<{ id: string; label: string }>>([])
+  const [activeId, setActiveId] = useState("")
+
+  useEffect(() => {
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-docs-content] article > section[id]"))
+    const nextItems = sections.flatMap(section => {
+      const heading = section.querySelector<HTMLElement>(":scope > h2")
+      return heading?.textContent ? [{ id: section.id, label: heading.textContent }] : []
+    })
+    setItems(nextItems)
+    setActiveId(nextItems[0]?.id ?? "")
+
+    let frame = 0
+    const updateActiveSection = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
+        let current = sections[0]?.id ?? ""
+        for (const section of sections) {
+          if (section.getBoundingClientRect().top <= 112) current = section.id
+        }
+        if (atBottom) current = sections.at(-1)?.id ?? current
+        setActiveId(current)
+      })
+    }
+
+    updateActiveSection()
+    window.addEventListener("scroll", updateActiveSection, { passive: true })
+    window.addEventListener("resize", updateActiveSection)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener("scroll", updateActiveSection)
+      window.removeEventListener("resize", updateActiveSection)
+    }
+  }, [currentHref])
+
+  return (
+    <aside className="hidden pt-10 xl:block">
+      {items.length > 1 ? (
+        <nav className="sticky top-24" aria-label="On this page">
+          <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-faint">On this page</div>
+          <div className="border-l border-line">
+            {items.map(item => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={cx(
+                  "-ml-px block border-l px-3 py-1.5 text-xs leading-5 transition-colors",
+                  activeId === item.id ? "border-primary text-fg" : "border-transparent text-faint hover:text-muted",
+                )}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </nav>
+      ) : null}
+    </aside>
   )
 }
 
@@ -75,9 +163,10 @@ export function DocsHeading({ eyebrow, title, description }: { eyebrow?: string;
   )
 }
 
-export function DocsSection({ title, className, children, ...props }: ComponentProps<"section"> & { title?: ReactNode }) {
+export function DocsSection({ title, className, children, id, ...props }: ComponentProps<"section"> & { title?: ReactNode }) {
+  const anchor = id ?? (typeof title === "string" ? sectionId(title) : undefined)
   return (
-    <section className={cx("border-b border-line py-10 last:border-0", className)} {...props}>
+    <section id={anchor} className={cx("scroll-mt-14 border-b border-line py-10 last:border-0", className)} {...props}>
       {title ? <h2 className="mb-5 font-display text-2xl font-semibold tracking-[-0.03em]">{title}</h2> : null}
       {children}
     </section>
