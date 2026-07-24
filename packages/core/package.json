@@ -3,6 +3,14 @@
   "version": "0.0.1",
   "description": "Shared framework-free contracts, network metadata, and browser policies for whitehash packages.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maerzhase/whitehash.git",
+    "directory": "packages/core"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",

@@ -20,6 +20,7 @@
     "format:fix": "biome format --write .",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
+    "release": "pnpm build && changeset publish",
     "test": "turbo run test",
     "version-packages": "changeset version"
   },

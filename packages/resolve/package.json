@@ -3,6 +3,14 @@
   "version": "0.0.1",
   "description": "URI to HTTP URL resolution for IPFS, onchfs, and data URIs — the single source of truth for how whitehash turns content-addressed URIs into fetchable URLs.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maerzhase/whitehash.git",
+    "directory": "packages/resolve"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
