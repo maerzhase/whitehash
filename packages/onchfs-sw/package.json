@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/onchfs-sw",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Resolve onchfs artwork in-browser through a same-origin service worker.",
   "license": "MIT",
   "type": "module",

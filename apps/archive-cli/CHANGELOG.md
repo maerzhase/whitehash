@@ -1,0 +1,65 @@
+# @whitehash/archive
+
+## 1.0.0
+
+### Major Changes
+
+- e271919: Add the wallet-to-offline-folder archive CLI. It discovers normalized tokens through the
+  public chain reader, downloads IPFS generator DAGs as trustless-gateway CAR files,
+  verifies every SHA-256 multihash before extracting UnixFS, reads onchfs generators
+  directly from public chains, preserves metadata and previews, and emits local replay
+  wrappers plus integrity manifests. The initial release deliberately implements the CAR
+  and UnixFS verification boundary locally so archiving does not add an unreviewed or
+  network-fetched dependency during the unattended run.
+
+### Minor Changes
+
+- e20f2f6: Add portable, versioned project iteration and single-token indexes with normalized
+  display data, original token metadata, direct property access, JSON validation,
+  and complete paginated project discovery.
+
+  Use one shared normalized project summary in both formats. Single-token indexes
+  enrich EVM collection metadata directly and resolve Tezos parent projects from
+  gentk contract storage while representing unavailable fields explicitly as null.
+
+  Normalize published fxhash capture settings on every project summary. Tezos
+  single-token indexing follows the gentk token_data issuer ID back to the parent
+  project so capture mode, trigger, GPU, resolution, selector, delay, and GIF
+  timing data are available without an fxhash-hosted API.
+
+  Add the focused `project`, `token`, `wallet`, and `verify` commands while retaining
+  earlier implicit forms as compatibility aliases. Project indexing includes an EVM RPC
+  mode that probes fxhash collection supply and token-ID boundaries before falling back
+  to canonical mint events.
+
+  Document project and token indexing, demonstrate both index formats through the existing
+  Artwork component, and cover direct chain refreshes and offline archives in the docs app.
+
+  Add a focused `useToken` React hook for loading and refreshing a single token index entry.
+  Remove the public `TokenGrid` layout helper from the UI package so integrators compose
+  token layouts from `Card` and `Artwork`, while gallery components retain their internal
+  responsive grid.
+
+### Patch Changes
+
+- 8171937: Add a dependency-free shared core package and consolidate chain IDs, labels, aliases,
+  URL slugs, onchfs network metadata, RPC defaults, token contracts, capture settings,
+  resolver response shapes, and artwork iframe policies across the monorepo. Existing
+  higher-level package entry points keep compatibility re-exports.
+- Updated dependencies [375274a]
+- Updated dependencies [8171937]
+- Updated dependencies [e20f2f6]
+- Updated dependencies [236bf6d]
+- Updated dependencies [7087678]
+- Updated dependencies [7087678]
+- Updated dependencies [6ab6977]
+- Updated dependencies [8224867]
+- Updated dependencies [4ac2f08]
+- Updated dependencies [4134600]
+- Updated dependencies [e20f2f6]
+- Updated dependencies [291e948]
+- Updated dependencies [21f922e]
+  - @whitehash/chain-reader@1.0.0
+  - @whitehash/core@0.1.0
+  - @whitehash/onchfs-sw@1.0.0
+  - @whitehash/resolve@1.0.0

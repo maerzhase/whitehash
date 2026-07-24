@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/react",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Headless React provider, hooks, and cache adapters for whitehash.",
   "license": "MIT",
   "type": "module",
