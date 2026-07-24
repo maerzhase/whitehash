@@ -13,3 +13,8 @@ apps/docs/out/
 apps/docs/public/onchfs-sw.js
 apps/docs/public/onchfs.global.js
 whitehash-archive/
+
+# Local planning notes and agent session artifacts
+/.private/
+/.claude/
+/.jez/

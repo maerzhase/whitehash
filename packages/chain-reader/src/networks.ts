@@ -2,7 +2,7 @@
  * Network configuration: contract addresses, endpoints, and deploy blocks.
  *
  * Addresses are copied from the fxhash monorepo config (MIT) and verified
- * against the production indexer configuration (July 2026). See PLAN.md §3.2/§3.3.
+ * against the production indexer configuration (July 2026).
  */
 import {
   chainDefinition,

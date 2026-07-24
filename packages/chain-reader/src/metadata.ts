@@ -1,7 +1,6 @@
 /**
  * Normalize raw token metadata JSON (TZIP-21 on Tezos, OpenSea+fxhash on EVM)
  * into whitehash's uniform shape, and detect unrevealed placeholder tokens.
- * See PLAN.md §3.4/§3.5.
  */
 import type {
   ProjectCaptureMode,
@@ -140,7 +139,7 @@ export function normalizeMetadata(raw: unknown): NormalizedMetadata {
     description: str(meta["description"]),
     iterationHash: str(meta["iterationHash"]) ?? str(meta["generationHash"]),
     // Prefer protocol-native artifactUri; never fall back to animation_url
-    // (fxhash rewrote onchfs animation_urls to its own proxy — PLAN §3.5).
+    // (fxhash rewrote onchfs animation_urls to its own proxy).
     artifactUri: str(meta["artifactUri"]),
     displayUri: str(meta["displayUri"]),
     thumbnailUri: str(meta["thumbnailUri"]),

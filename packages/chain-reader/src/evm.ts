@@ -7,7 +7,6 @@
  * fxhash's own indexer). FxGenArt721 does NOT implement ERC721Enumerable
  * (verified: supportsInterface(0x780e9d63) == false on the deployed Base impl),
  * so ownership is derived from `Transfer` logs and confirmed with `ownerOf`.
- * See PLAN.md §3.7.
  */
 import {
   createPublicClient,

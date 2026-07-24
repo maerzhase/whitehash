@@ -1,7 +1,7 @@
 /**
  * Read fxhash gentk tokens owned by a Tezos address via the public TzKT API.
  * TzKT indexes TZIP-21 metadata inline, so a single balances query returns
- * holdings with metadata attached. See PLAN.md §3.6.
+ * holdings with metadata attached.
  */
 import { normalizeMetadata } from "./metadata.js"
 import { TEZOS_NETWORKS } from "./networks.js"
@@ -131,7 +131,7 @@ export async function getTezosWalletTokens(
       const tokenId = bal.token?.tokenId
       if (!contract || tokenId === undefined) continue
 
-      // PLAN §6 closeout (2026-07-20): the 133-token mainnet fixture had inline
+      // A 133-token mainnet audit had inline
       // metadata on 133/133 balances. Keep the big-map path as a correctness
       // fallback for index lag, but avoid its extra request in the normal case.
       let rawMeta: Record<string, unknown> | null = bal.token?.metadata ?? null

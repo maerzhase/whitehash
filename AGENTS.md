@@ -19,6 +19,9 @@ subdirectory may add to or override them for that subtree.
 ## Making changes
 
 - Read the nearest package README and existing tests before changing behavior.
+- Store temporary plans, handoff notes, and session reports in `.private/plans/`,
+  and retain useful agent-generated audits under `.private/artifacts/`. The
+  `.private/` directory is local-only and must never be committed.
 - Keep changes focused. Do not modify unrelated files in a dirty worktree.
 - Reuse existing utilities and public contracts before introducing new abstractions.
 - Add or update focused tests for behavior changes and bug fixes. Prefer deterministic

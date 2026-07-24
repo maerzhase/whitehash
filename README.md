@@ -76,7 +76,7 @@ pnpm --filter @whitehash/docs dev
 
 Changesets record every meaningful package change. Package publication remains disabled
 until the maintainer explicitly approves scope ownership, initial versions, and public
-access. See [PLAN.md](./PLAN.md) and [STATUS.md](./STATUS.md).
+access.
 
 ## Versioning policy
 
