@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react"
 import {
-  formatRef,
-  projectRef,
   type ChainId,
+  formatRef,
   type ListOrder,
   type ProjectInput,
+  projectRef,
   type WhitehashClient,
   type WhitehashProject,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useWhitehash } from "./context.js"
 
 export interface UseProjectsOptions {
@@ -31,35 +31,47 @@ export function useProjects(options: UseProjectsOptions) {
   const [error, setError] = useState<string | null>(null)
   const runId = useRef(0)
 
-  const hydrate = useCallback((project: WhitehashProject, id: number) => {
-    void client.getProject(project).then(value => {
-      if (!value || runId.current !== id) return
-      setProjects(previous => previous.map(item =>
-        item.chain === value.chain && item.id === value.id ? value : item,
-      ))
-    }).catch(() => {
-      // Preview enrichment is best-effort; the discovered project stays usable.
-    })
-  }, [client])
+  const hydrate = useCallback(
+    (project: WhitehashProject, id: number) => {
+      void client
+        .getProject(project)
+        .then(value => {
+          if (!value || runId.current !== id) return
+          setProjects(previous =>
+            previous.map(item =>
+              item.chain === value.chain && item.id === value.id ? value : item,
+            ),
+          )
+        })
+        .catch(() => {
+          // Preview enrichment is best-effort; the discovered project stays usable.
+        })
+    },
+    [client],
+  )
 
-  const load = useCallback(async (append: boolean, fromCursor: string | null) => {
-    const id = ++runId.current
-    setLoading(true)
-    setError(null)
-    try {
-      const page = await client.listProjects({ chain, version, cursor: fromCursor, order, limit })
-      if (runId.current !== id) return
-      setProjects(previous => append ? [...previous, ...page.projects] : page.projects)
-      setCursor(page.cursor)
-      page.projects.forEach(project => {
-        if (!project.name || !project.thumbnailUri || project.minted === null) hydrate(project, id)
-      })
-    } catch (cause) {
-      if (runId.current === id) setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      if (runId.current === id) setLoading(false)
-    }
-  }, [chain, client, hydrate, limit, order, version])
+  const load = useCallback(
+    async (append: boolean, fromCursor: string | null) => {
+      const id = ++runId.current
+      setLoading(true)
+      setError(null)
+      try {
+        const page = await client.listProjects({ chain, version, cursor: fromCursor, order, limit })
+        if (runId.current !== id) return
+        setProjects(previous => (append ? [...previous, ...page.projects] : page.projects))
+        setCursor(page.cursor)
+        page.projects.forEach(project => {
+          if (!project.name || !project.thumbnailUri || project.minted === null)
+            hydrate(project, id)
+        })
+      } catch (cause) {
+        if (runId.current === id) setError(cause instanceof Error ? cause.message : String(cause))
+      } finally {
+        if (runId.current === id) setLoading(false)
+      }
+    },
+    [chain, client, hydrate, limit, order, version],
+  )
 
   useEffect(() => {
     setProjects([])

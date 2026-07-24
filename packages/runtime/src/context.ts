@@ -3,18 +3,10 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-import {
-  jsonStringifyBigint,
-  serializeParamsOrNull,
-  sumBytesParams,
-} from "./params/index.js"
+
+import { type IRuntimeContext, RuntimeContextEventEmitter } from "./interfaces.js"
+import { jsonStringifyBigint, serializeParamsOrNull, sumBytesParams } from "./params/index.js"
 import { BlockchainType } from "./shared.js"
-import type { DeepPartial } from "./vendor/index.js"
-import { cloneDeep } from "./vendor/object.js"
-import {
-  type IRuntimeContext,
-  RuntimeContextEventEmitter,
-} from "./interfaces.js"
 import type {
   RuntimeDefinition,
   RuntimeDetails,
@@ -29,6 +21,8 @@ import {
   mergeWithKeepingUint8ArrayType,
   quickHash,
 } from "./utils.js"
+import type { DeepPartial } from "./vendor/index.js"
+import { cloneDeep } from "./vendor/object.js"
 
 const DEFAULT_RUNTIME_STATE: RuntimeState = Object.freeze({
   hash: "",
@@ -91,7 +85,7 @@ export function runtimeContext(initial: RuntimeParams): IRuntimeContext {
       params: {
         inputBytes: serializeParamsOrNull(
           _runtime.state.params || {},
-          _runtime.definition.params || []
+          _runtime.definition.params || [],
         ),
         bytesSize: sumBytesParams(_runtime.definition.params || []),
       },
@@ -108,10 +102,7 @@ export function runtimeContext(initial: RuntimeParams): IRuntimeContext {
   return {
     state: () => _runtime.state,
     updateState: (newState: Partial<RuntimeState>) => {
-      _runtime.state = mergeWithKeepingUint8ArrayType(
-        cloneDeep(_runtime.state),
-        newState
-      )
+      _runtime.state = mergeWithKeepingUint8ArrayType(cloneDeep(_runtime.state), newState)
       _runtime.details = getDetails()
       emitter.emit("context-changed", _runtime)
       return _runtime
@@ -120,7 +111,7 @@ export function runtimeContext(initial: RuntimeParams): IRuntimeContext {
     updateDefinition: (newDefinition: Partial<RuntimeDefinition>) => {
       _runtime.definition = mergeWithKeepingUint8ArrayType(
         cloneDeep(_runtime.definition),
-        newDefinition
+        newDefinition,
       )
       _runtime.definition = enhanceRuntimeDefinition(_runtime)
       _runtime.details = getDetails()
@@ -129,10 +120,7 @@ export function runtimeContext(initial: RuntimeParams): IRuntimeContext {
     },
     output: () => _runtime.output,
     updateOutput: (newOutput: Partial<RuntimeOutput>) => {
-      _runtime.output = mergeWithKeepingUint8ArrayType(
-        cloneDeep(_runtime.output),
-        newOutput
-      )
+      _runtime.output = mergeWithKeepingUint8ArrayType(cloneDeep(_runtime.output), newOutput)
       emitter.emit("context-changed", _runtime)
       return _runtime
     },

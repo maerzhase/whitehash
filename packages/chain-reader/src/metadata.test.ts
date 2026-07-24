@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  isAssigned,
-  normalizeCaptureSettings,
-  normalizeMetadata,
-} from "./metadata.js"
+import { isAssigned, normalizeCaptureSettings, normalizeMetadata } from "./metadata.js"
 
 // Real signed gentk_v2 #589146 metadata (TzKT, July 2026).
 const signed = {
@@ -55,9 +51,7 @@ describe("isAssigned", () => {
   it("true for a signed token", () => expect(isAssigned(signed)).toBe(true))
   it("false for the placeholder by name", () => expect(isAssigned(placeholder)).toBe(false))
   it("false for placeholder even if name changed but description matches", () => {
-    expect(
-      isAssigned({ ...placeholder, name: "Untitled" }),
-    ).toBe(false)
+    expect(isAssigned({ ...placeholder, name: "Untitled" })).toBe(false)
   })
   it("false when no hash present", () => expect(isAssigned({ name: "x" })).toBe(false))
 })
@@ -103,15 +97,17 @@ describe("normalizeMetadata", () => {
 
 describe("normalizeCaptureSettings", () => {
   it("normalizes viewport project metadata", () => {
-    expect(normalizeCaptureSettings({
-      capture: {
-        mode: "viewport",
-        triggerMode: "delay",
-        gpu: false,
-        resolution: { x: "800", y: 800 },
-        delay: "2000",
-      },
-    })).toEqual({
+    expect(
+      normalizeCaptureSettings({
+        capture: {
+          mode: "viewport",
+          triggerMode: "delay",
+          gpu: false,
+          resolution: { x: "800", y: 800 },
+          delay: "2000",
+        },
+      }),
+    ).toEqual({
       mode: "VIEWPORT",
       triggerMode: "DELAY",
       gpu: false,
@@ -121,17 +117,19 @@ describe("normalizeCaptureSettings", () => {
   })
 
   it("normalizes canvas and GIF fields", () => {
-    expect(normalizeCaptureSettings({
-      captureSettings: {
-        mode: "CANVAS",
-        triggerMode: "FN_TRIGGER_GIF",
-        canvasSelector: "#art",
-        gif: "true",
-        frameCount: "12",
-        captureInterval: 100,
-        playbackFps: "24",
-      },
-    })).toEqual({
+    expect(
+      normalizeCaptureSettings({
+        captureSettings: {
+          mode: "CANVAS",
+          triggerMode: "FN_TRIGGER_GIF",
+          canvasSelector: "#art",
+          gif: "true",
+          frameCount: "12",
+          captureInterval: 100,
+          playbackFps: "24",
+        },
+      }),
+    ).toEqual({
       mode: "CANVAS",
       triggerMode: "FN_TRIGGER_GIF",
       canvasSelector: "#art",

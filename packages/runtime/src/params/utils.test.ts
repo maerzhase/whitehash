@@ -78,9 +78,7 @@ describe("runtime parameter encoding", () => {
   it("uses defaults for missing values and returns null for an empty definition", () => {
     const serialized = serializeParams({}, definitions)
     expect(deserializeParams(serialized, definitions, {})).toEqual(
-      Object.fromEntries(
-        definitions.map(definition => [definition.id, definition.default]),
-      ),
+      Object.fromEntries(definitions.map(definition => [definition.id, definition.default])),
     )
     expect(serializeParamsOrNull({}, [])).toBeNull()
   })
@@ -89,9 +87,7 @@ describe("runtime parameter encoding", () => {
     expect(ParameterProcessors.number.constrain?.(10.24, definitions[0] as never)).toBe(10)
     expect(ParameterProcessors.number.constrain?.(2.26, definitions[0] as never)).toBe(2.5)
     expect(ParameterProcessors.string.constrain?.("x", definitions[4] as never)).toBe("x")
-    expect(ParameterProcessors.select.constrain?.("missing", definitions[6] as never)).toBe(
-      "plain",
-    )
+    expect(ParameterProcessors.select.constrain?.("missing", definitions[6] as never)).toBe("plain")
     expect(ParameterProcessors.color.constrain?.("#abcdef1234", definitions[3] as never)).toBe(
       "abcdef12",
     )

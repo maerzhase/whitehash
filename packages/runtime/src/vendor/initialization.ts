@@ -94,10 +94,7 @@ export function intialization<Err extends Error = any>() {
      */
     check(message?: string): void {
       if (state === Init.FAILED) throw failReason
-      invariant(
-        state === Init.FINISHED,
-        message || "Initialization not finished"
-      )
+      invariant(state === Init.FINISHED, message || "Initialization not finished")
     },
     /**
      * Sets the initialization state to `STARTED`. Will throw an error if the
@@ -108,10 +105,7 @@ export function intialization<Err extends Error = any>() {
     start(message?: string): void {
       invariant(
         state === Init.NOT_STARTED,
-        message ||
-          initStartErrorMessage[
-            state as Init.FINISHED | Init.STARTED | Init.FAILED
-          ]
+        message || initStartErrorMessage[state as Init.FINISHED | Init.STARTED | Init.FAILED],
       )
       state = Init.STARTED
     },
@@ -124,10 +118,7 @@ export function intialization<Err extends Error = any>() {
     finish(message?: string): void {
       invariant(
         state === Init.STARTED,
-        message ||
-          initFinishErrorMessage[
-            state as Init.FINISHED | Init.NOT_STARTED | Init.FAILED
-          ]
+        message || initFinishErrorMessage[state as Init.FINISHED | Init.NOT_STARTED | Init.FAILED],
       )
       state = Init.FINISHED
     },
@@ -161,10 +152,7 @@ export class InitializationError<Reason extends Error> extends Error {
  * await initOnce() // throws
  * ```
  */
-export function initOnce(
-  init: Initialization,
-  fn: () => Promise<void>
-): () => Promise<void> {
+export function initOnce(init: Initialization, fn: () => Promise<void>): () => Promise<void> {
   return async () => {
     try {
       init.start()

@@ -16,7 +16,7 @@ type Blockchain = "ETHEREUM" | "BASE" | "TEZOS"
 export function mockTezosTransactionHash(): string {
   const randomSequence = Array.from(
     { length: 49 },
-    () => BASE58_CHARSET[(Math.random() * BASE58_CHARSET.length) | 0]
+    () => BASE58_CHARSET[(Math.random() * BASE58_CHARSET.length) | 0],
   ).join("")
   return `oo${randomSequence}`
 }
@@ -26,10 +26,7 @@ export function mockTezosTransactionHash(): string {
  * @returns {string} The mock Ethereum transaction hash.
  */
 export function mockEthereumTransactionHash(): string {
-  const randomBytes = Array.from(
-    { length: 32 },
-    () => (Math.random() * 256) | 0
-  )
+  const randomBytes = Array.from({ length: 32 }, () => (Math.random() * 256) | 0)
   const hexString = Array.from(randomBytes)
     .map(byte => byte.toString(16).padStart(2, "0"))
     .join("")
@@ -63,8 +60,7 @@ export function isEthereumTransactionHashValid(hash: string): boolean {
 /**
  * Alias for isEthereumTransactionHashValid function because base is eth l2.
  */
-export const isBaseTransactionHashValid: (hash: string) => boolean =
-  isEthereumTransactionHashValid
+export const isBaseTransactionHashValid: (hash: string) => boolean = isEthereumTransactionHashValid
 
 /**
  * Validates a Tezos transaction hash.
@@ -92,9 +88,7 @@ export function isTezosTransactionHashValid(hash: string): boolean {
 export function getBlockchainFromTransactionHash(hash: string): Blockchain {
   if (isEthereumTransactionHashValid(hash)) return "ETHEREUM"
   if (isTezosTransactionHashValid(hash)) return "TEZOS"
-  throw new Error(
-    "The provided value is not a valid tezos or ethereum transaction hash"
-  )
+  throw new Error("The provided value is not a valid tezos or ethereum transaction hash")
 }
 /**
  * Validates a transaction hash.

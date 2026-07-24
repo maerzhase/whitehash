@@ -2,11 +2,7 @@ import { randomUUID } from "node:crypto"
 import type { CaptureLock } from "./lock.js"
 
 export interface RedisLockClient {
-  set(
-    key: string,
-    value: string,
-    options: { NX: true; PX: number },
-  ): Promise<string | null>
+  set(key: string, value: string, options: { NX: true; PX: number }): Promise<string | null>
   eval(script: string, options: { keys: string[]; arguments: string[] }): Promise<unknown>
 }
 

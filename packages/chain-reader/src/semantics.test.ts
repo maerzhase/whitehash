@@ -1,6 +1,5 @@
-import { describe, expect, it } from "vitest"
 import type { ResolverConfig } from "@whitehash/resolve"
-import type { WhitehashToken } from "./types.js"
+import { describe, expect, it } from "vitest"
 import {
   artworkUrl,
   imageSourceUri,
@@ -8,6 +7,7 @@ import {
   renderArtifactUri,
   tokenKey,
 } from "./semantics.js"
+import type { WhitehashToken } from "./types.js"
 
 const resolver: ResolverConfig = {
   ipfsGateways: ["https://ipfs.io"],
@@ -53,9 +53,7 @@ describe("token semantics", () => {
       chain: "eip155:8453",
       artifactUri: "onchfs://abc/?fxhash=0xh",
     })
-    expect(artworkUrl(value, resolver)).toBe(
-      "https://proxy.example/eip155-8453/abc/?fxhash=0xh",
-    )
+    expect(artworkUrl(value, resolver)).toBe("https://proxy.example/eip155-8453/abc/?fxhash=0xh")
   })
 
   it("falls back between image sizes", () => {

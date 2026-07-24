@@ -4,7 +4,6 @@
  * Source: https://github.com/fxhash/fxhash.xyz
  */
 import type { FxParamDefinitions, FxParamsData } from "./params/index.js"
-import { type DeepPartial, EventEmitter } from "./vendor/index.js"
 import type {
   ControlState,
   ProjectState,
@@ -14,6 +13,7 @@ import type {
   RuntimeState,
   RuntimeWholeState,
 } from "./types.js"
+import { type DeepPartial, EventEmitter } from "./vendor/index.js"
 
 /**
  * An interface for the runtime controller.
@@ -106,7 +106,7 @@ export interface IRuntimeControls {
   update: (
     update: Partial<FxParamsData>,
     definition?: FxParamDefinitions | null,
-    options?: RuntimeControlsUpdateOptions
+    options?: RuntimeControlsUpdateOptions,
   ) => ControlsChangedEventPayload
 
   /**
@@ -221,4 +221,3 @@ export class RuntimeContextEventEmitter extends EventEmitter<RuntimeContextEvent
 export interface IRuntimeConnector {
   getUrl: (state: ProjectState, urlParams?: URLSearchParams) => string
 }
-

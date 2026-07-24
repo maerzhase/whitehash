@@ -12,16 +12,12 @@
  *
  * Adapted from the fxhash onchfs http-proxy example (MIT).
  */
+
+import type { OnchfsResponse } from "@whitehash/core"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import onchfs from "onchfs"
-import type { OnchfsResponse } from "@whitehash/core"
-import {
-  DEFAULT_NETWORK_SLUG,
-  PROXY_NETWORKS,
-  rpcsFor,
-  type ProxyNetwork,
-} from "./networks.js"
+import { DEFAULT_NETWORK_SLUG, PROXY_NETWORKS, type ProxyNetwork, rpcsFor } from "./networks.js"
 
 type ResolveFn = (uri: string) => Promise<OnchfsResponse>
 
@@ -30,9 +26,7 @@ export interface AppOptions {
   env?: Record<string, string | undefined>
 }
 
-function buildResolvers(
-  env: Record<string, string | undefined>,
-): Map<string, ResolveFn> {
+function buildResolvers(env: Record<string, string | undefined>): Map<string, ResolveFn> {
   const resolvers = new Map<string, ResolveFn>()
   for (const network of PROXY_NETWORKS) {
     // One resolver per network so a bare CID resolves unambiguously.
@@ -52,8 +46,7 @@ function findNetwork(slug: string): ProxyNetwork | undefined {
 
 export function createApp(options: AppOptions = {}): Hono {
   const env =
-    options.env ??
-    (typeof process !== "undefined" ? process.env : ({} as Record<string, string>))
+    options.env ?? (typeof process !== "undefined" ? process.env : ({} as Record<string, string>))
   const resolvers = buildResolvers(env)
 
   const app = new Hono()

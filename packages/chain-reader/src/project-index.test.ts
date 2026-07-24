@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import type { WhitehashProject } from "./browse.js"
-import {
-  buildProjectIndex,
-  parseProjectIndex,
-  type ProjectIndexReader,
-} from "./project-index.js"
+import { buildProjectIndex, type ProjectIndexReader, parseProjectIndex } from "./project-index.js"
 import type { WhitehashToken } from "./types.js"
 
 const project: WhitehashProject = {
@@ -118,10 +114,12 @@ describe("project iteration indexes", () => {
           minted: null,
           captureSettings: null,
         },
-        iterations: [{
-          position: 2,
-          token: { chain: "eip155:1", contract: "0x1", tokenId: "1", attributes: [] },
-        }],
+        iterations: [
+          {
+            position: 2,
+            token: { chain: "eip155:1", contract: "0x1", tokenId: "1", attributes: [] },
+          },
+        ],
         complete: true,
         nextCursor: null,
       }),

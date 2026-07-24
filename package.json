@@ -11,14 +11,20 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "check": "pnpm lint && pnpm format && pnpm check-types",
     "check-types": "turbo run check-types",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "dev": "turbo run dev",
     "changeset": "changeset",
+    "dev": "turbo run dev",
+    "fix": "biome check --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "test": "turbo run test",
     "version-packages": "changeset version"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.5",
     "@changesets/cli": "2.29.8",
     "turbo": "2.5.8",
     "typescript": "5.9.3",

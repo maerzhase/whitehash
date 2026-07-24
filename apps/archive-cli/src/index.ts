@@ -1,10 +1,10 @@
 #!/usr/bin/env node
+import { pathToFileURL } from "node:url"
+import { type ChainId, parseRef } from "@whitehash/chain-reader"
+import { resolveChainId } from "@whitehash/core"
 import { archiveWallets, verifyArchive } from "./archive.js"
 import { writeProjectIndex } from "./project-index.js"
 import { writeTokenIndex } from "./token-index.js"
-import { parseRef, type ChainId } from "@whitehash/chain-reader"
-import { resolveChainId } from "@whitehash/core"
-import { pathToFileURL } from "node:url"
 
 const HELP = `whitehash archive
 Create portable indexes and preserve wallet collections from public chain data.
@@ -178,7 +178,10 @@ function projectInput(
 function projectOutput(project: string): string {
   const identity = decodeURIComponent(project.split("/").at(-1) ?? project)
   const short = identity.startsWith("0x") ? identity.slice(0, 10) : identity
-  const safe = short.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+  const safe = short
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
   return `project-index-${safe || "project"}.json`
 }
 
@@ -230,7 +233,10 @@ function tokenInput(
 }
 
 function tokenOutput(tokenId: string): string {
-  const safe = tokenId.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+  const safe = tokenId
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
   return `token-index-${safe || "token"}.json`
 }
 
@@ -241,20 +247,14 @@ export function parseArgs(args: string[]): Command {
   if (args[0] === "help") {
     const words = args.slice(1)
     const topic = words.at(-1)
-    if (
-      topic !== undefined &&
-      topic !== "project" &&
-      topic !== "token" &&
-      topic !== "wallet"
-    ) {
+    if (topic !== undefined && topic !== "project" && topic !== "token" && topic !== "wallet") {
       usage(`No help topic named "${words.join(" ")}".`)
     }
     return { kind: "help", topic }
   }
   const canonicalProject = args[0] === "project"
   const aliasedProject = args[0] === "index" && args[1] === "project"
-  const legacyProject =
-    (args[0] === "index" && args[1] !== "token" && args[1] !== "project")
+  const legacyProject = args[0] === "index" && args[1] !== "token" && args[1] !== "project"
   if (canonicalProject || aliasedProject || legacyProject) {
     const projectArgs = aliasedProject ? args.slice(2) : args.slice(1)
     if (projectArgs[0] === "--help" || projectArgs[0] === "-h") {
@@ -274,8 +274,7 @@ export function parseArgs(args: string[]): Command {
         const value = projectArgs[++index]
         if (!value) usage("Expected a filename after --out.")
         outFile = value
-      }
-      else if (arg === "--chain") chain = chainId(projectArgs[++index])
+      } else if (arg === "--chain") chain = chainId(projectArgs[++index])
       else if (arg === "--page-size") pageSize = positiveInteger(projectArgs[++index])
       else if (arg === "--direct") source = "rpc"
       else if (arg === "--source") {
@@ -306,7 +305,7 @@ export function parseArgs(args: string[]): Command {
     }
     const contractValue = tokenArgs[0]
     if (!contractValue) {
-      usage("Missing token contract. Run \"whitehash-archive help token\".")
+      usage('Missing token contract. Run "whitehash-archive help token".')
     }
     const serialized = /^(?:whitehash:\/\/)?\/?token\//.test(contractValue)
     const tokenIdValue = serialized ? undefined : tokenArgs[1]
@@ -340,11 +339,7 @@ export function parseArgs(args: string[]): Command {
   }
 
   const canonicalWallet = args[0] === "archive" && args[1] === "wallet"
-  const walletArgs = canonicalWallet
-    ? args.slice(2)
-    : args[0] === "wallet"
-      ? args.slice(1)
-      : args
+  const walletArgs = canonicalWallet ? args.slice(2) : args[0] === "wallet" ? args.slice(1) : args
   if (walletArgs[0] === "--help" || walletArgs[0] === "-h") {
     return { kind: "help", topic: "wallet" }
   }
@@ -362,8 +357,7 @@ export function parseArgs(args: string[]): Command {
       const value = walletArgs[++index]
       if (!value) usage("Expected a folder after --out.")
       outDir = value
-    }
-    else if (arg === "--limit") limit = positiveInteger(walletArgs[++index])
+    } else if (arg === "--limit") limit = positiveInteger(walletArgs[++index])
     else if (arg.startsWith("-")) usage(`Unknown wallet option "${arg}".`)
     else addresses.push(arg)
   }
@@ -376,13 +370,15 @@ export function parseArgs(args: string[]): Command {
 export async function main(args: string[]): Promise<void> {
   const command = parseArgs(args)
   if (command.kind === "help") {
-    console.log(command.topic === "project"
-      ? PROJECT_HELP
-      : command.topic === "token"
-        ? TOKEN_HELP
-      : command.topic === "wallet"
-        ? WALLET_HELP
-        : HELP)
+    console.log(
+      command.topic === "project"
+        ? PROJECT_HELP
+        : command.topic === "token"
+          ? TOKEN_HELP
+          : command.topic === "wallet"
+            ? WALLET_HELP
+            : HELP,
+    )
     return
   }
   if (command.kind === "verify") {
@@ -391,9 +387,7 @@ export async function main(args: string[]): Promise<void> {
     return
   }
   if (command.kind === "index-project") {
-    console.log(
-      `Indexing project ${command.project}${command.chain ? ` on ${command.chain}` : ""}`,
-    )
+    console.log(`Indexing project ${command.project}${command.chain ? ` on ${command.chain}` : ""}`)
     const index = await writeProjectIndex({
       project: command.project,
       chain: command.chain,
@@ -416,7 +410,9 @@ export async function main(args: string[]): Promise<void> {
     console.log("Next: load the JSON with parseTokenIndex().")
     return
   }
-  console.log(`Archiving ${command.addresses.length} wallet${command.addresses.length === 1 ? "" : "s"}`)
+  console.log(
+    `Archiving ${command.addresses.length} wallet${command.addresses.length === 1 ? "" : "s"}`,
+  )
   const manifest = await archiveWallets({
     ...command,
     onProgress: message => console.log(message),
@@ -432,7 +428,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     } else {
       console.error(
         process.env.WHITEHASH_DEBUG === "1" && error instanceof Error
-          ? error.stack ?? message
+          ? (error.stack ?? message)
           : `Error: ${message}`,
       )
     }

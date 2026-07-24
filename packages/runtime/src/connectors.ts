@@ -38,18 +38,15 @@ export function getURLSearchParams(
     noFxParamsUpdateQuery?: boolean
     additionalParams?: URLSearchParams
     noParentHashUpdateQuery?: boolean
-  } = {}
+  } = {},
 ): string {
   const { inputBytes, parentHashes, ...stateWithoutParamsAndLineage } = state
   const urlSearchParams = new URLSearchParams({
-    ...Object.entries(stateWithoutParamsAndLineage).reduce(
-      (acc, [key, value]) => {
-        if (value == null) return acc
-        const newKey = QUERY_KEYS[key] || key
-        return { ...acc, [newKey]: value }
-      },
-      {}
-    ),
+    ...Object.entries(stateWithoutParamsAndLineage).reduce((acc, [key, value]) => {
+      if (value == null) return acc
+      const newKey = QUERY_KEYS[key] || key
+      return { ...acc, [newKey]: value }
+    }, {}),
     ...Object.fromEntries(options.additionalParams || []),
   })
   let paramsString = urlSearchParams.toString()
@@ -90,7 +87,7 @@ export function getURLSearchParams(
 export const getProjectUrl = (
   baseUrl: string,
   state: ProjectState,
-  urlParams?: URLSearchParams
+  urlParams?: URLSearchParams,
 ) => {
   const { snippetVersion, cid: _cid, ...projectState } = state
   void _cid
@@ -115,9 +112,7 @@ export interface RuntimeConnectorConfig {
  * resolved by the injected function; pre-mint and legacy services never acquire
  * hidden hosted defaults.
  */
-export function createRuntimeConnector(
-  config: RuntimeConnectorConfig
-): IRuntimeConnector {
+export function createRuntimeConnector(config: RuntimeConnectorConfig): IRuntimeConnector {
   return {
     getUrl(state: ProjectState, urlParams?: URLSearchParams) {
       const resolved = config.fsEmulatorBase

@@ -1,5 +1,5 @@
-import { del, get, set } from "idb-keyval"
 import type { ChainId, WhitehashToken } from "@whitehash/chain-reader"
+import { del, get, set } from "idb-keyval"
 
 const CACHE_VERSION = "v1"
 
@@ -10,15 +10,8 @@ export interface CachedWalletTokens {
 
 /** Pluggable persistence used by `useWalletTokens`. */
 export interface WhitehashCache {
-  getWalletTokens(
-    chain: ChainId,
-    address: string,
-  ): Promise<CachedWalletTokens | undefined>
-  setWalletTokens(
-    chain: ChainId,
-    address: string,
-    tokens: WhitehashToken[],
-  ): Promise<void>
+  getWalletTokens(chain: ChainId, address: string): Promise<CachedWalletTokens | undefined>
+  setWalletTokens(chain: ChainId, address: string, tokens: WhitehashToken[]): Promise<void>
   deleteWalletTokens(chain: ChainId, address: string): Promise<void>
 }
 
@@ -58,7 +51,5 @@ export function createMemoryCache(): WhitehashCache {
 }
 
 export function createDefaultCache(): WhitehashCache {
-  return typeof globalThis.indexedDB === "undefined"
-    ? createMemoryCache()
-    : createIndexedDbCache()
+  return typeof globalThis.indexedDB === "undefined" ? createMemoryCache() : createIndexedDbCache()
 }

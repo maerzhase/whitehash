@@ -56,9 +56,7 @@ describe("capture stores", () => {
       mimeType: "image/png",
       metadata: { token: "42" },
     })
-    expect(store.publicUrl?.("tokens/42.png")).toBe(
-      "https://cdn.example/captures/tokens/42.png",
-    )
+    expect(store.publicUrl?.("tokens/42.png")).toBe("https://cdn.example/captures/tokens/42.png")
   })
 
   it("prevents filesystem keys from escaping the configured root", async () => {

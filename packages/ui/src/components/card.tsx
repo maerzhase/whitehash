@@ -40,15 +40,11 @@ function Body({ className, ...props }: ComponentProps<"div">) {
 }
 
 function Title({ className, ...props }: ComponentProps<"span">) {
-  return (
-    <span className={cn("truncate text-sm font-medium text-fg", className)} {...props} />
-  )
+  return <span className={cn("truncate text-sm font-medium text-fg", className)} {...props} />
 }
 
 function Meta({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div className={cn("flex shrink-0 items-center gap-1.5", className)} {...props} />
-  )
+  return <div className={cn("flex shrink-0 items-center gap-1.5", className)} {...props} />
 }
 
 export const Card = { Root, Media, Body, Title, Meta }

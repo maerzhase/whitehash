@@ -1,25 +1,16 @@
-import {
-  createResolver,
-  type FetchFallbackOptions,
-  type ResolveOptions,
-} from "@whitehash/resolve"
+import { createResolver, type FetchFallbackOptions, type ResolveOptions } from "@whitehash/resolve"
 import {
   getEvmProjectInfo,
   getEvmProjectPreview,
   getTezosProject,
+  type ListOrder,
   listEvmProjectTokens,
   listProjects,
   listTezosProjectTokens,
-  type ListOrder,
 } from "./browse.js"
 import { isEvmChain, isTezosChain } from "./networks.js"
-import {
-  artworkUrl,
-  imageUrl,
-  liveViewStatus,
-  type LiveViewStatus,
-} from "./semantics.js"
-import { projectRef, tokenRef, type ProjectInput, type TokenInput } from "./refs.js"
+import { type ProjectInput, projectRef, type TokenInput, tokenRef } from "./refs.js"
+import { artworkUrl, imageUrl, type LiveViewStatus, liveViewStatus } from "./semantics.js"
 import { getTezosTokenProjectRefs, getToken } from "./token.js"
 import type {
   ChainId,
@@ -51,7 +42,8 @@ export interface GetWalletTokensOptions {
 }
 
 function addressChains(address: string, mode: NetworkMode): ChainId[] {
-  if (/^(tz[1-4]|KT1)/.test(address)) return [mode === "mainnet" ? "tezos:mainnet" : "tezos:ghostnet"]
+  if (/^(tz[1-4]|KT1)/.test(address))
+    return [mode === "mainnet" ? "tezos:mainnet" : "tezos:ghostnet"]
   if (/^0x[0-9a-fA-F]{40}$/.test(address)) {
     return mode === "mainnet" ? ["eip155:1", "eip155:8453"] : ["eip155:11155111", "eip155:84532"]
   }
@@ -85,30 +77,28 @@ export function createWhitehashClient(config: ChainReaderConfig) {
   return {
     config,
     resolver,
-    resolveUri: (uri: string, options?: ResolveOptions) =>
-      resolver.resolveUri(uri, options),
-    resolveUriAll: (uri: string, options?: ResolveOptions) =>
-      resolver.resolveUriAll(uri, options),
-    fetchUri: (uri: string, options?: FetchFallbackOptions) =>
-      resolver.fetch(uri, options),
-    getWalletTokens: (
-      address: string,
-      options: GetWalletTokensOptions = {},
-    ) => getWalletTokens(
-      address,
-      options.chains ?? addressChains(address, options.mode ?? "mainnet"),
-      config,
-      options.onProgress,
-    ),
-    listProjects: (
-      options: ListProjectsOptions,
-      onProgress?: ProgressCallback,
-    ) => listProjects(options.chain, config, {
-      issuerVersion: options.version,
-      cursor: options.cursor,
-      limit: options.limit,
-      order: options.order,
-    }, onProgress),
+    resolveUri: (uri: string, options?: ResolveOptions) => resolver.resolveUri(uri, options),
+    resolveUriAll: (uri: string, options?: ResolveOptions) => resolver.resolveUriAll(uri, options),
+    fetchUri: (uri: string, options?: FetchFallbackOptions) => resolver.fetch(uri, options),
+    getWalletTokens: (address: string, options: GetWalletTokensOptions = {}) =>
+      getWalletTokens(
+        address,
+        options.chains ?? addressChains(address, options.mode ?? "mainnet"),
+        config,
+        options.onProgress,
+      ),
+    listProjects: (options: ListProjectsOptions, onProgress?: ProgressCallback) =>
+      listProjects(
+        options.chain,
+        config,
+        {
+          issuerVersion: options.version,
+          cursor: options.cursor,
+          limit: options.limit,
+          order: options.order,
+        },
+        onProgress,
+      ),
     getProject,
     getToken: (input: TokenInput) => getToken(tokenRef(input), config),
     getTokenProject: async (token: WhitehashToken) => {
@@ -126,10 +116,7 @@ export function createWhitehashClient(config: ChainReaderConfig) {
       }
       return first
     },
-    listProjectTokens: async (
-      input: ProjectInput,
-      options: ListProjectTokensOptions = {},
-    ) => {
+    listProjectTokens: async (input: ProjectInput, options: ListProjectTokensOptions = {}) => {
       const ref = projectRef(input)
       const { chain } = ref
       if (isTezosChain(chain)) {
@@ -143,10 +130,8 @@ export function createWhitehashClient(config: ChainReaderConfig) {
       return Promise.resolve({ tokens: [], cursor: null })
     },
     artworkUrl: (token: WhitehashToken) => artworkUrl(token, config.resolver),
-    imageUrl: (
-      token: WhitehashToken,
-      prefer?: "display" | "thumbnail",
-    ) => imageUrl(token, config.resolver, prefer),
+    imageUrl: (token: WhitehashToken, prefer?: "display" | "thumbnail") =>
+      imageUrl(token, config.resolver, prefer),
     liveViewStatus: (token: WhitehashToken): LiveViewStatus =>
       liveViewStatus(token, config.resolver),
   }

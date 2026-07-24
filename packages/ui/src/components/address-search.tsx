@@ -1,8 +1,8 @@
-import { useEffect, useState, type ComponentProps } from "react"
+import { type ComponentProps, useEffect, useState } from "react"
+import { cn } from "../lib/cn.js"
 import { Button } from "./button.js"
 import { Dialog, type DialogProps } from "./dialog.js"
 import { Input } from "./field.js"
-import { cn } from "../lib/cn.js"
 
 export function isWalletAddress(value: string): boolean {
   return /^tz[1-4][1-9A-HJ-NP-Za-km-z]{33}$/.test(value) || /^0x[0-9a-fA-F]{40}$/.test(value)
@@ -66,7 +66,11 @@ export function AddressSearch({
         />
         <Button type="submit">View</Button>
       </form>
-      {error ? <p id="whitehash-address-error" className="mt-2 text-sm text-danger">{error}</p> : null}
+      {error ? (
+        <p id="whitehash-address-error" className="mt-2 text-sm text-danger">
+          {error}
+        </p>
+      ) : null}
       {recentAddresses.length > 0 ? (
         <div className="mt-4">
           <div className="mb-2 text-xs font-medium text-faint">Recent</div>
@@ -97,7 +101,9 @@ export function WalletSearch({ open, onOpenChange, onSubmit, recentAddresses }: 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <Dialog.Content aria-label="Search wallet">
         <Dialog.Title>View a wallet</Dialog.Title>
-        <p className="mt-1 text-sm text-muted">Enter a Tezos or Ethereum address to see the fxhash art it owns.</p>
+        <p className="mt-1 text-sm text-muted">
+          Enter a Tezos or Ethereum address to see the fxhash art it owns.
+        </p>
         <AddressSearch
           key={session}
           className="mt-4"

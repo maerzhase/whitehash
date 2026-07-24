@@ -3,14 +3,7 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-export type FxParamType =
-  | "number"
-  | "bigint"
-  | "boolean"
-  | "color"
-  | "string"
-  | "bytes"
-  | "select"
+export type FxParamType = "number" | "bigint" | "boolean" | "color" | "string" | "bytes" | "select"
 
 export type FxParamOptionsMap = {
   [Type in FxParamType]: {
@@ -96,23 +89,17 @@ export type hexString = `#${string}`
 
 export type FxParamProcessorTransformer<Type extends FxParamType> = (
   value: FxParamTypeMap[Type],
-  definition?: FxParamDefinition<Type>
+  definition?: FxParamDefinition<Type>,
 ) => FxParamTransformationTypeMap[Type]
 
 export type FxParamProcessorConstrainer<Type extends FxParamType> = (
   value: FxParamTypeMap[Type],
-  definition: FxParamDefinition<Type>
+  definition: FxParamDefinition<Type>,
 ) => FxParamTypeMap[Type]
 
 export interface FxParamProcessor<Type extends FxParamType> {
-  serialize: (
-    input: FxParamTypeMap[Type],
-    definition: FxParamDefinition<Type>
-  ) => string
-  deserialize: (
-    input: string,
-    definition: FxParamDefinition<Type>
-  ) => FxParamTypeMap[Type]
+  serialize: (input: FxParamTypeMap[Type], definition: FxParamDefinition<Type>) => string
+  deserialize: (input: string, definition: FxParamDefinition<Type>) => FxParamTypeMap[Type]
   bytesLength: (definition: FxParamDefinition<Type>) => number
   transform?: FxParamProcessorTransformer<Type>
   constrain?: FxParamProcessorConstrainer<Type>
@@ -131,4 +118,3 @@ export type FxParamsData = Record<string, any>
 export type FxParamsRaw = Record<string, FxParamValue<FxParamType>>
 export type FxParamTransformation = FxParamTransformationTypeMap[FxParamType]
 export type FxParamsTransformed = Record<string, FxParamTransformation>
-

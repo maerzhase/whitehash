@@ -1,4 +1,4 @@
-import { isChainId, type ChainId, type WhitehashToken } from "@whitehash/core"
+import { type ChainId, isChainId, type WhitehashToken } from "@whitehash/core"
 
 export interface ProjectRef {
   type: "project"
@@ -44,7 +44,12 @@ export function parseRef(value: string, expected: "project"): ProjectRef
 export function parseRef(value: string, expected: "token"): TokenRef
 export function parseRef(value: string, expected?: WhitehashRef["type"]): WhitehashRef
 export function parseRef(value: string, expected?: WhitehashRef["type"]): WhitehashRef {
-  const parts = value.trim().replace(/^whitehash:\/\//, "").replace(/^\/+/, "").split("/").map(decode)
+  const parts = value
+    .trim()
+    .replace(/^whitehash:\/\//, "")
+    .replace(/^\/+/, "")
+    .split("/")
+    .map(decode)
   const [type, chain] = parts
   if ((type !== "project" && type !== "token") || !chain || !isChainId(chain)) {
     throw new Error(`Invalid whitehash ref: ${value}`)
@@ -85,7 +90,10 @@ function addressInput(value: string): AddressInput | null {
 
 function contentInput(value: string): ContentInput | null {
   if (/^(ipfs|onchfs):\/\//i.test(value)) return { type: "content", uri: value }
-  if (/^Qm[1-9A-HJ-NP-Za-km-z]{44}(?:\/.*)?$/.test(value) || /^b[a-z2-7]{20,}(?:\/.*)?$/i.test(value)) {
+  if (
+    /^Qm[1-9A-HJ-NP-Za-km-z]{44}(?:\/.*)?$/.test(value) ||
+    /^b[a-z2-7]{20,}(?:\/.*)?$/i.test(value)
+  ) {
     return { type: "content", uri: `ipfs://${value}` }
   }
   return null
@@ -94,7 +102,11 @@ function contentInput(value: string): ContentInput | null {
 /** Parse refs, addresses, CIDs, and common pasted artwork/project URLs without fetching. */
 export function resolveInput(value: string, options: { chain?: ChainId } = {}): ResolvedInput {
   const input = value.trim()
-  try { return parseRef(input) } catch { /* Continue through paste-friendly forms. */ }
+  try {
+    return parseRef(input)
+  } catch {
+    /* Continue through paste-friendly forms. */
+  }
   const address = addressInput(input)
   if (address) return address
   const content = contentInput(input)
@@ -111,10 +123,16 @@ export function resolveInput(value: string, options: { chain?: ChainId } = {}): 
     }
     const projectIndex = parts.findIndex(part => part === "generative" || part === "project")
     if (projectIndex >= 0 && parts[projectIndex + 1]) {
-      return { type: "project", chain: options.chain ?? "tezos:mainnet", id: parts[projectIndex + 1]! }
+      return {
+        type: "project",
+        chain: options.chain ?? "tezos:mainnet",
+        id: parts[projectIndex + 1]!,
+      }
     }
     const nested = contentInput(url.searchParams.get("uri") ?? "")
     if (nested) return nested
-  } catch { /* Fall through to one actionable error. */ }
+  } catch {
+    /* Fall through to one actionable error. */
+  }
   throw new Error("Input is not a whitehash ref, address, CID, or supported artwork URL")
 }

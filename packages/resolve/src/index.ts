@@ -11,11 +11,7 @@
  * (fxhash monorepo `packages/config/src/utils/ipfs.ts`, MIT), with all
  * fxhash-hosted default endpoints removed.
  */
-import {
-  chainSlug as sharedChainSlug,
-  isChainId,
-  type ChainId,
-} from "@whitehash/core"
+import { type ChainId, isChainId, chainSlug as sharedChainSlug } from "@whitehash/core"
 
 export interface ResolverConfig {
   /**
@@ -24,10 +20,7 @@ export interface ResolverConfig {
    */
   ipfsGateways: string[]
   /** How onchfs virtual URLs are served; `null` disables browser resolution. */
-  onchfs:
-    | { mode: "service-worker"; basePath?: string }
-    | { mode: "proxy"; baseUrl: string }
-    | null
+  onchfs: { mode: "service-worker"; basePath?: string } | { mode: "proxy"; baseUrl: string } | null
 }
 
 export const DEFAULT_IPFS_GATEWAYS = ["https://ipfs.io", "https://dweb.link"]
@@ -72,15 +65,16 @@ function normalizeIpfsPath(value: string): string {
   // Metadata and user-provided values appear in several equivalent forms:
   // ipfs://CID, ipfs://ipfs/CID, /ipfs/CID, and bare CID. Keep the payload
   // intact while removing only a leading gateway namespace.
-  return value
-    .replace(/^\/+/, "")
-    .replace(/^ipfs\/+/, "")
+  return value.replace(/^\/+/, "").replace(/^ipfs\/+/, "")
 }
 
 function normalizeGatewayRoot(gateway: string): string {
   // Accept both a host root and the copy-paste-friendly gateway API root.
   // `https://host/ipfs/` must not become `https://host/ipfs/ipfs/CID`.
-  return gateway.trim().replace(/\/+$/, "").replace(/\/ipfs$/i, "")
+  return gateway
+    .trim()
+    .replace(/\/+$/, "")
+    .replace(/\/ipfs$/i, "")
 }
 
 function joinGateway(gateway: string, rest: string): string {
@@ -123,9 +117,11 @@ export function resolveUri(
   switch (scheme) {
     case "onchfs": {
       if (!config.onchfs) return null
-      const base = (config.onchfs.mode === "proxy"
-        ? config.onchfs.baseUrl
-        : config.onchfs.basePath ?? "/.whitehash/onchfs").replace(/\/+$/, "")
+      const base = (
+        config.onchfs.mode === "proxy"
+          ? config.onchfs.baseUrl
+          : (config.onchfs.basePath ?? "/.whitehash/onchfs")
+      ).replace(/\/+$/, "")
       const prefix = options.chain ? `/${chainSlug(options.chain)}` : ""
       return `${base}${prefix}/${rest}`
     }
@@ -195,7 +191,7 @@ export interface FetchFallbackOptions extends RequestInit {
 export async function fetchWithGatewayFallback(
   uri: string,
   config: ResolverConfig,
-  options: FetchFallbackOptions = {}
+  options: FetchFallbackOptions = {},
 ): Promise<Response> {
   const { fetchImpl, chain, ...init } = options
   const doFetch = fetchImpl ?? fetch
@@ -215,7 +211,7 @@ export async function fetchWithGatewayFallback(
     }
   }
   throw new Error(
-    `whitehash/resolve: all ${urls.length} gateway attempt(s) failed for ${uri}: ${String(lastError)}`
+    `whitehash/resolve: all ${urls.length} gateway attempt(s) failed for ${uri}: ${String(lastError)}`,
   )
 }
 
@@ -225,10 +221,8 @@ export async function fetchWithGatewayFallback(
 export function createResolver(config: ResolverConfig) {
   return {
     config,
-    resolveUri: (uri: string, options?: ResolveOptions) =>
-      resolveUri(uri, config, options),
-    resolveUriAll: (uri: string, options?: ResolveOptions) =>
-      resolveUriAll(uri, config, options),
+    resolveUri: (uri: string, options?: ResolveOptions) => resolveUri(uri, config, options),
+    resolveUriAll: (uri: string, options?: ResolveOptions) => resolveUriAll(uri, config, options),
     fetch: (uri: string, options?: FetchFallbackOptions) =>
       fetchWithGatewayFallback(uri, config, options),
   }

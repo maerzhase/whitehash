@@ -1,27 +1,18 @@
-import type { Browser } from "puppeteer-core"
 import {
-  CaptureMode,
-  CaptureTriggerMode,
   type ArtworkAttribute,
+  CaptureMode,
   type CaptureSettings,
+  CaptureTriggerMode,
   type WireCaptureSettings,
 } from "@whitehash/core"
+import type { Browser } from "puppeteer-core"
 import type { BrowserProvider } from "./browser/provider.js"
 
-export {
-  CaptureMode,
-  CaptureTriggerMode,
-  type CaptureSettings,
-  type WireCaptureSettings,
-}
+export { CaptureMode, type CaptureSettings, CaptureTriggerMode, type WireCaptureSettings }
 
 export type CaptureFeature = ArtworkAttribute<string | number | boolean>
 
-export type CaptureTriggerSource =
-  | "delay"
-  | "event"
-  | "console"
-  | "timeout-fallback"
+export type CaptureTriggerSource = "delay" | "event" | "console" | "timeout-fallback"
 
 export interface CaptureResult {
   image: Buffer

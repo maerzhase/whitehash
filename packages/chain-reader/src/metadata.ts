@@ -32,7 +32,7 @@ function str(v: unknown): string | null {
 
 function record(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown>
+    ? (value as Record<string, unknown>)
     : null
 }
 
@@ -58,17 +58,14 @@ export function normalizeCaptureSettings(raw: unknown): ProjectCaptureSettings |
   const source = record(metadata?.["capture"] ?? metadata?.["captureSettings"] ?? raw)
   if (!source) return null
 
-  const modeValue = typeof source["mode"] === "string"
-    ? source["mode"].toUpperCase()
-    : ""
+  const modeValue = typeof source["mode"] === "string" ? source["mode"].toUpperCase() : ""
   if (!["CANVAS", "VIEWPORT", "CUSTOM"].includes(modeValue)) return null
   const mode = modeValue as ProjectCaptureMode
 
-  const triggerValue = typeof source["triggerMode"] === "string"
-    ? source["triggerMode"].toUpperCase()
-    : ""
+  const triggerValue =
+    typeof source["triggerMode"] === "string" ? source["triggerMode"].toUpperCase() : ""
   const triggerMode = ["DELAY", "FN_TRIGGER", "FN_TRIGGER_GIF"].includes(triggerValue)
-    ? triggerValue as ProjectCaptureTriggerMode
+    ? (triggerValue as ProjectCaptureTriggerMode)
     : undefined
 
   const resolution = record(source["resolution"])
@@ -125,8 +122,7 @@ function normalizeAttributes(raw: unknown): { name: string; value: string }[] {
     if (!item || typeof item !== "object") continue
     const name = str(item.name) ?? str(item.trait_type)
     if (name === null) continue
-    const value =
-      item.value === null || item.value === undefined ? "" : String(item.value)
+    const value = item.value === null || item.value === undefined ? "" : String(item.value)
     out.push({ name, value })
   }
   return out

@@ -33,4 +33,3 @@ export function float2hex(n: number): string {
 
   return [...Array(8)].map((_, i) => getHex(view.getUint8(i))).join("")
 }
-

@@ -64,10 +64,7 @@ export function hexToRgba(hexCode: hexString): {
   const r = parseInt(hex.substring(0, 2), 16)
   const g = parseInt(hex.substring(2, 4), 16)
   const b = parseInt(hex.substring(4, 6), 16)
-  const a =
-    Math.round(
-      (parseInt(hex.substring(6, 8), 16) / 255 + Number.EPSILON) * 100
-    ) / 100
+  const a = Math.round((parseInt(hex.substring(6, 8), 16) / 255 + Number.EPSILON) * 100) / 100
 
   return { r, g, b, a }
 }
@@ -110,11 +107,9 @@ export const ParameterProcessors: FxParamProcessors = {
     bytesLength: () => 8,
     constrain: (value, definition) => {
       let min = Number.MIN_SAFE_INTEGER
-      if (typeof definition.options?.min !== "undefined")
-        min = Number(definition.options.min)
+      if (typeof definition.options?.min !== "undefined") min = Number(definition.options.min)
       let max = Number.MAX_SAFE_INTEGER
-      if (typeof definition.options?.max !== "undefined")
-        max = Number(definition.options.max)
+      if (typeof definition.options?.max !== "undefined") max = Number(definition.options.max)
       max = Math.min(max, Number.MAX_SAFE_INTEGER)
       min = Math.max(min, Number.MIN_SAFE_INTEGER)
       const v = Math.min(Math.max(value, min), max)
@@ -126,11 +121,9 @@ export const ParameterProcessors: FxParamProcessors = {
     },
     random: definition => {
       let min = Number.MIN_SAFE_INTEGER
-      if (typeof definition.options?.min !== "undefined")
-        min = Number(definition.options.min)
+      if (typeof definition.options?.min !== "undefined") min = Number(definition.options.min)
       let max = Number.MAX_SAFE_INTEGER
-      if (typeof definition.options?.max !== "undefined")
-        max = Number(definition.options.max)
+      if (typeof definition.options?.max !== "undefined") max = Number(definition.options.max)
       max = Math.min(max, Number.MAX_SAFE_INTEGER)
       min = Math.max(min, Number.MIN_SAFE_INTEGER)
       const v = Math.random() * (max - min) + min
@@ -158,21 +151,17 @@ export const ParameterProcessors: FxParamProcessors = {
     random: definition => {
       let min = MIN_SAFE_INT64
       let max = MAX_SAFE_INT64
-      if (typeof definition.options?.min !== "undefined")
-        min = BigInt(definition.options.min)
-      if (typeof definition.options?.max !== "undefined")
-        max = BigInt(definition.options.max)
+      if (typeof definition.options?.min !== "undefined") min = BigInt(definition.options.min)
+      if (typeof definition.options?.max !== "undefined") max = BigInt(definition.options.max)
       const range = max - min
       const bits = range.toString(2).length
       let random: bigint
       do {
         random = BigInt(
           "0b" +
-            Array.from(
-              crypto.getRandomValues(new Uint8Array(Math.ceil(bits / 8)))
-            )
+            Array.from(crypto.getRandomValues(new Uint8Array(Math.ceil(bits / 8))))
               .map(b => b.toString(2).padStart(8, "0"))
-              .join("")
+              .join(""),
         )
       } while (random > range)
       return random + min
@@ -232,9 +221,7 @@ export const ParameterProcessors: FxParamProcessors = {
       return hex.slice(0, 8).padEnd(8, "f")
     },
     random: () =>
-      `${[...Array(8)]
-        .map(() => Math.floor(Math.random() * 16).toString(16))
-        .join("")}`,
+      `${[...Array(8)].map(() => Math.floor(Math.random() * 16).toString(16)).join("")}`,
   },
 
   string: {
@@ -245,8 +232,7 @@ export const ParameterProcessors: FxParamProcessors = {
         return hex
       }
       let max = 64
-      if (typeof def.options?.maxLength !== "undefined")
-        max = Number(def.options.maxLength)
+      if (typeof def.options?.maxLength !== "undefined") max = Number(def.options.maxLength)
       let hex = stringToHex(input.substring(0, max))
       hex = hex.padEnd(max * 4, "0")
       return hex
@@ -259,29 +245,22 @@ export const ParameterProcessors: FxParamProcessors = {
       if (!def.version) {
         return 64 * 2
       }
-      if (typeof def.options?.maxLength !== "undefined")
-        return Number(def.options.maxLength) * 2
+      if (typeof def.options?.maxLength !== "undefined") return Number(def.options.maxLength) * 2
       return 64 * 2
     },
     random: definition => {
       let min = 0
-      if (typeof definition.options?.minLength !== "undefined")
-        min = definition.options.minLength
+      if (typeof definition.options?.minLength !== "undefined") min = definition.options.minLength
       let max = 64
-      if (typeof definition.options?.maxLength !== "undefined")
-        max = definition.options.maxLength
+      if (typeof definition.options?.maxLength !== "undefined") max = definition.options.maxLength
       const length = Math.round(Math.random() * (max - min) + min)
-      return [...Array(length)]
-        .map(() => (~~(Math.random() * 36)).toString(36))
-        .join("")
+      return [...Array(length)].map(() => (~~(Math.random() * 36)).toString(36)).join("")
     },
     constrain: (value, definition) => {
       let min = 0
-      if (typeof definition.options?.minLength !== "undefined")
-        min = definition.options.minLength
+      if (typeof definition.options?.minLength !== "undefined") min = definition.options.minLength
       let max = 64
-      if (typeof definition.options?.maxLength !== "undefined")
-        max = definition.options.maxLength
+      if (typeof definition.options?.maxLength !== "undefined") max = definition.options.maxLength
       const v = value.slice(0, max)
       if (v.length < min) {
         return v.padEnd(min)
@@ -339,9 +318,7 @@ export const ParameterProcessors: FxParamProcessors = {
       return definition.options.options[0] ?? ""
     },
     random: definition => {
-      const index = Math.round(
-        Math.random() * (definition.options.options.length - 1) + 0
-      )
+      const index = Math.round(Math.random() * (definition.options.options.length - 1) + 0)
       return definition.options.options[index] ?? ""
     },
   },
@@ -349,10 +326,7 @@ export const ParameterProcessors: FxParamProcessors = {
 
 // params are injected into the piece using the binary representation of the
 // numbers, to keep precision
-export function serializeParams(
-  params: any,
-  definition: FxParamDefinition<any>[]
-): string {
+export function serializeParams(params: any, definition: FxParamDefinition<any>[]): string {
   // a single hex string will be used for all the params
   let bytes = ""
   if (!definition) return bytes
@@ -360,9 +334,7 @@ export function serializeParams(
   // parameter as set on the UI
   for (const def of definition) {
     const { id, type } = def
-    const processor = ParameterProcessors[
-      type as FxParamType
-    ] as FxParamProcessor<any>
+    const processor = ParameterProcessors[type as FxParamType] as FxParamProcessor<any>
     // if the param is definined in the object
 
     const v = params[id] as FxParamTypeMap[]
@@ -382,7 +354,7 @@ export function serializeParams(
 // call seralizeParams(), returns nullif no params
 export function serializeParamsOrNull(
   params: FxParamsData,
-  definition: FxParamDefinition<any>[]
+  definition: FxParamDefinition<any>[],
 ): string | null {
   const serialized = serializeParams(params, definition || [])
   if (serialized.length === 0) return null
@@ -395,18 +367,14 @@ export function serializeParamsOrNull(
 export function deserializeParams(
   bytes: string,
   definition: FxParamDefinition<FxParamType>[],
-  options: { withTransform?: boolean; transformType?: FxParamTranformType }
+  options: { withTransform?: boolean; transformType?: FxParamTranformType },
 ): FxParamsRaw | FxParamsTransformed {
   const params: FxParamsRaw | FxParamsTransformed = {}
   for (const def of definition) {
-    const processor = ParameterProcessors[
-      def.type as FxParamType
-    ] as FxParamProcessor<FxParamType>
+    const processor = ParameterProcessors[def.type as FxParamType] as FxParamProcessor<FxParamType>
     const transformer =
       options.withTransform &&
-      (processor[
-        options.transformType || "transform"
-      ] as FxParamProcessorTransformer<FxParamType>)
+      (processor[options.transformType || "transform"] as FxParamProcessorTransformer<FxParamType>)
     if (!bytes) {
       let v: any
       if (typeof def.default === "undefined") v = processor.random(def)
@@ -419,10 +387,7 @@ export function deserializeParams(
     const valueBytes = bytes.substring(0, bytesLen * 2)
     bytes = bytes.substring(bytesLen * 2)
     // deserialize the bytes into the params
-    const val = processor.deserialize(
-      valueBytes,
-      def
-    ) as FxParamValue<FxParamType>
+    const val = processor.deserialize(valueBytes, def) as FxParamValue<FxParamType>
     params[def.id] = transformer ? transformer(val, def) : val
   }
   return params
@@ -442,9 +407,7 @@ export function consolidateParams(params: any, data: any): any[] {
     if (data?.hasOwnProperty(id)) {
       rtn[p].value = data[id]
     } else {
-      const processor = ParameterProcessors[
-        type as FxParamType
-      ] as FxParamProcessor<any>
+      const processor = ParameterProcessors[type as FxParamType] as FxParamProcessor<any>
       let v: any
       if (typeof def === "undefined") v = processor.random(definition)
       else v = def
@@ -466,7 +429,7 @@ export function consolidateParams(params: any, data: any): any[] {
  */
 export function buildParamsObject(
   definition: FxParamDefinitions,
-  data: FxParamsData | null
+  data: FxParamsData | null,
 ): FxParamsData {
   if (!definition) return {}
 
@@ -494,7 +457,7 @@ export function buildParamsObject(
 
 export function getRandomParamValues(
   params: FxParamDefinition<FxParamType>[],
-  options?: { noTransform?: boolean; randomizeAll?: boolean }
+  options?: { noTransform?: boolean; randomizeAll?: boolean },
 ): any {
   return params.reduce(
     (acc, definition) => {
@@ -506,29 +469,23 @@ export function getRandomParamValues(
         v = processor.random(definition) as FxParamType
       }
       if (v) {
-        acc[definition.id] = options?.noTransform
-          ? v
-          : processor.transform?.(v) || v
+        acc[definition.id] = options?.noTransform ? v : processor.transform?.(v) || v
       }
       return acc
     },
-    {} as Record<string, any>
+    {} as Record<string, any>,
   )
 }
 
-export function sumBytesParams(
-  definitions: FxParamDefinition<FxParamType>[]
-): number {
+export function sumBytesParams(definitions: FxParamDefinition<FxParamType>[]): number {
   return (
     definitions?.reduce(
       (acc, def) =>
         acc +
-        (
-          ParameterProcessors[
-            def.type as FxParamType
-          ] as FxParamProcessor<FxParamType>
-        ).bytesLength(def),
-      0
+        (ParameterProcessors[def.type as FxParamType] as FxParamProcessor<FxParamType>).bytesLength(
+          def,
+        ),
+      0,
     ) || 0
   )
 }
@@ -551,32 +508,28 @@ export const processParam = (
   paramId: string,
   value: FxParamValue<FxParamType>,
   definitions: FxParamDefinition<FxParamType>[],
-  transformType: FxParamTranformType
+  transformType: FxParamTranformType,
 ): FxParamValue<FxParamType> | FxParamTransformation => {
   const definition = definitions.find(d => d.id === paramId)
   if (!definition) {
     throw new Error(`No definition found for param ${paramId}`)
   }
   const processor = ParameterProcessors[definition.type]
-  const transformer = processor[
-    transformType
-  ] as FxParamProcessorTransformer<FxParamType>
+  const transformer = processor[transformType] as FxParamProcessorTransformer<FxParamType>
   return transformer?.(value, definition) || value
 }
 
 export const processParams = (
   values: FxParamsData,
   definitions: FxParamDefinition<FxParamType>[],
-  transformType: FxParamTranformType
+  transformType: FxParamTranformType,
 ): Record<string, FxParamValue<FxParamType>> => {
   const paramValues: Record<string, FxParamValue<FxParamType>> = {}
   for (const definition of definitions) {
     const processor = ParameterProcessors[definition.type]
     const value = values[definition.id]
     // deserialize the bytes into the params
-    const transformer = processor[
-      transformType
-    ] as FxParamProcessorTransformer<FxParamType>
+    const transformer = processor[transformType] as FxParamProcessorTransformer<FxParamType>
     paramValues[definition.id] = transformer?.(value, definition) || value
   }
   return paramValues

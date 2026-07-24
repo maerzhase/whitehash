@@ -1,10 +1,12 @@
+import type { DocsNavItem } from "./components/docs-chrome"
 import { API_ENTRIES } from "./docs-content"
 import { UNDERSTAND_ENTRIES } from "./understand-content"
-import type { DocsNavItem } from "./components/docs-chrome"
 
 export const DOC_NAV: DocsNavItem[] = [
   { label: "Getting started", href: "/guide/getting-started", group: "Start" },
-  ...UNDERSTAND_ENTRIES.filter(entry => ["overview", "data-model"].includes(entry.slug)).map(entry => ({ label: entry.title, href: `/understand/${entry.slug}`, group: "Understand" })),
+  ...UNDERSTAND_ENTRIES.filter(entry => ["overview", "data-model"].includes(entry.slug)).map(
+    entry => ({ label: entry.title, href: `/understand/${entry.slug}`, group: "Understand" }),
+  ),
   { label: "Configuration", href: "/guide/configuration", group: "Guides" },
   { label: "Archive CLI", href: "/guide/cli", group: "Guides" },
   { label: "Onchfs artwork", href: "/guide/onchfs", group: "Guides" },
@@ -26,6 +28,8 @@ export const DOC_NAV: DocsNavItem[] = [
     const entry = API_ENTRIES.find(candidate => candidate.slug === slug)
     return entry ? [{ label: entry.name, href: `/docs/${entry.slug}`, group: "Reference" }] : []
   }),
-  ...UNDERSTAND_ENTRIES.filter(entry => ["sources", "urls", "glossary"].includes(entry.slug)).map(entry => ({ label: entry.title, href: `/understand/${entry.slug}`, group: "Deep dives" })),
+  ...UNDERSTAND_ENTRIES.filter(entry => ["sources", "urls", "glossary"].includes(entry.slug)).map(
+    entry => ({ label: entry.title, href: `/understand/${entry.slug}`, group: "Deep dives" }),
+  ),
   { label: "LLM guide", href: "/llms", group: "Resources" },
 ]

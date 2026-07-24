@@ -69,10 +69,16 @@ All configuration is network-keyed, so testnets use the same public API shapes.
 ```bash
 pnpm install
 pnpm build
+pnpm check
 pnpm check-types
 pnpm test
+pnpm fix
+pnpm format
 pnpm --filter @whitehash/docs dev
 ```
+
+Biome linting and formatting checks run in CI. Use `pnpm fix` for safe combined fixes,
+or `pnpm format:fix` for a formatting-only pass.
 
 Changesets record every meaningful package change. Package publication remains disabled
 until the maintainer explicitly approves scope ownership, initial versions, and public

@@ -3,6 +3,8 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
+
+import semver from "semver"
 import {
   type FxParamDefinition,
   type FxParamDefinitions,
@@ -10,14 +12,9 @@ import {
   type FxParamType,
   jsonStringifyBigint,
 } from "./params/index.js"
+import type { RuntimeDefinition, RuntimeState, RuntimeWholeState } from "./types.js"
 import { float2hex, xorshiftString } from "./vendor/index.js"
 import { mergeRuntime } from "./vendor/object.js"
-import semver from "semver"
-import type {
-  RuntimeDefinition,
-  RuntimeState,
-  RuntimeWholeState,
-} from "./types.js"
 
 /**
  * Returns a boolean based on the provided snippet version. The boolean
@@ -25,13 +22,8 @@ import type {
  * params the the project url or not. Start from versions larger than 3.2.0,
  * the inputBytes should be passed as hash to the url.
  */
-export function fxParamsAsQueryParams(
-  snippetVersion: string | undefined
-): boolean {
-  return (
-    !semver.valid(snippetVersion) ||
-    (!!snippetVersion && semver.lte(snippetVersion, "3.2.0"))
-  )
+export function fxParamsAsQueryParams(snippetVersion: string | undefined): boolean {
+  return !semver.valid(snippetVersion) || (!!snippetVersion && semver.lte(snippetVersion, "3.2.0"))
 }
 
 /**
@@ -39,9 +31,7 @@ export function fxParamsAsQueryParams(
  * case that we accidentally saved the snippet version in the version field of
  * the token metadata.
  */
-export function isValidSnippetVersionInVersion(
-  snippetVersion: string
-): boolean {
+export function isValidSnippetVersionInVersion(snippetVersion: string): boolean {
   return !!semver.valid(snippetVersion) && semver.eq(snippetVersion, "3.0.1")
 }
 
@@ -59,8 +49,7 @@ export function getSnippetVersionFromProject(project: {
   metadata: Record<string, any>
 }): string | undefined {
   if (project.metadata.snippetVersion) return project.metadata.snippetVersion
-  if (isValidSnippetVersionInVersion(project.metadata.version))
-    return project.metadata.version
+  if (isValidSnippetVersionInVersion(project.metadata.version)) return project.metadata.version
   return undefined
 }
 
@@ -88,7 +77,7 @@ export function getCidFromProject(project: {
  */
 export function addVersionToParamsDefinition(
   definition: FxParamDefinitions,
-  version: string | null | undefined
+  version: string | null | undefined,
 ) {
   return definition.map(p => ({
     ...p,
@@ -103,14 +92,12 @@ export function addVersionToParamsDefinition(
  * @param runtime - The runtime
  * @returns The enhanced runtime definition
  */
-export function enhanceRuntimeDefinition(
-  runtime: RuntimeWholeState
-): RuntimeDefinition {
+export function enhanceRuntimeDefinition(runtime: RuntimeWholeState): RuntimeDefinition {
   return {
     ...runtime.definition,
     params: addVersionToParamsDefinition(
       runtime.definition.params || [],
-      runtime.definition.version || null
+      runtime.definition.version || null,
     ),
   }
 }
@@ -142,7 +129,7 @@ export function hashRuntimeState(state: RuntimeState) {
  */
 export function hashRuntimeHardState(
   state: RuntimeState,
-  definition: FxParamDefinition<FxParamType>[] | null
+  definition: FxParamDefinition<FxParamType>[] | null,
 ) {
   const staticParams: FxParamsData = {}
   for (const id in state.params) {

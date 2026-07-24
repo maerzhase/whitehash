@@ -32,23 +32,12 @@ describe("wallet enumeration", () => {
     await expect(
       getChainWalletTokens("tz1-owner", "tezos:mainnet", config, progress),
     ).resolves.toEqual([token("tezos:mainnet", "1")])
-    await expect(
-      getChainWalletTokens("0x-owner", "eip155:1", config, progress),
-    ).resolves.toEqual([token("eip155:1", "2")])
+    await expect(getChainWalletTokens("0x-owner", "eip155:1", config, progress)).resolves.toEqual([
+      token("eip155:1", "2"),
+    ])
 
-    expect(mocks.tezos).toHaveBeenCalledWith(
-      "tz1-owner",
-      "tezos:mainnet",
-      config,
-      fetch,
-      progress,
-    )
-    expect(mocks.evm).toHaveBeenCalledWith(
-      "0x-owner",
-      "eip155:1",
-      config,
-      progress,
-    )
+    expect(mocks.tezos).toHaveBeenCalledWith("tz1-owner", "tezos:mainnet", config, fetch, progress)
+    expect(mocks.evm).toHaveBeenCalledWith("0x-owner", "eip155:1", config, progress)
   })
 
   it("keeps successful results when another chain fails", async () => {
@@ -59,12 +48,7 @@ describe("wallet enumeration", () => {
     const progress = vi.fn()
 
     await expect(
-      getWalletTokens(
-        "0x-owner",
-        ["eip155:1", "eip155:8453"],
-        config,
-        progress,
-      ),
+      getWalletTokens("0x-owner", ["eip155:1", "eip155:8453"], config, progress),
     ).resolves.toEqual([token("eip155:8453", "7")])
     expect(progress).toHaveBeenCalledWith({
       chain: "eip155:1",
@@ -75,11 +59,7 @@ describe("wallet enumeration", () => {
 
   it("returns no tokens for an unknown chain without invoking a reader", async () => {
     await expect(
-      getChainWalletTokens(
-        "owner",
-        "unknown:network" as WhitehashToken["chain"],
-        config,
-      ),
+      getChainWalletTokens("owner", "unknown:network" as WhitehashToken["chain"], config),
     ).resolves.toEqual([])
     expect(mocks.evm).not.toHaveBeenCalled()
     expect(mocks.tezos).not.toHaveBeenCalled()

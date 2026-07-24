@@ -84,13 +84,14 @@ function key(bytes: Uint8Array): string {
 }
 
 function verifyBlock(block: Block): void {
-  const [versionOffset, codec] = block.cid[0] === 0x12
-    ? [0, 0x70]
-    : (() => {
-        const [, afterVersion] = readVarint(block.cid, 0)
-        const [parsedCodec, afterCodec] = readVarint(block.cid, afterVersion)
-        return [afterCodec, parsedCodec] as const
-      })()
+  const [versionOffset, codec] =
+    block.cid[0] === 0x12
+      ? [0, 0x70]
+      : (() => {
+          const [, afterVersion] = readVarint(block.cid, 0)
+          const [parsedCodec, afterCodec] = readVarint(block.cid, afterVersion)
+          return [afterCodec, parsedCodec] as const
+        })()
   void codec
   const [hashCode, afterHashCode] = readVarint(block.cid, versionOffset)
   const [digestLength, afterDigestLength] = readVarint(block.cid, afterHashCode)
@@ -123,7 +124,10 @@ function parseCar(bytes: Uint8Array): Map<string, Block> {
   return blocks
 }
 
-interface PbLink { hash: Uint8Array; name: string }
+interface PbLink {
+  hash: Uint8Array
+  name: string
+}
 
 function fields(bytes: Uint8Array): { number: number; wire: number; value: Uint8Array | number }[] {
   const output: { number: number; wire: number; value: Uint8Array | number }[] = []
@@ -158,8 +162,10 @@ function parsePbNode(bytes: Uint8Array): { data: Uint8Array; links: PbLink[] } {
       let hash = new Uint8Array()
       let name = ""
       for (const linkField of fields(field.value)) {
-        if (linkField.number === 1 && linkField.value instanceof Uint8Array) hash = new Uint8Array(linkField.value)
-        if (linkField.number === 2 && linkField.value instanceof Uint8Array) name = new TextDecoder().decode(linkField.value)
+        if (linkField.number === 1 && linkField.value instanceof Uint8Array)
+          hash = new Uint8Array(linkField.value)
+        if (linkField.number === 2 && linkField.value instanceof Uint8Array)
+          name = new TextDecoder().decode(linkField.value)
       }
       links.push({ hash, name })
     }
@@ -195,7 +201,8 @@ export function extractCar(car: Uint8Array, rootCid: string): ExtractedCar {
       if (path) files.set(safePath(path), block.bytes)
       return block.bytes
     }
-    if (block.codec !== 0x70) throw new Error(`Unsupported IPLD codec: 0x${block.codec.toString(16)}`)
+    if (block.codec !== 0x70)
+      throw new Error(`Unsupported IPLD codec: 0x${block.codec.toString(16)}`)
     const node = parsePbNode(block.bytes)
     const unix = unixFsData(node.data)
     if (unix.type === 1) {
@@ -206,12 +213,16 @@ export function extractCar(car: Uint8Array, rootCid: string): ExtractedCar {
       return new Uint8Array()
     }
     if (unix.type === 5) throw new Error("UnixFS HAMT directories are not supported yet")
-    if (unix.type !== 0 && unix.type !== 2) throw new Error(`Unsupported UnixFS node type: ${unix.type}`)
+    if (unix.type !== 0 && unix.type !== 2)
+      throw new Error(`Unsupported UnixFS node type: ${unix.type}`)
     const chunks = [unix.data, ...node.links.map(link => visit(link.hash, ""))]
     const length = chunks.reduce((sum, chunk) => sum + chunk.length, 0)
     const output = new Uint8Array(length)
     let cursor = 0
-    for (const chunk of chunks) { output.set(chunk, cursor); cursor += chunk.length }
+    for (const chunk of chunks) {
+      output.set(chunk, cursor)
+      cursor += chunk.length
+    }
     if (path) files.set(safePath(path), output)
     return output
   }

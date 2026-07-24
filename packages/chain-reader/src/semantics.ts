@@ -1,4 +1,4 @@
-import { resolveUri, type ResolverConfig } from "@whitehash/resolve"
+import { type ResolverConfig, resolveUri } from "@whitehash/resolve"
 import type { WhitehashToken } from "./types.js"
 
 /**
@@ -16,10 +16,7 @@ export function renderArtifactUri(token: WhitehashToken): string | null {
 }
 
 /** Resolve a token's live artwork URL for its chain. */
-export function artworkUrl(
-  token: WhitehashToken,
-  resolver: ResolverConfig,
-): string | null {
+export function artworkUrl(token: WhitehashToken, resolver: ResolverConfig): string | null {
   const uri = renderArtifactUri(token)
   return uri ? resolveUri(uri, resolver, { chain: token.chain }) : null
 }
@@ -51,10 +48,7 @@ export type LiveViewStatus =
   | { kind: "unavailable" }
 
 /** Explain whether a token can be rendered live and, if not, why. */
-export function liveViewStatus(
-  token: WhitehashToken,
-  resolver: ResolverConfig,
-): LiveViewStatus {
+export function liveViewStatus(token: WhitehashToken, resolver: ResolverConfig): LiveViewStatus {
   if (!token.assigned) return { kind: "unrevealed" }
   const uri = renderArtifactUri(token)
   if (!uri) return { kind: "unavailable" }
@@ -67,10 +61,7 @@ export function liveViewStatus(
 }
 
 /** True when the artwork is revealed and resolvable with this configuration. */
-export function canRenderLive(
-  token: WhitehashToken,
-  resolver: ResolverConfig,
-): boolean {
+export function canRenderLive(token: WhitehashToken, resolver: ResolverConfig): boolean {
   return liveViewStatus(token, resolver).kind === "ok"
 }
 

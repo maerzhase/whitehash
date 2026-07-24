@@ -1,5 +1,5 @@
-import type { ComponentProps, ReactNode } from "react"
 import { Dialog as BaseDialog } from "@base-ui-components/react/dialog"
+import type { ComponentProps, ReactNode } from "react"
 import { cn } from "../lib/cn.js"
 
 /**
@@ -13,11 +13,7 @@ const Root = BaseDialog.Root
 const Trigger = BaseDialog.Trigger
 const Close = BaseDialog.Close
 
-function Content({
-  className,
-  children,
-  ...props
-}: ComponentProps<typeof BaseDialog.Popup>) {
+function Content({ className, children, ...props }: ComponentProps<typeof BaseDialog.Popup>) {
   return (
     <BaseDialog.Portal>
       <BaseDialog.Backdrop
@@ -46,7 +42,10 @@ function Content({
 function Title({ className, ...props }: ComponentProps<typeof BaseDialog.Title>) {
   return (
     <BaseDialog.Title
-      className={cn("font-display text-2xl font-semibold leading-8 tracking-[-0.04em] text-fg", className)}
+      className={cn(
+        "font-display text-2xl font-semibold leading-8 tracking-[-0.04em] text-fg",
+        className,
+      )}
       {...props}
     />
   )

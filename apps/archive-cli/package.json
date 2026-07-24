@@ -14,7 +14,10 @@
       "default": "./dist/archive.js"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup src/index.ts src/archive.ts src/project-index.ts src/token-index.ts --format esm --dts --clean --platform node",
     "check-types": "tsc --noEmit",

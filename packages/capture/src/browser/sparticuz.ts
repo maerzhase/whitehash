@@ -1,15 +1,12 @@
 import type { Browser, LaunchOptions } from "puppeteer-core"
 import type { BrowserProvider } from "./provider.js"
 
-export interface SparticuzProviderOptions
-  extends Omit<LaunchOptions, "executablePath"> {
+export interface SparticuzProviderOptions extends Omit<LaunchOptions, "executablePath"> {
   packUrl?: string
   useGl?: string | false
 }
 
-export function sparticuzProvider(
-  options: SparticuzProviderOptions = {},
-): BrowserProvider {
+export function sparticuzProvider(options: SparticuzProviderOptions = {}): BrowserProvider {
   const { packUrl, useGl = "egl", args = [], ...launchOptions } = options
   return {
     async acquire() {

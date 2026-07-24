@@ -1,19 +1,16 @@
 "use client"
 
-import { useEffect, useRef, useState, type CSSProperties } from "react"
-import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   CURATED_PROJECT_EXAMPLES,
-  parseRef,
-  tokenKey,
   type CuratedProjectExample,
   type ProjectRef,
+  parseRef,
   type TokenRef,
+  tokenKey,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
-import { useProject, useWalletTokens, useWhitehash } from "@whitehash/react"
 import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
+import { useProject, useWalletTokens, useWhitehash } from "@whitehash/react"
 import {
   Artwork,
   Button,
@@ -24,10 +21,13 @@ import {
   WalletGallery,
   WhitehashProvider,
 } from "@whitehash/ui"
-import { API_ENTRIES, ApiDocPage, GuidePage, SAMPLE_TOKEN } from "./docs-content"
-import { UNDERSTAND_ENTRIES, UnderstandPage } from "./understand-content"
+import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { type CSSProperties, useEffect, useRef, useState } from "react"
 import { CodeBlock, DocsPage, DocsShell, SiteHeader } from "./components/docs-chrome"
+import { API_ENTRIES, ApiDocPage, GuidePage, SAMPLE_TOKEN } from "./docs-content"
 import { DOC_NAV } from "./docs-navigation"
+import { UnderstandPage } from "./understand-content"
 import { Variations } from "./variations-demo"
 
 type Route =
@@ -45,19 +45,32 @@ function parsePath(pathname: string, search: URLSearchParams): Route {
   if (parts[0] === "docs" && parts[1]) return { name: "api", slug: parts[1] }
   if (parts[0] === "guide" && parts[1]) return { name: "guide", slug: parts[1] }
   if (parts[0] === "understand" && parts[1]) return { name: "understand", slug: parts[1] }
-  if (parts[0] === "p" && parts[1] && parts[2]) return { name: "project", ref: { type: "project", chain: parts[1] as ProjectRef["chain"], id: parts[2] } }
+  if (parts[0] === "p" && parts[1] && parts[2])
+    return {
+      name: "project",
+      ref: { type: "project", chain: parts[1] as ProjectRef["chain"], id: parts[2] },
+    }
   if (parts[0] === "w" && parts[1]) {
     const address = parts[1]
-    if (parts[2] === "t" && parts[3] && parts[4] && parts[5]) return { name: "token", address, key: `${parts[3]}/${parts[4]}/${parts[5]}` }
+    if (parts[2] === "t" && parts[3] && parts[4] && parts[5])
+      return { name: "token", address, key: `${parts[3]}/${parts[4]}/${parts[5]}` }
     return { name: "wallet", address }
   }
   const project = search.get("project")
   if (project) {
-    try { return { name: "project", ref: parseRef(project, "project") } } catch { /* Invalid input lands on home. */ }
+    try {
+      return { name: "project", ref: parseRef(project, "project") }
+    } catch {
+      /* Invalid input lands on home. */
+    }
   }
   const directToken = search.get("tokenRef")
   if (directToken) {
-    try { return { name: "direct-token", ref: parseRef(directToken, "token") } } catch { /* Invalid input lands on home. */ }
+    try {
+      return { name: "direct-token", ref: parseRef(directToken, "token") }
+    } catch {
+      /* Invalid input lands on home. */
+    }
   }
   const wallet = search.get("wallet")
   const token = search.get("token")
@@ -68,11 +81,18 @@ function parsePath(pathname: string, search: URLSearchParams): Route {
 
 const segment = (value: string) => encodeURIComponent(value)
 const walletPath = (address: string) => `/?wallet=${segment(address)}`
-const tokenPath = (token: WhitehashToken, address: string) => `/?wallet=${segment(address)}&token=${segment(tokenKey(token))}`
+const tokenPath = (token: WhitehashToken, address: string) =>
+  `/?wallet=${segment(address)}&token=${segment(tokenKey(token))}`
 
 export function App() {
-  useEffect(() => { void registerOnchfsWorker().catch(error => console.warn("onchfs worker unavailable", error)) }, [])
-  return <WhitehashProvider><DocsApp /></WhitehashProvider>
+  useEffect(() => {
+    void registerOnchfsWorker().catch(error => console.warn("onchfs worker unavailable", error))
+  }, [])
+  return (
+    <WhitehashProvider>
+      <DocsApp />
+    </WhitehashProvider>
+  )
 }
 
 function DocsApp() {
@@ -80,7 +100,10 @@ function DocsApp() {
   const router = useRouter()
   const search = useSearchParams()
   const route = parsePath(pathname, search)
-  const navigate = (to: string) => { router.push(to); window.scrollTo(0, 0) }
+  const navigate = (to: string) => {
+    router.push(to)
+    window.scrollTo(0, 0)
+  }
 
   const address = route.name === "wallet" || route.name === "token" ? route.address : null
   const wallet = useWalletTokens(address)
@@ -88,29 +111,69 @@ function DocsApp() {
   const docsRoute = route.name === "api" || route.name === "guide" || route.name === "understand"
   return (
     <div className="min-h-screen bg-canvas text-fg">
-      <SiteHeader actions={<>
-        <Button variant="ghost" size="sm" render={<Link href="/guide/getting-started" />}>Docs</Button>
-        {address ? <Button variant="ghost" size="sm" onClick={wallet.refresh} disabled={wallet.loading}>{wallet.loading ? <Spinner className="size-3.5" /> : null}Refresh</Button> : null}
-      </>} />
+      <SiteHeader
+        actions={
+          <>
+            <Button variant="ghost" size="sm" render={<Link href="/guide/getting-started" />}>
+              Docs
+            </Button>
+            {address ? (
+              <Button variant="ghost" size="sm" onClick={wallet.refresh} disabled={wallet.loading}>
+                {wallet.loading ? <Spinner className="size-3.5" /> : null}Refresh
+              </Button>
+            ) : null}
+          </>
+        }
+      />
 
       {docsRoute ? (
         <DocsShell items={DOC_NAV} currentHref={pathname}>
-          {route.name === "api" ? <ApiDocPage entry={API_ENTRIES.find(entry => entry.slug === route.slug) ?? API_ENTRIES[0]!} />
-            : route.name === "understand" ? <UnderstandPage slug={route.slug} />
-              : <><GuidePage slug={route.slug} />{route.slug === "variations" ? <DocsPage><Variations token={SAMPLE_TOKEN} /></DocsPage> : null}</>}
+          {route.name === "api" ? (
+            <ApiDocPage
+              entry={API_ENTRIES.find(entry => entry.slug === route.slug) ?? API_ENTRIES[0]!}
+            />
+          ) : route.name === "understand" ? (
+            <UnderstandPage slug={route.slug} />
+          ) : (
+            <>
+              <GuidePage slug={route.slug} />
+              {route.slug === "variations" ? (
+                <DocsPage>
+                  <Variations token={SAMPLE_TOKEN} />
+                </DocsPage>
+              ) : null}
+            </>
+          )}
         </DocsShell>
       ) : (
         <main>
           {route.name === "home" ? <HomePage /> : null}
           <div className="mx-auto max-w-[1200px] px-4 pb-24 sm:px-6">
-            {route.name === "project" ? <ProjectRoute projectRef={route.ref} onBack={() => navigate("/")} /> : null}
-            {route.name === "wallet" && wallet.state ? <WalletGallery.Content address={wallet.state.address} state={wallet.state} loading={wallet.loading} onOpenToken={token => navigate(tokenPath(token, wallet.state!.address))} /> : null}
-            {route.name === "token" && wallet.state ? <TokenRoute tokenKeyWanted={route.key} tokens={wallet.state.tokens} loading={wallet.loading} onBack={() => navigate(walletPath(route.address))} /> : null}
-            {route.name === "direct-token" ? <DirectTokenRoute tokenRef={route.ref} onBack={() => navigate("/")} /> : null}
+            {route.name === "project" ? (
+              <ProjectRoute projectRef={route.ref} onBack={() => navigate("/")} />
+            ) : null}
+            {route.name === "wallet" && wallet.state ? (
+              <WalletGallery.Content
+                address={wallet.state.address}
+                state={wallet.state}
+                loading={wallet.loading}
+                onOpenToken={token => navigate(tokenPath(token, wallet.state!.address))}
+              />
+            ) : null}
+            {route.name === "token" && wallet.state ? (
+              <TokenRoute
+                tokenKeyWanted={route.key}
+                tokens={wallet.state.tokens}
+                loading={wallet.loading}
+                onBack={() => navigate(walletPath(route.address))}
+              />
+            ) : null}
+            {route.name === "direct-token" ? (
+              <DirectTokenRoute tokenRef={route.ref} onBack={() => navigate("/")} />
+            ) : null}
           </div>
         </main>
       )}
-
     </div>
   )
 }
@@ -122,21 +185,67 @@ function HomePage() {
         <div className="home-grid" aria-hidden />
         <div className="hero-inner relative z-10 mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-[1200px] items-center gap-14 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-20">
           <div className="hero-copy max-w-2xl">
-            <div className="mb-7 flex items-center gap-2 font-mono text-xs text-muted"><span className="size-1.5 rounded-full bg-success shadow-[0_0_14px_var(--color-success)]" /> Open source · Tezos, Ethereum &amp; Base</div>
-            <h1 className="font-display text-5xl font-semibold leading-[0.96] tracking-[-0.065em] sm:text-7xl lg:text-[5.25rem]">Generative art.<br /><span className="text-muted">Straight from the source.</span></h1>
-            <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">A React API for reading fxhash projects and tokens across Tezos, Ethereum, and Base, then resolving their IPFS and onchfs content—without depending on a centralized platform backend.</p>
-            <div className="mt-8 flex flex-wrap gap-2"><Button render={<Link href="/guide/getting-started" />}>Getting started</Button><Button variant="secondary" render={<a href="#discover" />}>Discover artwork</Button></div>
+            <div className="mb-7 flex items-center gap-2 font-mono text-xs text-muted">
+              <span className="size-1.5 rounded-full bg-success shadow-[0_0_14px_var(--color-success)]" />{" "}
+              Open source · Tezos, Ethereum &amp; Base
+            </div>
+            <h1 className="font-display text-5xl font-semibold leading-[0.96] tracking-[-0.065em] sm:text-7xl lg:text-[5.25rem]">
+              Generative art.
+              <br />
+              <span className="text-muted">Straight from the source.</span>
+            </h1>
+            <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+              A React API for reading fxhash projects and tokens across Tezos, Ethereum, and Base,
+              then resolving their IPFS and onchfs content—without depending on a centralized
+              platform backend.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-2">
+              <Button render={<Link href="/guide/getting-started" />}>Getting started</Button>
+              <Button variant="secondary" render={<a href="#discover" />}>
+                Discover artwork
+              </Button>
+            </div>
           </div>
           <div className="hero-visual">
-            <div className="mb-3 flex items-center justify-between font-mono text-[11px] text-faint"><span>live component</span><span>tezos:mainnet</span></div>
-            <Artwork.Root token={SAMPLE_TOKEN} className="hero-artwork"><Artwork.Image /><Artwork.Live /><Artwork.PlayButton /><Artwork.StatusBadge /></Artwork.Root>
+            <div className="mb-3 flex items-center justify-between font-mono text-[11px] text-faint">
+              <span>live component</span>
+              <span>tezos:mainnet</span>
+            </div>
+            <Artwork.Root token={SAMPLE_TOKEN} className="hero-artwork">
+              <Artwork.Image />
+              <Artwork.Live />
+              <Artwork.PlayButton />
+              <Artwork.StatusBadge />
+            </Artwork.Root>
           </div>
         </div>
       </section>
 
       <section className="border-y border-line bg-surface">
         <div className="mx-auto grid max-w-[1200px] divide-y divide-line px-4 sm:px-6 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
-          {[["01", "Read", "Start with a token, wallet, or project. Every chain resolves to one predictable data shape."], ["02", "Resolve", "Load content-addressed IPFS and onchfs artwork through replaceable gateways and RPCs."], ["03", "Render", "Show a resilient preview, then run the correctly seeded artwork in a restricted iframe."]].map(([number, title, copy]) => <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0"><div className="font-mono text-[11px] text-faint">{number}</div><h2 className="mt-4 text-lg font-medium">{title}</h2><p className="mt-2 text-sm leading-6 text-muted">{copy}</p></div>)}
+          {[
+            [
+              "01",
+              "Read",
+              "Start with a token, wallet, or project. Every chain resolves to one predictable data shape.",
+            ],
+            [
+              "02",
+              "Resolve",
+              "Load content-addressed IPFS and onchfs artwork through replaceable gateways and RPCs.",
+            ],
+            [
+              "03",
+              "Render",
+              "Show a resilient preview, then run the correctly seeded artwork in a restricted iframe.",
+            ],
+          ].map(([number, title, copy]) => (
+            <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0">
+              <div className="font-mono text-[11px] text-faint">{number}</div>
+              <h2 className="mt-4 text-lg font-medium">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-muted">{copy}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -148,12 +257,27 @@ function HomePage() {
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.85fr_1.15fr] lg:py-32">
           <div>
             <div className="section-kicker">One direct path</div>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Token in.<br />Artwork out.</h2>
-            <p className="mt-5 max-w-md leading-7 text-muted">Read one token by chain, contract, and ID. <code>Artwork</code> handles gateway fallback, the correctly seeded live artifact, iframe security, and explicit reveal states.</p>
-            <p className="mt-4 max-w-md text-sm leading-6 text-faint">Starting from a wallet or project? Those discovery APIs return the same <code>WhitehashToken</code>.</p>
-            <Link className="docs-text-link mt-6 inline-block" href="/guide/getting-started">Build your first artwork →</Link>
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+              Token in.
+              <br />
+              Artwork out.
+            </h2>
+            <p className="mt-5 max-w-md leading-7 text-muted">
+              Read one token by chain, contract, and ID. <code>Artwork</code> handles gateway
+              fallback, the correctly seeded live artifact, iframe security, and explicit reveal
+              states.
+            </p>
+            <p className="mt-4 max-w-md text-sm leading-6 text-faint">
+              Starting from a wallet or project? Those discovery APIs return the same{" "}
+              <code>WhitehashToken</code>.
+            </p>
+            <Link className="docs-text-link mt-6 inline-block" href="/guide/getting-started">
+              Build your first artwork →
+            </Link>
           </div>
-          <CodeBlock language="tsx" code={`const { token } = useToken({
+          <CodeBlock
+            language="tsx"
+            code={`const { token } = useToken({
   chain: "tezos:mainnet",
   contract: "KT1…",
   tokenId: "16333",
@@ -165,13 +289,16 @@ return token && (
     <Artwork.Live />
     <Artwork.PlayButton />
   </Artwork.Root>
-)`} />
+)`}
+          />
         </div>
       </section>
 
       <section className="border-t border-line bg-surface">
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-32">
-          <CodeBlock language="tsx" code={`const result = await capture({
+          <CodeBlock
+            language="tsx"
+            code={`const result = await capture({
   url: seededArtworkUrl,
   browser: localProvider({ useGl: "egl" }),
   allowlist: ["https://art.example/"],
@@ -184,18 +311,34 @@ return token && (
 
 result.image       // PNG or GIF
 result.features    // declared token traits
-result.triggeredBy // event, console, or delay`} />
+result.triggeredBy // event, console, or delay`}
+          />
           <div>
             <div className="section-kicker">Headless capture</div>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Artwork URL in.<br />Pixels out.</h2>
-            <p className="mt-5 max-w-md leading-7 text-muted">Run the original generator in headless Chromium, wait for its <code>fxpreview()</code> signal, and produce a deterministic viewport, canvas, or GIF capture with declared features.</p>
-            <p className="mt-4 max-w-md text-sm leading-6 text-faint">Use local Chrome in development, serverless Chromium on functions, or an isolated remote browser. Add storage and per-key locks only when your endpoint needs them.</p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+              Artwork URL in.
+              <br />
+              Pixels out.
+            </h2>
+            <p className="mt-5 max-w-md leading-7 text-muted">
+              Run the original generator in headless Chromium, wait for its <code>fxpreview()</code>{" "}
+              signal, and produce a deterministic viewport, canvas, or GIF capture with declared
+              features.
+            </p>
+            <p className="mt-4 max-w-md text-sm leading-6 text-faint">
+              Use local Chrome in development, serverless Chromium on functions, or an isolated
+              remote browser. Add storage and per-key locks only when your endpoint needs them.
+            </p>
             <div className="mt-6 flex flex-wrap gap-2 font-mono text-[11px] text-muted">
               {["viewport", "canvas", "GIF", "features", "Request → Response"].map(label => (
-                <span key={label} className="rounded-sm border border-line bg-canvas px-2.5 py-1.5">{label}</span>
+                <span key={label} className="rounded-sm border border-line bg-canvas px-2.5 py-1.5">
+                  {label}
+                </span>
               ))}
             </div>
-            <Link className="docs-text-link mt-7 inline-block" href="/guide/capture">Build a capture endpoint →</Link>
+            <Link className="docs-text-link mt-7 inline-block" href="/guide/capture">
+              Build a capture endpoint →
+            </Link>
           </div>
         </div>
       </section>
@@ -203,18 +346,44 @@ result.triggeredBy // event, console, or delay`} />
       <section className="border-t border-line">
         <div className="mx-auto max-w-[1200px] px-4 py-24 sm:px-6 lg:py-28">
           <div className="section-kicker">No required backend</div>
-          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Public data. Replaceable dependencies.</h2>
-          <p className="mt-5 max-w-2xl leading-7 text-muted">Whitehash reads known contracts, normalizes their differences, and resolves content-addressed artwork. Every RPC, indexer, gateway, and trusted contract is visible and configurable.</p>
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+            Public data. Replaceable dependencies.
+          </h2>
+          <p className="mt-5 max-w-2xl leading-7 text-muted">
+            Whitehash reads known contracts, normalizes their differences, and resolves
+            content-addressed artwork. Every RPC, indexer, gateway, and trusted contract is visible
+            and configurable.
+          </p>
           <div className="mt-10 border-t border-line">
-            {([
-              ["Projects and tokens", "The two stable shapes carried through every API.", "/understand/data-model"],
-              ["Where the data comes from", "Every fxhash contract and external read path, listed.", "/understand/sources"],
-              ["How artwork URLs are built", "Seeds, parameters, IPFS, and onchfs resolution.", "/understand/urls"],
-            ] as const).map(([title, copy, href]) => (
-              <Link key={href} href={href} className="group grid gap-2 border-b border-line py-6 transition-colors hover:text-primary sm:grid-cols-[.8fr_1.2fr_auto] sm:items-center sm:gap-8">
+            {(
+              [
+                [
+                  "Projects and tokens",
+                  "The two stable shapes carried through every API.",
+                  "/understand/data-model",
+                ],
+                [
+                  "Where the data comes from",
+                  "Every fxhash contract and external read path, listed.",
+                  "/understand/sources",
+                ],
+                [
+                  "How artwork URLs are built",
+                  "Seeds, parameters, IPFS, and onchfs resolution.",
+                  "/understand/urls",
+                ],
+              ] as const
+            ).map(([title, copy, href]) => (
+              <Link
+                key={href}
+                href={href}
+                className="group grid gap-2 border-b border-line py-6 transition-colors hover:text-primary sm:grid-cols-[.8fr_1.2fr_auto] sm:items-center sm:gap-8"
+              >
                 <h3 className="font-medium">{title}</h3>
                 <p className="text-sm leading-6 text-muted">{copy}</p>
-                <span className="text-sm text-faint transition-colors group-hover:text-primary">Read →</span>
+                <span className="text-sm text-faint transition-colors group-hover:text-primary">
+                  Read →
+                </span>
               </Link>
             ))}
           </div>
@@ -228,11 +397,15 @@ result.triggeredBy // event, console, or delay`} />
             <span className="block">Own the path from</span>
             <span className="mt-2 flex flex-wrap items-center justify-center gap-x-[.18em]">
               <span>crypto</span>
-              <span className="home-footer-mark" aria-hidden="true"><img src="/logo-original.png" alt="" /></span>
+              <span className="home-footer-mark" aria-hidden="true">
+                <img src="/logo-original.png" alt="" />
+              </span>
               <span>to canvas.</span>
             </span>
           </h2>
-          <div className="mt-10"><Button render={<Link href="/guide/getting-started" />}>Start building</Button></div>
+          <div className="mt-10">
+            <Button render={<Link href="/guide/getting-started" />}>Start building</Button>
+          </div>
         </div>
       </footer>
     </>
@@ -272,11 +445,14 @@ function CapabilityShowcase() {
         <div>
           <div className="section-kicker">Rendering field test</div>
           <h2 className="gallery-tagline mt-5 max-w-5xl font-display font-semibold">
-            One renderer.<br /><span className="text-muted">Every artwork.</span>
+            One renderer.
+            <br />
+            <span className="text-muted">Every artwork.</span>
           </h2>
         </div>
         <p className="max-w-sm text-sm leading-6 text-muted sm:text-base sm:leading-7">
-          Random editions from real projects put every path through its paces—from legacy IPFS and plotter work to onchfs, GPU, audio, and GIF output.
+          Random editions from real projects put every path through its paces—from legacy IPFS and
+          plotter work to onchfs, GPU, audio, and GIF output.
         </p>
       </header>
 
@@ -329,11 +505,11 @@ function CapabilityShowcase() {
               "--carousel-x": `${x}vw`,
               "--carousel-z": `${z}px`,
               "--carousel-rotate": `${offset * -18}deg`,
-              "--carousel-scale": String(Math.max(.64, 1 - distance * .09)),
+              "--carousel-scale": String(Math.max(0.64, 1 - distance * 0.09)),
               "--carousel-opacity": String(distance <= 2 ? 1 : 0),
               "--carousel-blur": `${distance * 3.5}px`,
               "--carousel-brightness": String(
-                distance === 0 ? 1 : distance === 1 ? .56 : distance === 2 ? .34 : .2,
+                distance === 0 ? 1 : distance === 1 ? 0.56 : distance === 2 ? 0.34 : 0.2,
               ),
               zIndex: total - distance,
             } as CSSProperties
@@ -375,7 +551,8 @@ function CapabilityShowcase() {
         </button>
       </div>
       <div className="carousel-hint mx-auto max-w-[1440px] px-4 sm:px-6">
-        <span>Swipe, use arrow keys, or choose a work</span><span aria-hidden>↔</span>
+        <span>Swipe, use arrow keys, or choose a work</span>
+        <span aria-hidden>↔</span>
       </div>
     </div>
   )
@@ -408,14 +585,16 @@ function CarouselArtwork({
       onClick={onSelect}
     >
       {active ? (
-        sample.token
-          ? <StaticCarouselArtworkContent sample={sample} />
-          : sample.example
-            ? <ProjectCarouselArtworkContent example={sample.example} />
-            : null
+        sample.token ? (
+          <StaticCarouselArtworkContent sample={sample} />
+        ) : sample.example ? (
+          <ProjectCarouselArtworkContent example={sample.example} />
+        ) : null
       ) : (
         <>
-          <div className="carousel-frame"><CarouselSkeleton /></div>
+          <div className="carousel-frame">
+            <CarouselSkeleton />
+          </div>
           <div className="carousel-caption">
             <span>{sample.name}</span>
           </div>
@@ -451,7 +630,11 @@ function CarouselSkeleton() {
   )
 }
 
-function StaticCarouselArtworkContent({ sample }: { sample: CarouselSample & { token?: WhitehashToken } }) {
+function StaticCarouselArtworkContent({
+  sample,
+}: {
+  sample: CarouselSample & { token?: WhitehashToken }
+}) {
   if (!sample.token) return null
   return (
     <>
@@ -503,9 +686,29 @@ function ProjectRoute({ projectRef, onBack }: { projectRef: ProjectRef; onBack: 
   return <ProjectGallery project={projectRef} onOpenToken={setToken} onBack={onBack} />
 }
 
-function TokenRoute({ tokenKeyWanted, tokens, loading, onBack }: { tokenKeyWanted: string; tokens: WhitehashToken[]; loading: boolean; onBack: () => void }) {
+function TokenRoute({
+  tokenKeyWanted,
+  tokens,
+  loading,
+  onBack,
+}: {
+  tokenKeyWanted: string
+  tokens: WhitehashToken[]
+  loading: boolean
+  onBack: () => void
+}) {
   const token = tokens.find(value => tokenKey(value) === tokenKeyWanted)
-  if (!token) return <DocsPage className="pt-8"><Button variant="link" onClick={onBack}>← Back</Button><p className="mt-3 text-muted">{loading ? "Loading…" : "Token not found in this wallet."}</p></DocsPage>
+  if (!token)
+    return (
+      <DocsPage className="pt-8">
+        <Button variant="link" onClick={onBack}>
+          ← Back
+        </Button>
+        <p className="mt-3 text-muted">
+          {loading ? "Loading…" : "Token not found in this wallet."}
+        </p>
+      </DocsPage>
+    )
   return <TokenExperience token={token} onBack={onBack} />
 }
 
@@ -515,21 +718,59 @@ function DirectTokenRoute({ tokenRef, onBack }: { tokenRef: TokenRef; onBack: ()
   const [error, setError] = useState<string | null>(null)
   useEffect(() => {
     let alive = true
-    setToken(null); setError(null)
-    void client.getToken(tokenRef).then(value => { if (alive) setToken(value) }).catch(cause => {
-      if (alive) setError(cause instanceof Error ? cause.message : String(cause))
-    })
-    return () => { alive = false }
+    setToken(null)
+    setError(null)
+    void client
+      .getToken(tokenRef)
+      .then(value => {
+        if (alive) setToken(value)
+      })
+      .catch(cause => {
+        if (alive) setError(cause instanceof Error ? cause.message : String(cause))
+      })
+    return () => {
+      alive = false
+    }
   }, [client, tokenRef.chain, tokenRef.contract, tokenRef.tokenId])
   if (token) return <TokenExperience token={token} onBack={onBack} />
-  return <DocsPage className="pt-8"><Button variant="link" onClick={onBack}>← Back</Button><p className="mt-3 text-muted">{error ?? "Loading token…"}</p></DocsPage>
+  return (
+    <DocsPage className="pt-8">
+      <Button variant="link" onClick={onBack}>
+        ← Back
+      </Button>
+      <p className="mt-3 text-muted">{error ?? "Loading token…"}</p>
+    </DocsPage>
+  )
 }
 
 function TokenExperience({ token, onBack }: { token: WhitehashToken; onBack: () => void }) {
   const [tab, setTab] = useState<"details" | "explore">("details")
-  return <DocsPage className="pt-5">
-    <Button variant="link" onClick={onBack}>← Back</Button>
-    <div className="mt-4 flex gap-2"><Button size="sm" variant={tab === "details" ? "primary" : "secondary"} onClick={() => setTab("details")}>Details</Button><Button size="sm" variant={tab === "explore" ? "primary" : "secondary"} onClick={() => setTab("explore")}>Explore</Button></div>
-    {tab === "details" ? <TokenDetails token={token} className="pt-0" /> : <Variations token={token} />}
-  </DocsPage>
+  return (
+    <DocsPage className="pt-5">
+      <Button variant="link" onClick={onBack}>
+        ← Back
+      </Button>
+      <div className="mt-4 flex gap-2">
+        <Button
+          size="sm"
+          variant={tab === "details" ? "primary" : "secondary"}
+          onClick={() => setTab("details")}
+        >
+          Details
+        </Button>
+        <Button
+          size="sm"
+          variant={tab === "explore" ? "primary" : "secondary"}
+          onClick={() => setTab("explore")}
+        >
+          Explore
+        </Button>
+      </div>
+      {tab === "details" ? (
+        <TokenDetails token={token} className="pt-0" />
+      ) : (
+        <Variations token={token} />
+      )}
+    </DocsPage>
+  )
 }

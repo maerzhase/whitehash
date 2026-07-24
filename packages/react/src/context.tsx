@@ -1,21 +1,13 @@
 import {
-  createContext,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from "react"
-import {
+  type ChainReaderConfig,
   createWhitehashClient,
   DEFAULT_NETWORK_MODE,
   defaultChainReaderConfig,
-  type ChainReaderConfig,
   type NetworkMode,
   type WhitehashClient,
 } from "@whitehash/chain-reader"
-import {
-  createDefaultCache,
-  type WhitehashCache,
-} from "./cache.js"
+import { createContext, type ReactNode, useContext, useMemo } from "react"
+import { createDefaultCache, type WhitehashCache } from "./cache.js"
 
 export interface WhitehashProviderConfig extends Omit<ChainReaderConfig, "resolver"> {
   /** URI resolution defaults to ipfs.io then dweb.link; onchfs is opt-in. */
@@ -51,13 +43,10 @@ export function WhitehashProvider({
     () => ({ ...defaults.resolver, ...resolverOverrides }),
     [defaults, resolverOverrides],
   )
-  const chainReaderConfig = useMemo(
-    () => {
-      const { mode: _mode, ...readerConfig } = config
-      return { ...defaults, ...readerConfig, resolver }
-    },
-    [config, defaults, resolver],
-  )
+  const chainReaderConfig = useMemo(() => {
+    const { mode: _mode, ...readerConfig } = config
+    return { ...defaults, ...readerConfig, resolver }
+  }, [config, defaults, resolver])
   const client = useMemo(
     () => clientOverride ?? createWhitehashClient(chainReaderConfig),
     [chainReaderConfig, clientOverride],

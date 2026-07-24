@@ -4,7 +4,7 @@ export function cloneDeep<T>(value: T): T {
   if (Array.isArray(value)) return value.map(cloneDeep) as T
   if (value && typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value).map(([key, child]) => [key, cloneDeep(child)])
+      Object.entries(value).map(([key, child]) => [key, cloneDeep(child)]),
     ) as T
   }
   return value
@@ -12,7 +12,7 @@ export function cloneDeep<T>(value: T): T {
 
 export function mergeRuntime<T extends Record<string, unknown>>(
   target: T,
-  source: Record<string, unknown>
+  source: Record<string, unknown>,
 ): T {
   const output = target as Record<string, unknown>
   for (const [key, value] of Object.entries(source)) {
@@ -24,7 +24,7 @@ export function mergeRuntime<T extends Record<string, unknown>>(
         current && typeof current === "object" && !Array.isArray(current)
           ? (current as Record<string, unknown>)
           : {},
-        value as Record<string, unknown>
+        value as Record<string, unknown>,
       )
     } else output[key] = value
   }

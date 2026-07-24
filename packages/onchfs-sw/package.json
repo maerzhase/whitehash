@@ -17,7 +17,10 @@
     "./worker.js": "./dist/worker.js",
     "./onchfs.global.js": "./dist/onchfs.global.js"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean && tsup src/worker.ts --format iife --platform browser --out-dir dist --minify && node scripts/prepare-worker.mjs",
     "check-types": "tsc --noEmit",

@@ -10,7 +10,9 @@ describe("onchfs virtual requests", () => {
     )
     expect(parsed?.network.blockchain).toBe("eip155:1")
     expect(parsed?.uri).toBe("/abc/index.html?fxhash=0x1")
-    expect(parsed?.cacheUrl).toBe(`https://docs.example${ONCHFS_VIRTUAL_PATH}/eip155-1/abc/index.html`)
+    expect(parsed?.cacheUrl).toBe(
+      `https://docs.example${ONCHFS_VIRTUAL_PATH}/eip155-1/abc/index.html`,
+    )
   })
 
   it("preserves resolver headers and adds immutable caching", async () => {

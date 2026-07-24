@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest"
 import { defaultResolverConfig } from "@whitehash/resolve"
+import { describe, expect, it, vi } from "vitest"
 import { getTezosWalletTokens, isTezosAddress } from "./tezos.js"
 import type { ChainReaderConfig } from "./types.js"
 
@@ -78,9 +78,9 @@ describe("getTezosWalletTokens (mocked TzKT)", () => {
   })
 
   it("rejects non-Tezos addresses", async () => {
-    await expect(
-      getTezosWalletTokens("0xabc", "tezos:mainnet", config),
-    ).rejects.toThrow(/Not a Tezos address/)
+    await expect(getTezosWalletTokens("0xabc", "tezos:mainnet", config)).rejects.toThrow(
+      /Not a Tezos address/,
+    )
   })
 })
 

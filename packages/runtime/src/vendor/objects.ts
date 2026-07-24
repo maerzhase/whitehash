@@ -27,8 +27,7 @@ export type NonNullableFields<T> = {
  * const example3: TOne = { prop1: "Hello", prop2: 42 }; // Valid
  * const example4: TOne = {}; // Error: At least one property required
  */
-export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> &
-  U[keyof U]
+export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U]
 
 type Only<T, U> = {
   [P in keyof T]: T[P]
@@ -88,4 +87,3 @@ export type DeepPartial<T> = T extends object
       [P in keyof T]?: DeepPartial<T[P]>
     }
   : T
-

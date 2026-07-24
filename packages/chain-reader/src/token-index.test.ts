@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import {
-  buildTokenIndex,
-  parseTokenIndex,
-  type TokenIndexReader,
-} from "./token-index.js"
 import type { WhitehashProject } from "./browse.js"
+import { buildTokenIndex, parseTokenIndex, type TokenIndexReader } from "./token-index.js"
 import type { WhitehashToken } from "./types.js"
 
 const token: WhitehashToken = {
@@ -94,9 +90,7 @@ describe("token indexes", () => {
   })
 
   it("rejects malformed JSON", () => {
-    expect(() => parseTokenIndex({ format: "future" })).toThrow(
-      "Unsupported token index format",
-    )
+    expect(() => parseTokenIndex({ format: "future" })).toThrow("Unsupported token index format")
     expect(() =>
       parseTokenIndex({
         format: "whitehash-token-index@1",

@@ -12,8 +12,7 @@ export const CaptureTriggerMode = {
   FN_TRIGGER_GIF: "FN_TRIGGER_GIF",
 } as const
 
-export type CaptureTriggerMode =
-  (typeof CaptureTriggerMode)[keyof typeof CaptureTriggerMode]
+export type CaptureTriggerMode = (typeof CaptureTriggerMode)[keyof typeof CaptureTriggerMode]
 
 /** Capture configuration shared by project metadata and the capture engine. */
 export interface CaptureSettings {

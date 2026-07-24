@@ -11,8 +11,8 @@
  * blocks at load time.
  */
 import { writeFileSync } from "node:fs"
-import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 import { defaultResolverConfig } from "@whitehash/resolve"
 import { discoverEvmCollections } from "../src/evm.js"
 import { EVM_NETWORKS } from "../src/networks.js"
@@ -22,9 +22,7 @@ const here = dirname(fileURLToPath(import.meta.url))
 const snapshotsDir = join(here, "..", "snapshots")
 
 const arg = process.argv[2]
-const chains = (
-  arg ? [arg] : Object.keys(EVM_NETWORKS)
-) as Extract<ChainId, `eip155:${string}`>[]
+const chains = (arg ? [arg] : Object.keys(EVM_NETWORKS)) as Extract<ChainId, `eip155:${string}`>[]
 
 const config = { resolver: defaultResolverConfig() }
 

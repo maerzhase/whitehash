@@ -1,37 +1,34 @@
-import { useEffect, useState, type ComponentProps } from "react"
 import {
-  MAINNET_CHAINS,
-  TESTNET_CHAINS,
-  projectLabel,
-  projectRef,
-  tokenKey,
   type ChainId,
   type ListOrder,
+  MAINNET_CHAINS,
   type ProjectInput,
   type ProjectRef,
+  projectLabel,
+  projectRef,
+  TESTNET_CHAINS,
+  tokenKey,
   type WhitehashProject,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
+import { chainLabel as coreChainLabel, isTezosChain } from "@whitehash/core"
 import {
-  chainLabel as coreChainLabel,
-  isTezosChain,
-} from "@whitehash/core"
-import {
+  type ChainState,
   useGatewayImage,
   useProject,
   useProjects,
   useWalletTokens,
   useWhitehash,
-  type ChainState,
 } from "@whitehash/react"
-import { Badge, type BadgeProps } from "./badge.js"
+import { type ComponentProps, useEffect, useState } from "react"
+import { cn } from "../lib/cn.js"
 import { Artwork } from "./artwork.js"
+import { Badge, type BadgeProps } from "./badge.js"
 import { Button } from "./button.js"
 import { Card } from "./card.js"
 import { Skeleton } from "./feedback.js"
 import { ToggleGroup } from "./toggle-group.js"
 import { TokenGrid } from "./token-grid.js"
-import { cn } from "../lib/cn.js"
 
 const ISSUER_VERSIONS = ["v3", "v2", "v1", "v0"]
 export function editionsLabel(minted: number | null, editions: number | null): string {
@@ -53,7 +50,11 @@ export function SortToggle({
   onChange: (order: ListOrder) => void
 }) {
   return (
-    <ToggleGroup value={order} onValueChange={value => onChange(value as ListOrder)} aria-label="Sort order">
+    <ToggleGroup
+      value={order}
+      onValueChange={value => onChange(value as ListOrder)}
+      aria-label="Sort order"
+    >
       <ToggleGroup.Item value="newest">Newest</ToggleGroup.Item>
       <ToggleGroup.Item value="oldest">Oldest</ToggleGroup.Item>
     </ToggleGroup>
@@ -68,7 +69,13 @@ const STATUS_VARIANT: Record<ChainState["status"], BadgeProps["variant"]> = {
   error: "danger",
 }
 
-function ArtworkCard({ token, onOpen }: { token: WhitehashToken; onOpen?: (token: WhitehashToken) => void }) {
+function ArtworkCard({
+  token,
+  onOpen,
+}: {
+  token: WhitehashToken
+  onOpen?: (token: WhitehashToken) => void
+}) {
   const content = (
     <>
       <Card.Media>
@@ -79,13 +86,19 @@ function ArtworkCard({ token, onOpen }: { token: WhitehashToken; onOpen?: (token
       </Card.Media>
       <Card.Body>
         <Card.Title>{token.name ?? `#${token.tokenId}`}</Card.Title>
-        <Card.Meta><Badge>{chainLabel(token.chain)}</Badge></Card.Meta>
+        <Card.Meta>
+          <Badge>{chainLabel(token.chain)}</Badge>
+        </Card.Meta>
       </Card.Body>
     </>
   )
-  return onOpen
-    ? <Button variant="card" onClick={() => onOpen(token)}>{content}</Button>
-    : <Card.Root>{content}</Card.Root>
+  return onOpen ? (
+    <Button variant="card" onClick={() => onOpen(token)}>
+      {content}
+    </Button>
+  ) : (
+    <Card.Root>{content}</Card.Root>
+  )
 }
 
 export interface WalletGalleryProps extends ComponentProps<"section"> {
@@ -137,10 +150,14 @@ function WalletGalleryContent({
         </div>
       </div>
       {noChains ? (
-        <p className="text-muted">That doesn’t look like a Tezos or EVM address for the current network mode.</p>
+        <p className="text-muted">
+          That doesn’t look like a Tezos or EVM address for the current network mode.
+        </p>
       ) : null}
       <TokenGrid loading={!state}>
-        {state?.tokens.map(token => <ArtworkCard key={tokenKey(token)} token={token} onOpen={onOpenToken} />)}
+        {state?.tokens.map(token => (
+          <ArtworkCard key={tokenKey(token)} token={token} onOpen={onOpenToken} />
+        ))}
       </TokenGrid>
       {!loading && state && state.tokens.length === 0 && !noChains ? (
         <p className="mt-4 text-muted">No fxhash tokens found for this wallet.</p>
@@ -156,9 +173,7 @@ function ProjectCard({ project, onOpen }: { project: WhitehashProject; onOpen?: 
   const uri = project.thumbnailUri ?? project.displayUri
   const label = editionsLabel(project.minted, project.editions)
 
-  return (
-    <ProjectCardImage project={project} name={name} uri={uri} label={label} onOpen={onOpen} />
-  )
+  return <ProjectCardImage project={project} name={name} uri={uri} label={label} onOpen={onOpen} />
 }
 
 function ProjectCardImage({
@@ -188,23 +203,40 @@ function ProjectCardImage({
               loading="lazy"
               className="block size-full object-contain"
             />
-          ) : <div className="hatch size-full" aria-hidden />}
+          ) : (
+            <div className="hatch size-full" aria-hidden />
+          )}
         </div>
       </Card.Media>
       <Card.Body>
         <Card.Title>{name}</Card.Title>
-        {label ? <Card.Meta><Badge>{label}</Badge></Card.Meta> : null}
+        {label ? (
+          <Card.Meta>
+            <Badge>{label}</Badge>
+          </Card.Meta>
+        ) : null}
       </Card.Body>
     </>
   )
-  return onOpen ? <Button variant="card" onClick={onOpen}>{body}</Button> : <Card.Root>{body}</Card.Root>
+  return onOpen ? (
+    <Button variant="card" onClick={onOpen}>
+      {body}
+    </Button>
+  ) : (
+    <Card.Root>{body}</Card.Root>
+  )
 }
 
 function ProjectGridSkeleton() {
   return Array.from({ length: 8 }, (_, index) => (
     <Card.Root key={index} aria-hidden className="shadow-[0_1px_2px_rgba(0,0,0,.16)]">
-      <Card.Media className="bg-canvas"><Skeleton className="absolute inset-5" /></Card.Media>
-      <Card.Body><Skeleton className="h-4 w-2/3" /><Skeleton className="h-4 w-14" /></Card.Body>
+      <Card.Media className="bg-canvas">
+        <Skeleton className="absolute inset-5" />
+      </Card.Media>
+      <Card.Body>
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="h-4 w-14" />
+      </Card.Body>
     </Card.Root>
   ))
 }
@@ -243,14 +275,30 @@ export function ProjectBrowser({
   return (
     <section className={className} {...props}>
       <div className="flex flex-wrap items-center gap-4 border-b border-line py-10">
-        <h2 className="mr-auto font-display text-2xl font-semibold leading-8 tracking-[-0.04em]">Browse Projects</h2>
-        <ToggleGroup value={chain} onValueChange={value => changeChain(value as ChainId)} aria-label="Chain">
-          {chains.map(value => <ToggleGroup.Item key={value} value={value}>{chainLabel(value)}</ToggleGroup.Item>)}
+        <h2 className="mr-auto font-display text-2xl font-semibold leading-8 tracking-[-0.04em]">
+          Browse Projects
+        </h2>
+        <ToggleGroup
+          value={chain}
+          onValueChange={value => changeChain(value as ChainId)}
+          aria-label="Chain"
+        >
+          {chains.map(value => (
+            <ToggleGroup.Item key={value} value={value}>
+              {chainLabel(value)}
+            </ToggleGroup.Item>
+          ))}
         </ToggleGroup>
         {isTezosChain(chain) ? (
           <ToggleGroup value={version} onValueChange={setVersion} aria-label="Project version">
             {ISSUER_VERSIONS.map(value => (
-              <ToggleGroup.Item key={value} value={value} title={`fxhash issuer ${value} (era of projects)`}>{value}</ToggleGroup.Item>
+              <ToggleGroup.Item
+                key={value}
+                value={value}
+                title={`fxhash issuer ${value} (era of projects)`}
+              >
+                {value}
+              </ToggleGroup.Item>
             ))}
           </ToggleGroup>
         ) : null}
@@ -258,19 +306,31 @@ export function ProjectBrowser({
       </div>
       {error ? <p className="text-sm text-danger">{error}</p> : null}
       <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
-        {initialLoading ? <ProjectGridSkeleton /> : projects.map(project => (
-          <ProjectCard
-            key={`${project.chain}:${project.id}`}
-            project={project}
-            onOpen={onOpenProject ? () => onOpenProject(projectRef(project)) : undefined}
-          />
-        ))}
+        {initialLoading ? (
+          <ProjectGridSkeleton />
+        ) : (
+          projects.map(project => (
+            <ProjectCard
+              key={`${project.chain}:${project.id}`}
+              project={project}
+              onOpen={onOpenProject ? () => onOpenProject(projectRef(project)) : undefined}
+            />
+          ))
+        )}
       </div>
       <div className="mt-4 flex min-h-10 items-start" aria-live="polite">
         {initialLoading ? <span className="sr-only">Loading projects</span> : null}
-        {loading && projects.length > 0 ? <p className="text-muted">Loading more projects…</p> : null}
-        {!loading && hasMore ? <Button variant="link" onClick={loadMore}>Load More</Button> : null}
-        {!loading && projects.length === 0 && !error ? <p className="text-muted">No projects found.</p> : null}
+        {loading && projects.length > 0 ? (
+          <p className="text-muted">Loading more projects…</p>
+        ) : null}
+        {!loading && hasMore ? (
+          <Button variant="link" onClick={loadMore}>
+            Load More
+          </Button>
+        ) : null}
+        {!loading && projects.length === 0 && !error ? (
+          <p className="text-muted">No projects found.</p>
+        ) : null}
       </div>
     </section>
   )
@@ -294,22 +354,47 @@ export function ProjectGallery({
   const label = project ? editionsLabel(project.minted, project.editions) : ""
   return (
     <section className={cn("pt-8", className)} {...props}>
-      {onBack ? <Button variant="link" onClick={onBack}>← All Projects</Button> : null}
+      {onBack ? (
+        <Button variant="link" onClick={onBack}>
+          ← All Projects
+        </Button>
+      ) : null}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-3 py-5">
-        <h2 className="font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">{project ? projectLabel(project) : projectRef.id}</h2>
-        {label ? <Badge>{label}{project?.minted !== null && project?.editions !== null ? " minted" : ""}</Badge> : null}
+        <h2 className="font-display text-3xl font-semibold leading-10 tracking-[-0.04em]">
+          {project ? projectLabel(project) : projectRef.id}
+        </h2>
+        {label ? (
+          <Badge>
+            {label}
+            {project?.minted !== null && project?.editions !== null ? " minted" : ""}
+          </Badge>
+        ) : null}
         {isTezosChain(projectRef.chain) ? <SortToggle order={order} onChange={setOrder} /> : null}
       </div>
-      {project?.description ? <p className="max-w-3xl text-sm leading-relaxed text-muted">{project.description}</p> : null}
+      {project?.description ? (
+        <p className="max-w-3xl text-sm leading-relaxed text-muted">{project.description}</p>
+      ) : null}
       {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       <TokenGrid loading={loading && tokens.length === 0}>
-        {tokens.map(token => <ArtworkCard key={tokenKey(token)} token={token} onOpen={onOpenToken} />)}
+        {tokens.map(token => (
+          <ArtworkCard key={tokenKey(token)} token={token} onOpen={onOpenToken} />
+        ))}
       </TokenGrid>
       <div className="mt-4 flex min-h-10 items-start" aria-live="polite">
-        {loading && tokens.length === 0 ? <span className="sr-only">Loading iterations</span> : null}
-        {loading && tokens.length > 0 ? <p className="text-muted">Loading more iterations…</p> : null}
-        {!loading && hasMore ? <Button variant="link" onClick={() => void loadMore()}>Load More</Button> : null}
-        {!loading && tokens.length === 0 && !error ? <p className="text-muted">No minted iterations found.</p> : null}
+        {loading && tokens.length === 0 ? (
+          <span className="sr-only">Loading iterations</span>
+        ) : null}
+        {loading && tokens.length > 0 ? (
+          <p className="text-muted">Loading more iterations…</p>
+        ) : null}
+        {!loading && hasMore ? (
+          <Button variant="link" onClick={() => void loadMore()}>
+            Load More
+          </Button>
+        ) : null}
+        {!loading && tokens.length === 0 && !error ? (
+          <p className="text-muted">No minted iterations found.</p>
+        ) : null}
       </div>
     </section>
   )

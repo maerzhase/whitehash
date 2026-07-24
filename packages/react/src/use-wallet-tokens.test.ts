@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest"
 import { createWhitehashClient, type WhitehashToken } from "@whitehash/chain-reader"
+import { describe, expect, it, vi } from "vitest"
 import type { WhitehashCache } from "./cache.js"
 import { loadWalletChain } from "./use-wallet-tokens.js"
 

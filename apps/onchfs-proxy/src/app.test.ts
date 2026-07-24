@@ -29,9 +29,10 @@ describe("rpcsFor", () => {
   })
 
   it("parses a comma-separated env override", () => {
-    expect(
-      rpcsFor(network, { ONCHFS_BASE_RPCS: "https://a.example, https://b.example" }),
-    ).toEqual(["https://a.example", "https://b.example"])
+    expect(rpcsFor(network, { ONCHFS_BASE_RPCS: "https://a.example, https://b.example" })).toEqual([
+      "https://a.example",
+      "https://b.example",
+    ])
   })
 
   it("falls back to defaults for an empty override", () => {

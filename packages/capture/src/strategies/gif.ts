@@ -1,11 +1,7 @@
 import type { Page } from "puppeteer-core"
 import { CaptureError } from "../errors.js"
-import {
-  CaptureMode,
-  CaptureTriggerMode,
-  type CaptureSettings,
-} from "../types.js"
 import type { TriggerController } from "../triggers.js"
+import { CaptureMode, type CaptureSettings, CaptureTriggerMode } from "../types.js"
 
 interface RgbaFrame {
   pixels: Uint8Array
@@ -13,11 +9,7 @@ interface RgbaFrame {
   height: number
 }
 
-async function viewportFrame(
-  page: Page,
-  width: number,
-  height: number,
-): Promise<RgbaFrame> {
+async function viewportFrame(page: Page, width: number, height: number): Promise<RgbaFrame> {
   const base64 = await page.screenshot({ type: "png", encoding: "base64" })
   const pixels = await page.evaluate(
     async (dataUrl: string, frameWidth: number, frameHeight: number) => {
@@ -88,11 +80,7 @@ export async function captureGif(
     }
     frames.push(
       settings.mode === CaptureMode.VIEWPORT
-        ? await viewportFrame(
-            page,
-            settings.resolution!.x,
-            settings.resolution!.y,
-          )
+        ? await viewportFrame(page, settings.resolution!.x, settings.resolution!.y)
         : await canvasFrame(page, settings.canvasSelector!),
     )
   }

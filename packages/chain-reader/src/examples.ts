@@ -13,10 +13,7 @@ export type ExampleGeneratorStorage = "ipfs" | "onchfs"
 export type ExampleMetadataStorage = "ipfs" | "platform-with-ipfs-backup"
 
 export type ExampleCaptureMode = "canvas" | "viewport" | "gif"
-export type ExampleProjectKind =
-  | "tezos-issuer-v2"
-  | "evm-fixed-editions"
-  | "evm-open-form"
+export type ExampleProjectKind = "tezos-issuer-v2" | "evm-fixed-editions" | "evm-open-form"
 
 /** A real mainnet project selected to exercise a distinct rendering path. */
 export interface CuratedProjectExample {

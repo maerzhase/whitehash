@@ -1,6 +1,4 @@
-export function toNextRouteHandler(
-  handler: (request: Request) => Promise<Response>,
-): {
+export function toNextRouteHandler(handler: (request: Request) => Promise<Response>): {
   GET(request: Request): Promise<Response>
   HEAD(request: Request): Promise<Response>
 } {

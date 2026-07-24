@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
 import {
-  tokenKey,
   type LiveViewStatus,
+  tokenKey,
   type WhitehashClient,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
-import {
-  ARTWORK_IFRAME_ALLOW,
-  ARTWORK_IFRAME_SANDBOX,
-} from "@whitehash/core"
+import { ARTWORK_IFRAME_ALLOW, ARTWORK_IFRAME_SANDBOX } from "@whitehash/core"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useWhitehash } from "./context.js"
 
 export { ARTWORK_IFRAME_ALLOW, ARTWORK_IFRAME_SANDBOX }
@@ -42,12 +39,15 @@ export function useArtworkFrame(
     if (status.kind === "ok") setPlaying(true)
   }, [status.kind])
   const stop = useCallback(() => setPlaying(false), [])
-  const iframeProps = useMemo<ArtworkIframeProps>(() => ({
-    title: token.name ?? "artwork",
-    src: status.kind === "ok" ? status.url : undefined,
-    sandbox: ARTWORK_IFRAME_SANDBOX,
-    allow: ARTWORK_IFRAME_ALLOW,
-  }), [status, token.name])
+  const iframeProps = useMemo<ArtworkIframeProps>(
+    () => ({
+      title: token.name ?? "artwork",
+      src: status.kind === "ok" ? status.url : undefined,
+      sandbox: ARTWORK_IFRAME_SANDBOX,
+      allow: ARTWORK_IFRAME_ALLOW,
+    }),
+    [status, token.name],
+  )
 
   return { status, playing, play, stop, iframeProps }
 }

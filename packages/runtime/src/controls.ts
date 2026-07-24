@@ -3,20 +3,21 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-import {
-  type FxParamDefinitions,
-  type FxParamsData,
-  serializeParamsOrNull,
-} from "./params/index.js"
-import { invariant } from "./vendor/index.js"
-import { cloneDeep } from "./vendor/object.js"
+
 import {
   type IRuntimeControls,
   RuntimeControlsEventEmitter,
   type RuntimeControlsUpdateOptions,
 } from "./interfaces.js"
+import {
+  type FxParamDefinitions,
+  type FxParamsData,
+  serializeParamsOrNull,
+} from "./params/index.js"
 import type { ControlState } from "./types.js"
 import { mergeWithKeepingUint8ArrayType } from "./utils.js"
+import { invariant } from "./vendor/index.js"
+import { cloneDeep } from "./vendor/object.js"
 
 const DEFAULT_CONTROL_STATE: ControlState = Object.freeze({
   params: {
@@ -30,9 +31,7 @@ const DEFAULT_CONTROL_STATE: ControlState = Object.freeze({
  * @returns RuntimeControls - Which exoses the state, update method and an event emitter
  * @public
  */
-export function runtimeControls(
-  initial: ControlState = DEFAULT_CONTROL_STATE
-): IRuntimeControls {
+export function runtimeControls(initial: ControlState = DEFAULT_CONTROL_STATE): IRuntimeControls {
   const emitter = new RuntimeControlsEventEmitter()
   let _controls: ControlState = initial
   return {
@@ -40,13 +39,13 @@ export function runtimeControls(
     update(
       update: Partial<FxParamsData>,
       definition?: FxParamDefinitions | null,
-      options?: RuntimeControlsUpdateOptions
+      options?: RuntimeControlsUpdateOptions,
     ) {
       invariant(
         Object.keys(update).every(id =>
-          (definition || _controls.params.definition)?.find(d => d.id === id)
+          (definition || _controls.params.definition)?.find(d => d.id === id),
         ),
-        "Unknown parameter. Please provide the definition for each parameter."
+        "Unknown parameter. Please provide the definition for each parameter.",
       )
       _controls = mergeWithKeepingUint8ArrayType(cloneDeep(_controls), {
         params: {
@@ -60,10 +59,7 @@ export function runtimeControls(
     },
     emitter,
     getInputBytes() {
-      return serializeParamsOrNull(
-        _controls.params.values || {},
-        _controls.params.definition || []
-      )
+      return serializeParamsOrNull(_controls.params.values || {}, _controls.params.definition || [])
     },
   }
 }

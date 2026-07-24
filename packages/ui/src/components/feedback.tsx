@@ -18,20 +18,9 @@ export function Spinner({ className, ...props }: ComponentProps<"span">) {
 
 /** Placeholder shimmer for content that hasn't loaded. */
 export function Skeleton({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-sm bg-surface-2", className)}
-      {...props}
-    />
-  )
+  return <div className={cn("animate-pulse rounded-sm bg-surface-2", className)} {...props} />
 }
 
 export function Separator({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      role="separator"
-      className={cn("h-px w-full bg-line", className)}
-      {...props}
-    />
-  )
+  return <div role="separator" className={cn("h-px w-full bg-line", className)} {...props} />
 }

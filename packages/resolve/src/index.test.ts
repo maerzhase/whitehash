@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from "vitest"
 import {
   createResolver,
   fetchWithGatewayFallback,
+  type ResolverConfig,
   resolveUri,
   resolveUriAll,
-  type ResolverConfig,
 } from "./index.js"
 
 const config: ResolverConfig = {
@@ -27,7 +27,11 @@ const CID = "QmYwSwaXj3M89rpUb1uYbfAT9x5x9zZ8bmcU3JHrYNqR4T"
 describe("resolveUri", () => {
   const cases: Array<[string, string, string | null]> = [
     // pass-through
-    ["data URI", "data:application/json;base64,eyJhIjoxfQ==", "data:application/json;base64,eyJhIjoxfQ=="],
+    [
+      "data URI",
+      "data:application/json;base64,eyJhIjoxfQ==",
+      "data:application/json;base64,eyJhIjoxfQ==",
+    ],
     ["blob URI", "blob:https://x/abc", "blob:https://x/abc"],
     ["https URL", "https://cdn.example/x.png", "https://cdn.example/x.png"],
     ["http URL", "http://cdn.example/x.png", "http://cdn.example/x.png"],
@@ -37,9 +41,17 @@ describe("resolveUri", () => {
     ["absolute /ipfs path", `/ipfs/${CID}`, `https://ipfs.io/ipfs/${CID}`],
     ["bare CID", CID, `https://ipfs.io/ipfs/${CID}`],
     // ipfs with path
-    ["ipfs:// with path", `ipfs://${CID}/1/metadata.json`, `https://ipfs.io/ipfs/${CID}/1/metadata.json`],
+    [
+      "ipfs:// with path",
+      `ipfs://${CID}/1/metadata.json`,
+      `https://ipfs.io/ipfs/${CID}/1/metadata.json`,
+    ],
     // ipfs with query (v1-era artifact: query directly on CID)
-    ["ipfs:// with query on CID", `ipfs://${CID}?fxhash=ooABCD`, `https://ipfs.io/ipfs/${CID}?fxhash=ooABCD`],
+    [
+      "ipfs:// with query on CID",
+      `ipfs://${CID}?fxhash=ooABCD`,
+      `https://ipfs.io/ipfs/${CID}?fxhash=ooABCD`,
+    ],
     // ipfs with path + query + fragment (modern artifact URI)
     [
       "ipfs:// artifact w/ path,query,fragment",
@@ -62,28 +74,30 @@ describe("resolveUri", () => {
 
   it("preserves fragment for onchfs URIs", () => {
     expect(resolveUri(`onchfs://${CID}/?fxhash=x#0xff`, config)).toBe(
-      `https://proxy.example/${CID}/?fxhash=x#0xff`
+      `https://proxy.example/${CID}/?fxhash=x#0xff`,
     )
   })
 
   it("prefixes the chain slug for onchfs when a chain is given", () => {
-    expect(
-      resolveUri(`onchfs://abc/index.html`, config, { chain: "eip155:8453" })
-    ).toBe(`https://proxy.example/eip155-8453/abc/index.html`)
-    expect(
-      resolveUri(`onchfs://abc/index.html`, config, { chain: "tezos:mainnet" })
-    ).toBe(`https://proxy.example/tezos-mainnet/abc/index.html`)
+    expect(resolveUri(`onchfs://abc/index.html`, config, { chain: "eip155:8453" })).toBe(
+      `https://proxy.example/eip155-8453/abc/index.html`,
+    )
+    expect(resolveUri(`onchfs://abc/index.html`, config, { chain: "tezos:mainnet" })).toBe(
+      `https://proxy.example/tezos-mainnet/abc/index.html`,
+    )
   })
 
   it("points onchfs at the same-origin service-worker virtual path", () => {
-    expect(resolveUri("onchfs://abc/index.html?fxhash=x#0xff", serviceWorker, {
-      chain: "eip155:1",
-    })).toBe("/.whitehash/onchfs/eip155-1/abc/index.html?fxhash=x#0xff")
+    expect(
+      resolveUri("onchfs://abc/index.html?fxhash=x#0xff", serviceWorker, {
+        chain: "eip155:1",
+      }),
+    ).toBe("/.whitehash/onchfs/eip155-1/abc/index.html?fxhash=x#0xff")
   })
 
   it("ignores the chain hint for non-onchfs URIs", () => {
     expect(resolveUri(`ipfs://${CID}`, config, { chain: "eip155:1" })).toBe(
-      `https://ipfs.io/ipfs/${CID}`
+      `https://ipfs.io/ipfs/${CID}`,
     )
   })
 
@@ -117,13 +131,12 @@ describe("resolveUriAll", () => {
   })
 
   it("accepts gateway roots that already end in /ipfs", () => {
-    expect(resolveUriAll(`ipfs://${CID}`, {
-      ...config,
-      ipfsGateways: ["https://ipfs.io/ipfs/", "https://dweb.link/ipfs"],
-    })).toEqual([
-      `https://ipfs.io/ipfs/${CID}`,
-      `https://dweb.link/ipfs/${CID}`,
-    ])
+    expect(
+      resolveUriAll(`ipfs://${CID}`, {
+        ...config,
+        ipfsGateways: ["https://ipfs.io/ipfs/", "https://dweb.link/ipfs"],
+      }),
+    ).toEqual([`https://ipfs.io/ipfs/${CID}`, `https://dweb.link/ipfs/${CID}`])
   })
 
   it("returns a single element for pass-through URIs", () => {
@@ -152,14 +165,14 @@ describe("fetchWithGatewayFallback", () => {
 
   it("throws when every gateway fails", async () => {
     const fetchImpl = vi.fn().mockResolvedValue(new Response("nope", { status: 500 }))
-    await expect(
-      fetchWithGatewayFallback(`ipfs://${CID}`, config, { fetchImpl })
-    ).rejects.toThrow(/all 2 gateway/)
+    await expect(fetchWithGatewayFallback(`ipfs://${CID}`, config, { fetchImpl })).rejects.toThrow(
+      /all 2 gateway/,
+    )
   })
 
   it("throws for unresolvable URIs", async () => {
     await expect(fetchWithGatewayFallback(`temp://${CID}`, config)).rejects.toThrow(
-      /cannot resolve/
+      /cannot resolve/,
     )
   })
 })

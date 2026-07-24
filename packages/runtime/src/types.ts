@@ -12,11 +12,7 @@ import type { BlockchainType, RawTokenFeatures } from "./shared.js"
  * - minting: The runtime is used for minting
  * - capture: The runtime is used for capture
  */
-export type ExecutionContext =
-  | "minting"
-  | "standalone"
-  | "capture"
-  | "fast-capture"
+export type ExecutionContext = "minting" | "standalone" | "capture" | "fast-capture"
 
 /**
  * The state of the project that is needed to connect a project
@@ -120,4 +116,3 @@ export type RuntimeWholeState = {
   details: RuntimeDetails
   output: RuntimeOutput
 }
-

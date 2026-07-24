@@ -1,12 +1,19 @@
-import type { Metadata } from "next"
-import Link from "next/link"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
-import { Callout, CodeBlock, DocsHeading, DocsPage, DocsSection } from "../../../src/components/docs-chrome"
+import type { Metadata } from "next"
+import Link from "next/link"
+import {
+  Callout,
+  CodeBlock,
+  DocsHeading,
+  DocsPage,
+  DocsSection,
+} from "../../../src/components/docs-chrome"
 
 export const metadata: Metadata = {
   title: "LLM guide",
-  description: "A machine-readable map of the Whitehash toolkit, architecture, domain semantics, and documentation.",
+  description:
+    "A machine-readable map of the Whitehash toolkit, architecture, domain semantics, and documentation.",
 }
 
 export default async function LlmsPage() {
@@ -22,13 +29,17 @@ export default async function LlmsPage() {
       <DocsSection title="About this file">
         <div className="docs-prose">
           <p>
-            This page mirrors the canonical <Link className="docs-text-link" href="/llms.txt">/llms.txt</Link>{" "}file.
-            It explains the toolkit&rsquo;s purpose, layers, data flow, supported networks, domain rules, and constraints for
-            code-generating models.
+            This page mirrors the canonical{" "}
+            <Link className="docs-text-link" href="/llms.txt">
+              /llms.txt
+            </Link>{" "}
+            file. It explains the toolkit&rsquo;s purpose, layers, data flow, supported networks,
+            domain rules, and constraints for code-generating models.
           </p>
         </div>
         <Callout className="mt-5">
-          The raw text endpoint is the source of truth. This page reads it during the static build, so the two versions cannot drift.
+          The raw text endpoint is the source of truth. This page reads it during the static build,
+          so the two versions cannot drift.
         </Callout>
       </DocsSection>
       <DocsSection title="Full llms.txt">

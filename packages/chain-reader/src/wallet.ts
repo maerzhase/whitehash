@@ -1,12 +1,7 @@
 import { getEvmWalletTokens } from "./evm.js"
 import { isEvmChain, isTezosChain } from "./networks.js"
 import { getTezosWalletTokens } from "./tezos.js"
-import type {
-  ChainId,
-  ChainReaderConfig,
-  ProgressCallback,
-  WhitehashToken,
-} from "./types.js"
+import type { ChainId, ChainReaderConfig, ProgressCallback, WhitehashToken } from "./types.js"
 
 /** Enumerate one chain and surface errors to the caller. */
 export async function getChainWalletTokens(

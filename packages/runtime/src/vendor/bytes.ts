@@ -52,4 +52,3 @@ export function xorshiftString(str: string): number {
 export function xorshift64(serializable: any): number {
   return xorshiftString(JSON.stringify(serializable))
 }
-

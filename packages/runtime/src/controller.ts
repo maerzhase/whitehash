@@ -3,19 +3,10 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
-import {
-  buildParamsObject,
-  deserializeParams,
-  type FxParamsData,
-} from "./params/index.js"
-import {
-  cleanup,
-  intialization,
-  invariant,
-  mockBlockchainAddress,
-  mockTransactionHash,
-} from "./vendor/index.js"
-import { debounce } from "./vendor/debounce.js"
+
+import { directRuntimeConnector } from "./connectors.js"
+import { runtimeContext } from "./context.js"
+import { runtimeControls } from "./controls.js"
 import {
   type ControlsChangedEventPayload,
   type IRuntimeConnector,
@@ -23,11 +14,17 @@ import {
   type IRuntimeController,
   RuntimeControllerEventEmitter,
 } from "./interfaces.js"
+import { buildParamsObject, deserializeParams, type FxParamsData } from "./params/index.js"
 import type { ControlState, ProjectState, RuntimeWholeState } from "./types.js"
-import { directRuntimeConnector } from "./connectors.js"
-import { runtimeContext } from "./context.js"
-import { runtimeControls } from "./controls.js"
 import { addVersionToParamsDefinition } from "./utils.js"
+import { debounce } from "./vendor/debounce.js"
+import {
+  cleanup,
+  intialization,
+  invariant,
+  mockBlockchainAddress,
+  mockTransactionHash,
+} from "./vendor/index.js"
 
 /**
  * This function is used to handle old snippet events for projects
@@ -86,9 +83,7 @@ export interface IRuntimeControllerParams {
  * @param params - initial state of the runtime and options
  * @returns IRuntimeController
  */
-export function createRuntimeController(
-  params: IRuntimeControllerParams
-): IRuntimeController {
+export function createRuntimeController(params: IRuntimeControllerParams): IRuntimeController {
   const clean = cleanup()
   const init = intialization()
   const options = params.options
@@ -110,11 +105,8 @@ export function createRuntimeController(
         _initial.inputBytes &&
         deserializeParams(
           _initial.inputBytes,
-          addVersionToParamsDefinition(
-            _initial.definition,
-            _initial.snippetVersion
-          ),
-          {}
+          addVersionToParamsDefinition(_initial.definition, _initial.snippetVersion),
+          {},
         )) ||
       {},
     parentHashes: _initial.parentHashes,
@@ -135,21 +127,16 @@ export function createRuntimeController(
   _runtime.emitter.on("context-changed", _handleContextChange)
   function _handleContextChange(runtime: RuntimeWholeState) {
     // If definition or state hash changed, sync the iframe
-    if (
-      runtime.details.stateHash.hard !== _prevRuntime?.details.stateHash.hard
-    ) {
+    if (runtime.details.stateHash.hard !== _prevRuntime?.details.stateHash.hard) {
       _syncIframe()
     }
     // If the definition changed and params are defined, update the controls
-    if (
-      runtime.details.definitionHash.params !==
-      _prevRuntime?.details.definitionHash.params
-    ) {
+    if (runtime.details.definitionHash.params !== _prevRuntime?.details.definitionHash.params) {
       _controls.update(
         runtime.definition.params
           ? buildParamsObject(runtime.definition.params, runtime.state.params)
           : {},
-        runtime.definition.params
+        runtime.definition.params,
       )
     }
     emitter.emit("runtime-changed", runtime)
@@ -163,23 +150,17 @@ export function createRuntimeController(
       const { update, state } = eventData
       // find the params that actually changed
       const changed = Object.keys(update)
-        .filter(id =>
-          !_prevControls ? true : _prevControls.params.values[id] !== update[id]
-        )
+        .filter(id => (!_prevControls ? true : _prevControls.params.values[id] !== update[id]))
         .map(id => state.params.definition?.find(d => d.id === id))
       // when there are no changes we don't need to do anything
       // e.g. when artworks call emit in a draw loop this should
       // catch too many updates that are actually not needed
       if (changed.length === 0) return
       // find params that are update mode "sync" via window.postMessage API
-      const synced = changed.filter(
-        (def): def is NonNullable<typeof def> => def?.update === "sync"
-      )
+      const synced = changed.filter((def): def is NonNullable<typeof def> => def?.update === "sync")
       // if at least one change, soft refresh "sync" params
       if (Object.keys(synced).length > 0) {
-        softUpdateParams(
-          Object.fromEntries(synced.map(def => [def.id, update[def.id]]))
-        )
+        softUpdateParams(Object.fromEntries(synced.map(def => [def.id, update[def.id]])))
       }
       if (!eventData.options?.forceRefresh) {
         // if auto-refresh is defined, we update params on the runtime
@@ -205,10 +186,7 @@ export function createRuntimeController(
     invariant(_iframe, "_iframe is required")
     _updateParamsDebounced({ params })
     // TODO: refactor message event handling
-    _iframe.contentWindow?.postMessage(
-      { id: "fxhash_params:update", data: { params } },
-      "*"
-    )
+    _iframe.contentWindow?.postMessage({ id: "fxhash_params:update", data: { params } }, "*")
   }
 
   function _onMessage(e: MessageEvent) {

@@ -6,9 +6,10 @@ export interface OnchfsWorkerNetwork {
   rpcs: readonly string[]
 }
 
-export const ONCHFS_WORKER_NETWORKS: readonly OnchfsWorkerNetwork[] =
-  CHAIN_DEFINITIONS.map(network => ({
+export const ONCHFS_WORKER_NETWORKS: readonly OnchfsWorkerNetwork[] = CHAIN_DEFINITIONS.map(
+  network => ({
     slug: network.slug,
     blockchain: network.onchfsNetwork,
     rpcs: network.defaultRpcs,
-  }))
+  }),
+)

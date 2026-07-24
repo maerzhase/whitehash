@@ -1,18 +1,9 @@
-import {
-  createContext,
-  useContext,
-  type ComponentProps,
-  type ReactNode,
-} from "react"
-import {
-  imageSourceUri,
-  type LiveViewStatus,
-  type WhitehashToken,
-} from "@whitehash/chain-reader"
+import { imageSourceUri, type LiveViewStatus, type WhitehashToken } from "@whitehash/chain-reader"
 import { useArtworkFrame, useGatewayImage } from "@whitehash/react"
+import { type ComponentProps, createContext, type ReactNode, useContext } from "react"
+import { cn } from "../lib/cn.js"
 import { Badge, type BadgeProps } from "./badge.js"
 import { Button, type ButtonProps } from "./button.js"
-import { cn } from "../lib/cn.js"
 
 interface ArtworkContextValue {
   token: WhitehashToken
@@ -40,10 +31,7 @@ function Root({ token, className, children, ...props }: ArtworkRootProps) {
   return (
     <ArtworkContext.Provider value={{ token, ...frame }}>
       <div
-        className={cn(
-          "relative aspect-square overflow-hidden bg-surface",
-          className,
-        )}
+        className={cn("relative aspect-square overflow-hidden bg-surface", className)}
         {...props}
       >
         {children}
@@ -52,22 +40,14 @@ function Root({ token, className, children, ...props }: ArtworkRootProps) {
   )
 }
 
-export interface ArtworkImageProps
-  extends Omit<ComponentProps<"img">, "src" | "onError"> {
+export interface ArtworkImageProps extends Omit<ComponentProps<"img">, "src" | "onError"> {
   source?: "display" | "thumbnail"
   /** Override the token-derived image with another protocol-native URI. */
   uri?: string | null
   fallback?: ReactNode
 }
 
-function Image({
-  source = "display",
-  uri,
-  fallback,
-  alt,
-  className,
-  ...props
-}: ArtworkImageProps) {
+function Image({ source = "display", uri, fallback, alt, className, ...props }: ArtworkImageProps) {
   const { token, playing } = useArtworkContext()
   const sourceUri = uri === undefined ? imageSourceUri(token, source) : uri
   const image = useGatewayImage(sourceUri, token.chain)
@@ -93,11 +73,7 @@ function Live({
   const { playing, iframeProps } = useArtworkContext()
   if (!playing || !iframeProps.src) return null
   return (
-    <iframe
-      className={cn("block size-full border-0", className)}
-      {...props}
-      {...iframeProps}
-    />
+    <iframe className={cn("block size-full border-0", className)} {...props} {...iframeProps} />
   )
 }
 

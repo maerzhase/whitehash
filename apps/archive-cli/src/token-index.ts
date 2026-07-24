@@ -2,8 +2,8 @@ import { mkdir, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import {
   buildTokenIndex,
-  createWhitehashClient,
   type ChainId,
+  createWhitehashClient,
   type TokenIndex,
 } from "@whitehash/chain-reader"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"
@@ -17,9 +17,7 @@ export interface WriteTokenIndexOptions {
 }
 
 /** Read one token and write its display-ready metadata as portable JSON. */
-export async function writeTokenIndex(
-  options: WriteTokenIndexOptions,
-): Promise<TokenIndex> {
+export async function writeTokenIndex(options: WriteTokenIndexOptions): Promise<TokenIndex> {
   const client = createWhitehashClient({
     resolver: {
       ipfsGateways: options.gateways ?? [...DEFAULT_IPFS_GATEWAYS],

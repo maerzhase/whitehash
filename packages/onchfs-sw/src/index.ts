@@ -25,7 +25,10 @@ export async function registerOnchfsWorker(
   await navigator.serviceWorker.ready
   if (!navigator.serviceWorker.controller) {
     await new Promise<void>(resolve => {
-      const done = () => { clearTimeout(timer); resolve() }
+      const done = () => {
+        clearTimeout(timer)
+        resolve()
+      }
       const timer = setTimeout(done, options.timeoutMs ?? 10_000)
       navigator.serviceWorker.addEventListener("controllerchange", done, { once: true })
     })

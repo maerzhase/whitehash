@@ -10,10 +10,7 @@ import { BASE58_CHARSET } from "./constants.js"
 type Blockchain = "ETHEREUM" | "BASE" | "TEZOS"
 
 export function mockEthereumAddress(): string {
-  const randomBytes = Array.from(
-    { length: 20 },
-    () => (Math.random() * 256) | 0
-  )
+  const randomBytes = Array.from({ length: 20 }, () => (Math.random() * 256) | 0)
   const hexString = Array.from(randomBytes)
     .map(byte => byte.toString(16).padStart(2, "0"))
     .join("")
@@ -25,7 +22,7 @@ export const mockBaseAddress: () => string = mockEthereumAddress
 export function mockTezosAddress() {
   const randomSequence = Array.from(
     { length: 33 },
-    () => BASE58_CHARSET[(Math.random() * BASE58_CHARSET.length) | 0]
+    () => BASE58_CHARSET[(Math.random() * BASE58_CHARSET.length) | 0],
   ).join("")
   return `tz1${randomSequence}`
 }
@@ -52,19 +49,16 @@ export function isEthereumAddressValid(address: string): boolean {
   return /^(0x)?[0-9a-fA-F]{40}$/.test(address)
 }
 
-export const isBaseAddressValid: (address: string) => boolean =
-  isEthereumAddressValid
+export const isBaseAddressValid: (address: string) => boolean = isEthereumAddressValid
 
 export function getBlockchainFromAddress(address: string): Blockchain {
   if (isEthereumAddressValid(address)) return "ETHEREUM"
   if (isTezosAddressValid(address)) return "TEZOS"
-  throw new Error(
-    "The provided address is not a valid tezos or ethereum address"
-  )
+  throw new Error("The provided address is not a valid tezos or ethereum address")
 }
 
 export function isBlockchainAddressValid(address: string): boolean {
-  return [isTezosAddressValid, isEthereumAddressValid, isBaseAddressValid].some(
-    validation => validation(address)
+  return [isTezosAddressValid, isEthereumAddressValid, isBaseAddressValid].some(validation =>
+    validation(address),
   )
 }

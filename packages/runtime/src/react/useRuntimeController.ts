@@ -3,6 +3,8 @@
  * Copyright (c) fxhash contributors.
  * Source: https://github.com/fxhash/fxhash.xyz
  */
+
+import { type RefCallback, useCallback, useEffect, useMemo, useState } from "react"
 import {
   type ControlState,
   type ControlsChangedEventPayload,
@@ -12,13 +14,6 @@ import {
   type ProjectState,
   type RuntimeWholeState,
 } from "../index.js"
-import {
-  type RefCallback,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react"
 
 export interface IUseRuntimeControllerReturn {
   controller: IRuntimeController
@@ -33,10 +28,7 @@ export type UseRuntimeController = (params: {
   options?: IRuntimeControllerOptions
 }) => IUseRuntimeControllerReturn
 
-export const useRuntimeController: UseRuntimeController = ({
-  state,
-  options,
-}) => {
+export const useRuntimeController: UseRuntimeController = ({ state, options }) => {
   // biome-ignore lint/correctness/useExhaustiveDependencies: ok
   const controller = useMemo<IRuntimeController>(
     () =>
@@ -62,14 +54,10 @@ export const useRuntimeController: UseRuntimeController = ({
       state.legacy,
       options?.autoRefresh,
       options?.connector,
-    ]
+    ],
   )
-  const [runtime, setRuntime] = useState<RuntimeWholeState>(() =>
-    controller.runtime().whole()
-  )
-  const [controls, setControls] = useState<ControlState>(() =>
-    controller.controls().state()
-  )
+  const [runtime, setRuntime] = useState<RuntimeWholeState>(() => controller.runtime().whole())
+  const [controls, setControls] = useState<ControlState>(() => controller.controls().state())
 
   const ref = useCallback(
     (iframe: HTMLIFrameElement) => {
@@ -81,7 +69,7 @@ export const useRuntimeController: UseRuntimeController = ({
         }
       }
     },
-    [controller]
+    [controller],
   )
 
   useEffect(() => {
@@ -110,4 +98,3 @@ export const useRuntimeController: UseRuntimeController = ({
     ref,
   }
 }
-

@@ -2,5 +2,9 @@ import { Suspense } from "react"
 import { App } from "../src/App"
 
 export default function Page() {
-  return <Suspense><App /></Suspense>
+  return (
+    <Suspense>
+      <App />
+    </Suspense>
+  )
 }

@@ -1,8 +1,7 @@
 import puppeteer, { type Browser, type ConnectOptions } from "puppeteer-core"
 import type { BrowserProvider } from "./provider.js"
 
-export interface RemoteProviderOptions
-  extends Omit<ConnectOptions, "browserWSEndpoint"> {
+export interface RemoteProviderOptions extends Omit<ConnectOptions, "browserWSEndpoint"> {
   browserWSEndpoint: string
 }
 

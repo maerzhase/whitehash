@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react"
 import {
   formatRef,
   parseRef,
-  tokenRef,
   type TokenInput,
+  tokenRef,
   type WhitehashClient,
   type WhitehashToken,
 } from "@whitehash/chain-reader"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useWhitehash } from "./context.js"
 
 export interface UseTokenOptions {
@@ -44,7 +44,8 @@ export function useToken(input: TokenInput | null, options: UseTokenOptions = {}
     setToken(null)
     setLoading(true)
     setError(null)
-    void client.getToken(parseRef(serializedRef, "token"))
+    void client
+      .getToken(parseRef(serializedRef, "token"))
       .then(value => {
         if (runId.current === id) setToken(value)
       })

@@ -2,13 +2,13 @@ import { mkdir, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import {
   buildProjectIndex,
+  type ChainId,
   createWhitehashClient,
   getEvmProjectTokensViaRpc,
-  parseRef,
-  type ChainId,
-  type ProjectIndexReader,
   type ProjectIndex,
+  type ProjectIndexReader,
   type ProjectRef,
+  parseRef,
 } from "@whitehash/chain-reader"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"
 
@@ -27,9 +27,7 @@ function stringify(value: unknown): string {
 }
 
 /** Discover every minted iteration and write a portable normalized JSON index. */
-export async function writeProjectIndex(
-  options: WriteProjectIndexOptions,
-): Promise<ProjectIndex> {
+export async function writeProjectIndex(options: WriteProjectIndexOptions): Promise<ProjectIndex> {
   const serialized = /^(?:whitehash:\/\/)?\/?project\//.test(options.project)
   const ref: ProjectRef = serialized
     ? parseRef(options.project, "project")
@@ -74,9 +72,7 @@ export async function writeProjectIndex(
     pageSize: options.pageSize,
     onProgress: progress => {
       const total = progress.total === null ? "" : ` / ${progress.total}`
-      options.onProgress?.(
-        `  page ${progress.pages}: ${progress.iterations}${total} iterations`,
-      )
+      options.onProgress?.(`  page ${progress.pages}: ${progress.iterations}${total} iterations`)
     },
   })
   const outFile = resolve(options.outFile)

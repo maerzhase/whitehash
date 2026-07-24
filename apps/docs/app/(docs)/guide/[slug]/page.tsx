@@ -1,6 +1,14 @@
 import { DocsRoutePage } from "../../../../src/docs-route-page"
 
-const SLUGS = ["getting-started", "configuration", "cli", "onchfs", "theming", "variations", "capture"]
+const SLUGS = [
+  "getting-started",
+  "configuration",
+  "cli",
+  "onchfs",
+  "theming",
+  "variations",
+  "capture",
+]
 
 export function generateStaticParams() {
   return SLUGS.map(slug => ({ slug }))

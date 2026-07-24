@@ -1,7 +1,7 @@
 import type { Browser } from "puppeteer-core"
 import type { BrowserProvider } from "./browser/provider.js"
 import { capture } from "./capture.js"
-import { CaptureError, asCaptureError } from "./errors.js"
+import { asCaptureError, CaptureError } from "./errors.js"
 import type { CaptureLock } from "./lock/lock.js"
 import type { CaptureStore, StoredCapture } from "./store/store.js"
 import type {
@@ -27,16 +27,12 @@ export interface CaptureHandlerConfig {
   lockTtlMs?: number
   waiterTimeoutMs?: number
   waiterPollMs?: number
-  postprocess?(
-    result: CaptureResult,
-    target: CaptureTarget,
-  ): Promise<StoredCapture> | StoredCapture
+  postprocess?(result: CaptureResult, target: CaptureTarget): Promise<StoredCapture> | StoredCapture
   /** Primarily useful for deterministic integration tests and custom queue wrappers. */
   captureFn?: typeof capture
 }
 
-const sleep = (milliseconds: number) =>
-  new Promise(resolve => setTimeout(resolve, milliseconds))
+const sleep = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds))
 
 function responseBody(value: Uint8Array): ArrayBuffer {
   const copy = new Uint8Array(value.byteLength)
@@ -59,10 +55,7 @@ function errorStatus(error: CaptureError): number {
 
 function jsonError(error: unknown): Response {
   const captureError = asCaptureError(error)
-  return Response.json(
-    { error: captureError.code },
-    { status: errorStatus(captureError) },
-  )
+  return Response.json({ error: captureError.code }, { status: errorStatus(captureError) })
 }
 
 async function storedResponse(
@@ -75,7 +68,10 @@ async function storedResponse(
   if (store.publicUrl) {
     return new Response(null, {
       status: 307,
-      headers: { ...Object.fromEntries(new Headers(headers)), Location: await store.publicUrl(key) },
+      headers: {
+        ...Object.fromEntries(new Headers(headers)),
+        Location: await store.publicUrl(key),
+      },
     })
   }
   const value = await store.get(key)

@@ -31,10 +31,13 @@ export function fsStore(options: FsStoreOptions): CaptureStore {
       try {
         const [body, metadata] = await Promise.all([
           readFile(safePath(options.root, key)),
-          readFile(metadataPath(key), "utf8").then(value => JSON.parse(value) as {
-            mimeType: string
-            metadata?: Record<string, string>
-          }),
+          readFile(metadataPath(key), "utf8").then(
+            value =>
+              JSON.parse(value) as {
+                mimeType: string
+                metadata?: Record<string, string>
+              },
+          ),
         ])
         return { body, ...metadata }
       } catch {

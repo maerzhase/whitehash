@@ -1,9 +1,5 @@
 import { CaptureError } from "./errors.js"
-import {
-  CaptureMode,
-  CaptureTriggerMode,
-  type CaptureSettings,
-} from "./types.js"
+import { CaptureMode, type CaptureSettings, CaptureTriggerMode } from "./types.js"
 
 function requiredNumber(
   value: unknown,
@@ -26,8 +22,7 @@ function requiredNumber(
 
 function optionalInteger(value: unknown, name: string): number | undefined {
   if (value == null || value === "") return undefined
-  const parsed =
-    typeof value === "number" ? Math.round(value) : Number.parseInt(String(value), 10)
+  const parsed = typeof value === "number" ? Math.round(value) : Number.parseInt(String(value), 10)
   if (Number.isNaN(parsed)) {
     throw new CaptureError("INVALID_PARAMETERS", `${name} must be a number`)
   }
@@ -55,9 +50,8 @@ export function validateCaptureSettings(input: unknown): CaptureSettings {
     throw new CaptureError("INVALID_PARAMETERS", `Unsupported capture mode: ${String(mode)}`)
   }
 
-  const triggerMode = raw.triggerMode == null || raw.triggerMode === ""
-    ? CaptureTriggerMode.DELAY
-    : raw.triggerMode
+  const triggerMode =
+    raw.triggerMode == null || raw.triggerMode === "" ? CaptureTriggerMode.DELAY : raw.triggerMode
   if (!Object.values(CaptureTriggerMode).includes(triggerMode as CaptureTriggerMode)) {
     throw new CaptureError("INVALID_TRIGGER_PARAMETERS", "Invalid triggerMode")
   }

@@ -50,10 +50,7 @@ export const CHAIN_DEFINITIONS = [
     mode: "testnet",
     aliases: ["ghostnet"],
     onchfsNetwork: "tezos:NetXnHfVqm9iesp",
-    defaultRpcs: [
-      "https://ghostnet.tezos.ecadinfra.com",
-      "https://ghostnet.tezos.marigold.dev",
-    ],
+    defaultRpcs: ["https://ghostnet.tezos.ecadinfra.com", "https://ghostnet.tezos.marigold.dev"],
   },
   {
     id: "eip155:1",
@@ -63,10 +60,7 @@ export const CHAIN_DEFINITIONS = [
     mode: "mainnet",
     aliases: ["ethereum", "eth"],
     onchfsNetwork: "eip155:1",
-    defaultRpcs: [
-      "https://eth.llamarpc.com",
-      "https://ethereum-rpc.publicnode.com",
-    ],
+    defaultRpcs: ["https://eth.llamarpc.com", "https://ethereum-rpc.publicnode.com"],
   },
   {
     id: "eip155:11155111",
@@ -76,10 +70,7 @@ export const CHAIN_DEFINITIONS = [
     mode: "testnet",
     aliases: ["sepolia"],
     onchfsNetwork: "eip155:11155111",
-    defaultRpcs: [
-      "https://ethereum-sepolia-rpc.publicnode.com",
-      "https://rpc.sepolia.org",
-    ],
+    defaultRpcs: ["https://ethereum-sepolia-rpc.publicnode.com", "https://rpc.sepolia.org"],
   },
   {
     id: "eip155:8453",
@@ -89,10 +80,7 @@ export const CHAIN_DEFINITIONS = [
     mode: "mainnet",
     aliases: ["base"],
     onchfsNetwork: "eip155:8453",
-    defaultRpcs: [
-      "https://mainnet.base.org",
-      "https://base-rpc.publicnode.com",
-    ],
+    defaultRpcs: ["https://mainnet.base.org", "https://base-rpc.publicnode.com"],
   },
   {
     id: "eip155:84532",
@@ -102,20 +90,17 @@ export const CHAIN_DEFINITIONS = [
     mode: "testnet",
     aliases: ["base-sepolia"],
     onchfsNetwork: "eip155:84532",
-    defaultRpcs: [
-      "https://sepolia.base.org",
-      "https://base-sepolia-rpc.publicnode.com",
-    ],
+    defaultRpcs: ["https://sepolia.base.org", "https://base-sepolia-rpc.publicnode.com"],
   },
 ] as const satisfies readonly ChainDefinition[]
 
-export const MAINNET_CHAINS: ChainId[] = CHAIN_DEFINITIONS
-  .filter(chain => chain.mode === "mainnet")
-  .map(chain => chain.id)
+export const MAINNET_CHAINS: ChainId[] = CHAIN_DEFINITIONS.filter(
+  chain => chain.mode === "mainnet",
+).map(chain => chain.id)
 
-export const TESTNET_CHAINS: ChainId[] = CHAIN_DEFINITIONS
-  .filter(chain => chain.mode === "testnet")
-  .map(chain => chain.id)
+export const TESTNET_CHAINS: ChainId[] = CHAIN_DEFINITIONS.filter(
+  chain => chain.mode === "testnet",
+).map(chain => chain.id)
 
 const CHAIN_IDS = new Set<string>(CHAINS)
 const CHAIN_BY_ID = new Map<ChainId, ChainDefinition>(

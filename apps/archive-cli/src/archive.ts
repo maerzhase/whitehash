@@ -1,20 +1,12 @@
 import { createHash } from "node:crypto"
+import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises"
+import { dirname, extname, join, relative, resolve, sep } from "node:path"
 import { gunzipSync } from "node:zlib"
-import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises"
-import { basename, dirname, extname, join, relative, resolve, sep } from "node:path"
-import onchfs from "onchfs"
-import {
-  createWhitehashClient,
-  type ChainId,
-  type WhitehashToken,
-} from "@whitehash/chain-reader"
-import {
-  ARTWORK_IFRAME_SANDBOX,
-  chainSlug,
-  type OnchfsResponse,
-} from "@whitehash/core"
+import { type ChainId, createWhitehashClient, type WhitehashToken } from "@whitehash/chain-reader"
+import { ARTWORK_IFRAME_SANDBOX, chainSlug, type OnchfsResponse } from "@whitehash/core"
 import { ONCHFS_WORKER_NETWORKS } from "@whitehash/onchfs-sw"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"
+import onchfs from "onchfs"
 import { extractCar, writeExtractedCar } from "./car.js"
 
 export interface ArchiveOptions {
@@ -51,14 +43,26 @@ function safeSegment(value: string): string {
 }
 
 function html(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;")
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
 }
 
 function stringify(value: unknown): string {
-  return JSON.stringify(value, (_key, item) => typeof item === "bigint" ? item.toString() : item, 2) + "\n"
+  return (
+    JSON.stringify(value, (_key, item) => (typeof item === "bigint" ? item.toString() : item), 2) +
+    "\n"
+  )
 }
 
-function contentParts(uri: string): { scheme: "ipfs" | "onchfs"; cid: string; path: string; suffix: string } {
+function contentParts(uri: string): {
+  scheme: "ipfs" | "onchfs"
+  cid: string
+  path: string
+  suffix: string
+} {
   const match = /^(ipfs|onchfs):\/\/([^/?#]+)([^?#]*)?([?#].*)?$/i.exec(uri)
   if (!match) throw new Error(`Unsupported generator URI: ${uri}`)
   return {
@@ -109,7 +113,9 @@ function referenceValues(content: Uint8Array, path: string): string[] {
   }
   if (/\.css$/i.test(path)) matches.push(...text.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi))
   if (/\.(?:js|mjs)$/i.test(path)) {
-    matches.push(...text.matchAll(/\b(?:import|export)\s+(?:[^"';()]*?\s+from\s*)?["']([^"']+)["']/g))
+    matches.push(
+      ...text.matchAll(/\b(?:import|export)\s+(?:[^"';()]*?\s+from\s*)?["']([^"']+)["']/g),
+    )
     matches.push(...text.matchAll(/\bimport\(\s*["']([^"']+)["']\s*\)/g))
   }
   return matches.map(match => match[1]?.trim()).filter((value): value is string => Boolean(value))
@@ -171,8 +177,12 @@ function extension(uri: string, contentType: string | null): string {
   const pathExtension = extname(uri.split(/[?#]/, 1)[0] ?? "")
   if (/^\.[a-zA-Z0-9]{1,8}$/.test(pathExtension)) return pathExtension
   const known: Record<string, string> = {
-    "image/avif": ".avif", "image/gif": ".gif", "image/jpeg": ".jpg",
-    "image/png": ".png", "image/svg+xml": ".svg", "image/webp": ".webp",
+    "image/avif": ".avif",
+    "image/gif": ".gif",
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/svg+xml": ".svg",
+    "image/webp": ".webp",
   }
   return known[(contentType ?? "").split(";", 1)[0]!.toLowerCase()] ?? ".bin"
 }
@@ -200,7 +210,9 @@ async function fileHashes(root: string): Promise<Record<string, string>> {
       if (entry.isDirectory()) await visit(path)
       else if (entry.isFile() && entry.name !== "integrity.json") {
         const local = relative(root, path).split(sep).join("/")
-        output[local] = createHash("sha256").update(await readFile(path)).digest("hex")
+        output[local] = createHash("sha256")
+          .update(await readFile(path))
+          .digest("hex")
       }
     }
   }
@@ -217,17 +229,25 @@ function tokenWrapper(token: WhitehashToken, entry: string): string {
 }
 
 function gallery(manifest: ArchiveManifest): string {
-  const cards = manifest.tokens.map(token => `<li><a href="./${html(token.path)}/index.html">${html(token.name ?? `${token.contract} #${token.tokenId}`)}</a><small>${html(token.chain)} · ${html(token.artifact)}</small></li>`).join("\n")
+  const cards = manifest.tokens
+    .map(
+      token =>
+        `<li><a href="./${html(token.path)}/index.html">${html(token.name ?? `${token.contract} #${token.tokenId}`)}</a><small>${html(token.chain)} · ${html(token.artifact)}</small></li>`,
+    )
+    .join("\n")
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>whitehash archive</title><style>body{font:16px system-ui;background:#090909;color:#eee;max-width:70rem;margin:3rem auto;padding:0 1rem}ul{display:grid;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr));gap:1rem;padding:0}li{list-style:none;border:1px solid #333;padding:1rem}a{color:#fff}small{display:block;color:#999;margin-top:.5rem}</style></head><body><h1>whitehash archive</h1><p>${manifest.tokens.length} artwork${manifest.tokens.length === 1 ? "" : "s"}, preserved from public infrastructure.</p><ul>${cards}</ul></body></html>\n`
 }
 
 export async function verifyArchive(root: string): Promise<{ tokens: number; files: number }> {
-  const manifest = JSON.parse(await readFile(join(root, "manifest.json"), "utf8")) as ArchiveManifest
+  const manifest = JSON.parse(
+    await readFile(join(root, "manifest.json"), "utf8"),
+  ) as ArchiveManifest
   let files = 0
   await stat(join(root, "index.html"))
   for (const token of manifest.tokens) {
     const tokenDir = resolve(root, token.path)
-    if (!tokenDir.startsWith(resolve(root) + sep)) throw new Error(`Manifest path escapes archive: ${token.path}`)
+    if (!tokenDir.startsWith(resolve(root) + sep))
+      throw new Error(`Manifest path escapes archive: ${token.path}`)
     const wrapper = await readFile(join(tokenDir, "index.html"), "utf8")
     const source = /src="\.\/artifact\/([^"?#]+)(?:[?#][^"]*)?"/.exec(wrapper)?.[1]
     if (!source) throw new Error(`Wrapper has no local artifact reference: ${token.path}`)
@@ -236,13 +256,18 @@ export async function verifyArchive(root: string): Promise<{ tokens: number; fil
     const inspectReferences = async (directory: string): Promise<void> => {
       for (const entry of await readdir(directory, { withFileTypes: true })) {
         const path = join(directory, entry.name)
-        if (entry.isDirectory()) { await inspectReferences(path); continue }
+        if (entry.isDirectory()) {
+          await inspectReferences(path)
+          continue
+        }
         if (!/\.(?:css|html?|js|mjs|svg)$/i.test(entry.name)) continue
         const content = new Uint8Array(await readFile(path))
         for (const value of referenceValues(content, entry.name)) {
           if (/^(?:data:|blob:|#|javascript:|mailto:)/i.test(value)) continue
           if (/^(?:[a-z]+:|\/\/)/i.test(value)) {
-            throw new Error(`External artifact reference in ${relative(artifactDir, path)}: ${value}`)
+            throw new Error(
+              `External artifact reference in ${relative(artifactDir, path)}: ${value}`,
+            )
           }
           const local = value.split(/[?#]/, 1)[0]
           if (!local) continue
@@ -255,9 +280,13 @@ export async function verifyArchive(root: string): Promise<{ tokens: number; fil
       }
     }
     await inspectReferences(artifactDir)
-    const expected = JSON.parse(await readFile(join(tokenDir, "integrity.json"), "utf8")) as Record<string, string>
+    const expected = JSON.parse(await readFile(join(tokenDir, "integrity.json"), "utf8")) as Record<
+      string,
+      string
+    >
     const actual = await fileHashes(tokenDir)
-    if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`Integrity mismatch: ${token.path}`)
+    if (JSON.stringify(actual) !== JSON.stringify(expected))
+      throw new Error(`Integrity mismatch: ${token.path}`)
     files += Object.keys(actual).length
   }
   return { tokens: manifest.tokens.length, files }
@@ -278,7 +307,8 @@ export async function archiveWallets(options: ArchiveOptions): Promise<ArchiveMa
       chains: options.chains,
       onProgress: event => options.onProgress?.(`  ${event.chain}: ${event.message}`),
     })
-    for (const token of tokens) discovered.set(`${token.chain}/${token.contract}/${token.tokenId}`, token)
+    for (const token of tokens)
+      discovered.set(`${token.chain}/${token.contract}/${token.tokenId}`, token)
   }
   const selected = [...discovered.values()].slice(0, options.limit)
   if (selected.length === 0) throw new Error("No supported artwork tokens found")
@@ -293,8 +323,12 @@ export async function archiveWallets(options: ArchiveOptions): Promise<ArchiveMa
     await mkdir(artifactDir, { recursive: true })
     options.onProgress?.(`[${index + 1}/${selected.length}] ${token.name ?? localPath}`)
     await writeFile(join(tokenDir, "metadata.json"), stringify(token.raw))
-    await archiveImage(token, "thumbnail", token.thumbnailUri, tokenDir, client.fetchUri).catch(error => options.onProgress?.(`  thumbnail skipped: ${String(error)}`))
-    await archiveImage(token, "display", token.displayUri, tokenDir, client.fetchUri).catch(error => options.onProgress?.(`  display skipped: ${String(error)}`))
+    await archiveImage(token, "thumbnail", token.thumbnailUri, tokenDir, client.fetchUri).catch(
+      error => options.onProgress?.(`  thumbnail skipped: ${String(error)}`),
+    )
+    await archiveImage(token, "display", token.displayUri, tokenDir, client.fetchUri).catch(error =>
+      options.onProgress?.(`  display skipped: ${String(error)}`),
+    )
     let files: number
     if (parts.scheme === "ipfs") {
       const car = await fetchCar(parts.cid, gateways, fetcher)
@@ -310,10 +344,24 @@ export async function archiveWallets(options: ArchiveOptions): Promise<ArchiveMa
     await writeFile(join(tokenDir, "index.html"), tokenWrapper(token, entry))
     const integrity = await fileHashes(tokenDir)
     await writeFile(join(tokenDir, "integrity.json"), stringify(integrity))
-    archived.push({ chain: token.chain, contract: token.contract, tokenId: token.tokenId, name: token.name, path: localPath, artifact: parts.scheme, files })
+    archived.push({
+      chain: token.chain,
+      contract: token.contract,
+      tokenId: token.tokenId,
+      name: token.name,
+      path: localPath,
+      artifact: parts.scheme,
+      files,
+    })
   }
-  if (archived.length === 0) throw new Error("Tokens were found, but none had an archiveable generator")
-  const manifest: ArchiveManifest = { format: 1, createdAt: new Date().toISOString(), addresses: options.addresses, tokens: archived }
+  if (archived.length === 0)
+    throw new Error("Tokens were found, but none had an archiveable generator")
+  const manifest: ArchiveManifest = {
+    format: 1,
+    createdAt: new Date().toISOString(),
+    addresses: options.addresses,
+    tokens: archived,
+  }
   await writeFile(join(outDir, "manifest.json"), stringify(manifest))
   await writeFile(join(outDir, "index.html"), gallery(manifest))
   await verifyArchive(outDir)

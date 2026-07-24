@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest"
 import { defaultResolverConfig } from "@whitehash/resolve"
+import { describe, expect, it, vi } from "vitest"
 import {
   discoverEvmCollectionsViaBlockscout,
   getEvmWalletTokensViaBlockscout,
@@ -27,8 +27,8 @@ function factoryLogsResponse() {
 
 describe("discoverEvmCollectionsViaBlockscout", () => {
   it("extracts collections from ProjectCreated logs only", async () => {
-    const fetchImpl = vi.fn(async () =>
-      new Response(JSON.stringify(factoryLogsResponse())),
+    const fetchImpl = vi.fn(
+      async () => new Response(JSON.stringify(factoryLogsResponse())),
     ) as unknown as typeof fetch
 
     const snap = await discoverEvmCollectionsViaBlockscout("eip155:8453", config, fetchImpl)

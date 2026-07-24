@@ -1,5 +1,5 @@
-import { projectRef, type ProjectInput, type ProjectRef } from "./refs.js"
 import type { ListOrder, WhitehashProject } from "./browse.js"
+import { type ProjectInput, type ProjectRef, projectRef } from "./refs.js"
 import type { WhitehashToken } from "./types.js"
 
 export const PROJECT_INDEX_FORMAT = "whitehash-project-index@1" as const

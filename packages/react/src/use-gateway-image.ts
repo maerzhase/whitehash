@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
 import type { ChainId, WhitehashClient } from "@whitehash/chain-reader"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useWhitehash } from "./context.js"
 
 export interface UseGatewayImageOptions {
@@ -16,7 +16,7 @@ export function useGatewayImage(
   const client = options.client ?? context.client
   const configKey = `${client.config.resolver.ipfsGateways.join(",")}|${JSON.stringify(client.config.resolver.onchfs)}`
   const urls = useMemo(
-    () => uri ? client.resolveUriAll(uri, { chain }) : [],
+    () => (uri ? client.resolveUriAll(uri, { chain }) : []),
     [chain, client, configKey, uri],
   )
   const [index, setIndex] = useState(0)

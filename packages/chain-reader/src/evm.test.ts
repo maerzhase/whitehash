@@ -1,12 +1,8 @@
-import { describe, expect, it, vi } from "vitest"
 import { defaultResolverConfig } from "@whitehash/resolve"
-import {
-  discoverEvmProjectTokenRefsViaRpc,
-  getEvmWalletTokens,
-  isEvmAddress,
-} from "./evm.js"
-import type { ChainReaderConfig } from "./types.js"
 import type { PublicClient } from "viem"
+import { describe, expect, it, vi } from "vitest"
+import { discoverEvmProjectTokenRefsViaRpc, getEvmWalletTokens, isEvmAddress } from "./evm.js"
+import type { ChainReaderConfig } from "./types.js"
 
 describe("isEvmAddress", () => {
   it("accepts checksummed and lowercase 0x addresses", () => {
@@ -22,15 +18,14 @@ describe("isEvmAddress", () => {
 describe("discoverEvmProjectTokenRefsViaRpc", () => {
   it("enumerates a probed sequential FxGenArt721 supply without scanning logs", async () => {
     const contract = "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632"
-    const readContract = vi.fn(async ({ functionName, args }: {
-      functionName: string
-      args?: readonly bigint[]
-    }) => {
-      if (functionName === "totalSupply") return 3n
-      const tokenId = args?.[0]
-      if (tokenId && tokenId >= 1n && tokenId <= 3n) return contract
-      throw new Error("missing")
-    })
+    const readContract = vi.fn(
+      async ({ functionName, args }: { functionName: string; args?: readonly bigint[] }) => {
+        if (functionName === "totalSupply") return 3n
+        const tokenId = args?.[0]
+        if (tokenId && tokenId >= 1n && tokenId <= 3n) return contract
+        throw new Error("missing")
+      },
+    )
     const client = {
       getBlockNumber: vi.fn().mockResolvedValue(20_000_000n),
       readContract,
@@ -51,7 +46,7 @@ describe("discoverEvmProjectTokenRefsViaRpc", () => {
     const deployment = 10_786_145n
     const contract = "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632"
     const getBytecode = vi.fn(async ({ blockNumber }: { blockNumber?: bigint }) =>
-      (blockNumber ?? 0n) >= deployment ? "0x1234" : undefined
+      (blockNumber ?? 0n) >= deployment ? "0x1234" : undefined,
     )
     const getLogs = vi.fn(async () => [
       { address: contract, blockNumber: deployment + 2n, logIndex: 1, args: { tokenId: 9n } },
@@ -63,12 +58,7 @@ describe("discoverEvmProjectTokenRefsViaRpc", () => {
       evm: { maxBlock: 10_786_150 },
     }
 
-    const result = await discoverEvmProjectTokenRefsViaRpc(
-      "eip155:8453",
-      contract,
-      config,
-      client,
-    )
+    const result = await discoverEvmProjectTokenRefsViaRpc("eip155:8453", contract, config, client)
 
     expect(result.deploymentBlock).toBe(Number(deployment))
     expect(result.strategy).toBe("mint-logs")
@@ -93,9 +83,7 @@ live("getEvmWalletTokens (live Base)", () => {
   it("reads owned tokens with resolvable metadata", async () => {
     const tokens = await getEvmWalletTokens(HOLDER, "eip155:8453", config)
     expect(tokens.length).toBeGreaterThanOrEqual(1)
-    const collectionTokens = tokens.filter(
-      token => token.contract.toLowerCase() === COLLECTION,
-    )
+    const collectionTokens = tokens.filter(token => token.contract.toLowerCase() === COLLECTION)
     expect(collectionTokens.length).toBeGreaterThanOrEqual(1)
     for (const t of collectionTokens) {
       expect(t.assigned).toBe(true)

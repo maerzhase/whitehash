@@ -3,13 +3,11 @@ import { createServer, type Server } from "node:http"
 import type { AddressInfo } from "node:net"
 import { fileURLToPath } from "node:url"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { capture, CaptureMode, CaptureTriggerMode } from "../src/index.js"
 import { findLocalChrome, localProvider } from "../src/browser/local.js"
+import { CaptureMode, CaptureTriggerMode, capture } from "../src/index.js"
 
 const runIntegration = process.env.WHITEHASH_CAPTURE_INTEGRATION === "1"
-const fixturePath = fileURLToPath(
-  new URL("./fixtures/artwork/index.html", import.meta.url),
-)
+const fixturePath = fileURLToPath(new URL("./fixtures/artwork/index.html", import.meta.url))
 
 describe.runIf(runIntegration)("real Chromium capture fixture", () => {
   let server: Server

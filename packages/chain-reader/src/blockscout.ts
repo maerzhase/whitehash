@@ -11,9 +11,9 @@
  * re-read tokenURI from chain and fetch the real JSON.
  */
 import { getAddress } from "viem"
+import { fetchEvmMetadata, readTokenUris } from "./evm.js"
 import { normalizeMetadata } from "./metadata.js"
 import { EVM_NETWORKS } from "./networks.js"
-import { fetchEvmMetadata, readTokenUris } from "./evm.js"
 import type {
   ChainId,
   ChainReaderConfig,
@@ -32,8 +32,7 @@ export const BLOCKSCOUT_DEFAULTS: Record<EvmChain, string> = {
   "eip155:84532": "https://base-sepolia.blockscout.com",
 }
 
-const PROJECT_CREATED_TOPIC =
-  "0x546bc3cd5ff4b322df8339c6833b99285a6333e5e5f90a88ced57d9de7c345fc"
+const PROJECT_CREATED_TOPIC = "0x546bc3cd5ff4b322df8339c6833b99285a6333e5e5f90a88ced57d9de7c345fc"
 
 const MAX_PAGES = 200 // safety backstop for pagination loops
 
@@ -77,16 +76,10 @@ interface BsPage<T> {
 }
 
 /** Iterate a paginated Blockscout v2 endpoint. */
-async function* bsPages<T>(
-  baseUrl: string,
-  fetchImpl: typeof fetch,
-): AsyncGenerator<T[]> {
+async function* bsPages<T>(baseUrl: string, fetchImpl: typeof fetch): AsyncGenerator<T[]> {
   let params: Record<string, unknown> | null = null
   for (let page = 0; page < MAX_PAGES; page++) {
-    const data: BsPage<T> = await bsFetch<BsPage<T>>(
-      withPageParams(baseUrl, params),
-      fetchImpl,
-    )
+    const data: BsPage<T> = await bsFetch<BsPage<T>>(withPageParams(baseUrl, params), fetchImpl)
     yield data.items ?? []
     if (!data.next_page_params) return
     params = data.next_page_params
@@ -205,9 +198,7 @@ export async function buildEvmTokensRefreshingStale(
   items: { contract: string; tokenId: string; metadata: Record<string, unknown> | null }[],
   onProgress?: ProgressCallback,
 ): Promise<WhitehashToken[]> {
-  const staleIdx = items
-    .map((o, i) => (looksStale(o.metadata) ? i : -1))
-    .filter(i => i >= 0)
+  const staleIdx = items.map((o, i) => (looksStale(o.metadata) ? i : -1)).filter(i => i >= 0)
 
   const refreshedUris = new Map<number, string | null>()
   if (staleIdx.length > 0) {
@@ -221,7 +212,9 @@ export async function buildEvmTokensRefreshingStale(
       config,
       staleIdx.map(i => ({ contract: items[i]!.contract, tokenId: items[i]!.tokenId })),
     )
-    staleIdx.forEach((idx, j) => refreshedUris.set(idx, uris[j] ?? null))
+    staleIdx.forEach((idx, j) => {
+      refreshedUris.set(idx, uris[j] ?? null)
+    })
   }
 
   // Fetch refreshed metadata concurrently (one fetch per stale token).

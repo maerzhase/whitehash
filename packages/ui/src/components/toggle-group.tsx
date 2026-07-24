@@ -1,6 +1,6 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
-import { ToggleGroup as BaseToggleGroup } from "@base-ui-components/react/toggle-group"
 import { Toggle } from "@base-ui-components/react/toggle"
+import { ToggleGroup as BaseToggleGroup } from "@base-ui-components/react/toggle-group"
+import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { cn } from "../lib/cn.js"
 
 /**

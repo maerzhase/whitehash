@@ -4,12 +4,7 @@
  * Addresses are copied from the fxhash monorepo config (MIT) and verified
  * against the production indexer configuration (July 2026).
  */
-import {
-  chainDefinition,
-  isEvmChain,
-  isTezosChain,
-  type ChainId,
-} from "@whitehash/core"
+import { type ChainId, chainDefinition, isEvmChain, isTezosChain } from "@whitehash/core"
 
 export interface TezosNetworkConfig {
   chainId: Extract<ChainId, `tezos:${string}`>
@@ -39,10 +34,7 @@ export interface EvmNetworkConfig {
   deployBlock: number
 }
 
-export const TEZOS_NETWORKS: Record<
-  Extract<ChainId, `tezos:${string}`>,
-  TezosNetworkConfig
-> = {
+export const TEZOS_NETWORKS: Record<Extract<ChainId, `tezos:${string}`>, TezosNetworkConfig> = {
   "tezos:mainnet": {
     chainId: "tezos:mainnet",
     onchfsNetwork: chainDefinition("tezos:mainnet").onchfsNetwork,
@@ -79,10 +71,7 @@ export const TEZOS_NETWORKS: Record<
 
 const MULTICALL3: `0x${string}` = "0xcA11bde05977b3631167028862bE2a173976CA11"
 
-export const EVM_NETWORKS: Record<
-  Extract<ChainId, `eip155:${string}`>,
-  EvmNetworkConfig
-> = {
+export const EVM_NETWORKS: Record<Extract<ChainId, `eip155:${string}`>, EvmNetworkConfig> = {
   "eip155:1": {
     chainId: "eip155:1",
     numericChainId: 1,

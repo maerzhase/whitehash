@@ -44,13 +44,7 @@ export interface ButtonProps
   extends useRender.ComponentProps<"button">,
     VariantProps<typeof buttonVariants> {}
 
-export function Button({
-  render = <button />,
-  className,
-  variant,
-  size,
-  ...props
-}: ButtonProps) {
+export function Button({ render = <button />, className, variant, size, ...props }: ButtonProps) {
   // `card`/`link` bring their own sizing, so drop the default height/padding.
   const resolvedSize = size ?? (variant === "card" || variant === "link" ? "none" : "md")
   return useRender({

@@ -1,10 +1,7 @@
 import { existsSync } from "node:fs"
 import { delimiter, join } from "node:path"
 import puppeteer, { type Browser, type LaunchOptions } from "puppeteer-core"
-import {
-  CONTAINER_CHROME_ARGS,
-  type BrowserProvider,
-} from "./provider.js"
+import { type BrowserProvider, CONTAINER_CHROME_ARGS } from "./provider.js"
 
 const PLATFORM_PATHS: Record<NodeJS.Platform, string[]> = {
   darwin: [
@@ -65,11 +62,7 @@ export function localProvider(options: LocalProviderOptions = {}): BrowserProvid
         ...launchOptions,
         executablePath: executablePath ?? findLocalChrome(),
         headless: launchOptions.headless ?? true,
-        args: [
-          ...CONTAINER_CHROME_ARGS,
-          ...(useGl ? [`--use-gl=${useGl}`] : []),
-          ...args,
-        ],
+        args: [...CONTAINER_CHROME_ARGS, ...(useGl ? [`--use-gl=${useGl}`] : []), ...args],
         acceptInsecureCerts: true,
       }),
     release: async (browser: Browser) => {

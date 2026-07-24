@@ -18,13 +18,13 @@ import {
   discoverEvmCollectionsViaBlockscout,
 } from "./blockscout.js"
 import { normalizeCaptureSettings, normalizeMetadata } from "./metadata.js"
-import { EVM_NETWORKS, TEZOS_NETWORKS } from "./networks.js"
+import { TEZOS_NETWORKS } from "./networks.js"
 import { hexToUtf8 } from "./tezos.js"
 import type {
   ChainId,
   ChainReaderConfig,
-  ProjectCaptureSettings,
   ProgressCallback,
+  ProjectCaptureSettings,
   WhitehashToken,
 } from "./types.js"
 
@@ -63,10 +63,7 @@ export type ListOrder = "newest" | "oldest"
 // ---------------------------------------------------------------------------
 
 function tzktBase(chain: TezosChain, config: ChainReaderConfig): string {
-  return (config.tzkt?.[chain] ?? TEZOS_NETWORKS[chain].defaultTzktBaseUrl).replace(
-    /\/+$/,
-    "",
-  )
+  return (config.tzkt?.[chain] ?? TEZOS_NETWORKS[chain].defaultTzktBaseUrl).replace(/\/+$/, "")
 }
 
 interface TzktLedgerKey {
@@ -159,15 +156,11 @@ export async function listTezosProjects(
           id: `${version}:${k.key}`,
           name: typeof meta?.["name"] === "string" ? (meta["name"] as string) : null,
           description:
-            typeof meta?.["description"] === "string"
-              ? (meta["description"] as string)
-              : null,
+            typeof meta?.["description"] === "string" ? (meta["description"] as string) : null,
           displayUri:
             typeof meta?.["displayUri"] === "string" ? (meta["displayUri"] as string) : null,
           thumbnailUri:
-            typeof meta?.["thumbnailUri"] === "string"
-              ? (meta["thumbnailUri"] as string)
-              : null,
+            typeof meta?.["thumbnailUri"] === "string" ? (meta["thumbnailUri"] as string) : null,
           editions: counts.editions,
           minted: counts.minted,
           captureSettings: normalizeCaptureSettings(meta),
@@ -211,10 +204,8 @@ export async function getTezosProject(
     chain,
     id: ref,
     name: typeof meta?.["name"] === "string" ? (meta["name"] as string) : null,
-    description:
-      typeof meta?.["description"] === "string" ? (meta["description"] as string) : null,
-    displayUri:
-      typeof meta?.["displayUri"] === "string" ? (meta["displayUri"] as string) : null,
+    description: typeof meta?.["description"] === "string" ? (meta["description"] as string) : null,
+    displayUri: typeof meta?.["displayUri"] === "string" ? (meta["displayUri"] as string) : null,
     thumbnailUri:
       typeof meta?.["thumbnailUri"] === "string" ? (meta["thumbnailUri"] as string) : null,
     editions: counts.editions,

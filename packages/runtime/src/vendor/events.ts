@@ -21,10 +21,7 @@ type EventReceiver<T> = (payload: T) => void | Promise<void>
 export interface IEventEmitter<T extends EventMap> {
   on<K extends EventKey<T>>(name: K, fn: EventReceiver<T[K]>): () => void
   off<K extends EventKey<T>>(name: K, fn: EventReceiver<T[K]>): void
-  emit<K extends EventKey<T>>(
-    name: K,
-    ...[payload]: OptionalIfUndefined<T[K]>
-  ): Promise<void>
+  emit<K extends EventKey<T>>(name: K, ...[payload]: OptionalIfUndefined<T[K]>): Promise<void>
 }
 
 /**
@@ -45,10 +42,7 @@ export class EventEmitter<T extends EventMap> implements IEventEmitter<T> {
    * @returns A function which can be used to remove the event listener which
    * was just set.
    */
-  public on<K extends EventKey<T>>(
-    name: K,
-    fn: EventReceiver<T[K]>
-  ): () => void {
+  public on<K extends EventKey<T>>(name: K, fn: EventReceiver<T[K]>): () => void {
     // biome-ignore lint/suspicious/noPrototypeBuiltins: ok
     if (!this._listeners.hasOwnProperty(name)) {
       this._listeners[name] = []
@@ -92,9 +86,7 @@ export class EventEmitter<T extends EventMap> implements IEventEmitter<T> {
     if (this._muted[name]) return
     const listeners = this._listeners[name]
     if (!listeners) return
-    await Promise.allSettled(
-      listeners.map(listener => Promise.resolve(listener(payload as any)))
-    )
+    await Promise.allSettled(listeners.map(listener => Promise.resolve(listener(payload as any))))
   }
 
   /**
@@ -106,10 +98,7 @@ export class EventEmitter<T extends EventMap> implements IEventEmitter<T> {
    * this emitter emits it.
    * @returns A function to clear the pipe.
    */
-  public pipe<K extends EventKey<T>>(
-    name: K,
-    emitter: EventEmitter<T>
-  ): () => void {
+  public pipe<K extends EventKey<T>>(name: K, emitter: EventEmitter<T>): () => void {
     return this.on(name, payload => emitter.emit(name, payload))
   }
 

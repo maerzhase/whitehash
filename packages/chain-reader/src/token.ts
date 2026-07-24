@@ -23,7 +23,7 @@ export async function getTezosTokenProjectRefs(
     encodeURIComponent(token.tokenId)
   const response = await fetchImpl(url)
   if (!response.ok) return []
-  const value = await response.json() as { value?: { issuer_id?: string | number } }
+  const value = (await response.json()) as { value?: { issuer_id?: string | number } }
   const issuerId = value.value?.issuer_id
   if (issuerId === undefined || issuerId === null) return []
   return network.issuerContracts.map(issuer => ({
@@ -34,7 +34,10 @@ export async function getTezosTokenProjectRefs(
 }
 
 /** Universal direct token read used by typed refs and paste-anything navigation. */
-export async function getToken(ref: TokenRef, config: ChainReaderConfig): Promise<WhitehashToken | null> {
+export async function getToken(
+  ref: TokenRef,
+  config: ChainReaderConfig,
+): Promise<WhitehashToken | null> {
   if (isEvmChain(ref.chain)) {
     const [token] = await buildEvmTokensRefreshingStale(ref.chain, config, [
       { contract: ref.contract, tokenId: ref.tokenId, metadata: null },
@@ -42,11 +45,14 @@ export async function getToken(ref: TokenRef, config: ChainReaderConfig): Promis
     return token ?? null
   }
   if (!isTezosChain(ref.chain)) return null
-  const base = (config.tzkt?.[ref.chain] ?? TEZOS_NETWORKS[ref.chain].defaultTzktBaseUrl).replace(/\/+$/, "")
+  const base = (config.tzkt?.[ref.chain] ?? TEZOS_NETWORKS[ref.chain].defaultTzktBaseUrl).replace(
+    /\/+$/,
+    "",
+  )
   const url = `${base}/v1/tokens?contract=${encodeURIComponent(ref.contract)}&tokenId=${encodeURIComponent(ref.tokenId)}&limit=1`
   const response = await fetch(url)
   if (!response.ok) throw new Error(`TzKT HTTP ${response.status} for token ${ref.tokenId}`)
-  const [value] = await response.json() as Array<{ metadata?: Record<string, unknown> | null }>
+  const [value] = (await response.json()) as Array<{ metadata?: Record<string, unknown> | null }>
   if (!value) return null
   const metadata = normalizeMetadata(value.metadata ?? {})
   return {

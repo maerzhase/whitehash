@@ -15,7 +15,10 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "snapshots"],
+  "files": [
+    "dist",
+    "snapshots"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
     "check-types": "tsc --noEmit",

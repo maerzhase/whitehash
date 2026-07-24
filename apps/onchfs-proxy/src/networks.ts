@@ -3,11 +3,7 @@
  * by @whitehash/resolve's chainSlug) to onchfs-js blockchain ids and RPC lists.
  * RPCs are overridable via environment variables (comma-separated).
  */
-import {
-  CHAIN_DEFINITIONS,
-  chainDefinition,
-  type ChainId,
-} from "@whitehash/core"
+import { CHAIN_DEFINITIONS, type ChainId, chainDefinition } from "@whitehash/core"
 
 export interface ProxyNetwork {
   /** URL path slug, e.g. "eip155-8453". */
@@ -36,13 +32,9 @@ export const PROXY_NETWORKS: ProxyNetwork[] = CHAIN_DEFINITIONS.map(network => (
 }))
 
 /** Default network used when a request has no recognized network prefix. */
-export const DEFAULT_NETWORK_SLUG =
-  chainDefinition("tezos:mainnet").slug
+export const DEFAULT_NETWORK_SLUG = chainDefinition("tezos:mainnet").slug
 
-export function rpcsFor(
-  network: ProxyNetwork,
-  env: Record<string, string | undefined>,
-): string[] {
+export function rpcsFor(network: ProxyNetwork, env: Record<string, string | undefined>): string[] {
   const override = env[network.rpcEnvVar]
   if (override) {
     const list = override

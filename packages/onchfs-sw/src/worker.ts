@@ -21,9 +21,11 @@ declare function importScripts(...urls: string[]): void
   stderr: {},
 }
 importScripts("./onchfs.global.js")
-const onchfs = (globalThis as typeof globalThis & {
-  Onchfs: { resolver: { create(config: unknown[]): unknown } }
-}).Onchfs
+const onchfs = (
+  globalThis as typeof globalThis & {
+    Onchfs: { resolver: { create(config: unknown[]): unknown } }
+  }
+).Onchfs
 
 type ResolveFn = (uri: string) => Promise<OnchfsResponse>
 const resolvers = new Map<string, ResolveFn>()
@@ -46,20 +48,27 @@ self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return
   const parsed = parseOnchfsRequest(event.request.url, ONCHFS_WORKER_NETWORKS)
   if (!parsed) return
-  event.respondWith((async () => {
-    const cache = await caches.open(ONCHFS_CACHE)
-    const cacheKey = new Request(parsed.cacheUrl)
-    const cached = await cache.match(cacheKey)
-    if (cached) return cached
-    try {
-      const response = await responseFromOnchfs(await resolverFor(parsed.network.slug)(parsed.uri))
-      if (response.ok) await cache.put(cacheKey, response.clone())
-      return response
-    } catch (cause) {
-      return Response.json(
-        { error: "onchfs resolution failed", detail: cause instanceof Error ? cause.message : String(cause) },
-        { status: 502 },
-      )
-    }
-  })())
+  event.respondWith(
+    (async () => {
+      const cache = await caches.open(ONCHFS_CACHE)
+      const cacheKey = new Request(parsed.cacheUrl)
+      const cached = await cache.match(cacheKey)
+      if (cached) return cached
+      try {
+        const response = await responseFromOnchfs(
+          await resolverFor(parsed.network.slug)(parsed.uri),
+        )
+        if (response.ok) await cache.put(cacheKey, response.clone())
+        return response
+      } catch (cause) {
+        return Response.json(
+          {
+            error: "onchfs resolution failed",
+            detail: cause instanceof Error ? cause.message : String(cause),
+          },
+          { status: 502 },
+        )
+      }
+    })(),
+  )
 })

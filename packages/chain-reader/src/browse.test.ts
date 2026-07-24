@@ -1,10 +1,6 @@
-import { describe, expect, it, vi } from "vitest"
 import { defaultResolverConfig } from "@whitehash/resolve"
-import {
-  getTezosProject,
-  listTezosProjects,
-  listTezosProjectTokens,
-} from "./browse.js"
+import { describe, expect, it, vi } from "vitest"
+import { getTezosProject, listTezosProjects, listTezosProjectTokens } from "./browse.js"
 import type { ChainReaderConfig } from "./types.js"
 
 const config: ChainReaderConfig = { resolver: defaultResolverConfig() }
@@ -72,8 +68,7 @@ describe("listTezosProjects", () => {
   })
 
   it("supports oldest-first ordering", async () => {
-    const fetchImpl = vi.fn(async () => new Response(JSON.stringify([]))) as unknown as
-      typeof fetch
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify([]))) as unknown as typeof fetch
     await listTezosProjects("tezos:mainnet", config, { order: "oldest" }, fetchImpl)
     expect(String((fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls[0]![0])).toContain(
       "sort.asc=id",

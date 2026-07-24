@@ -1,10 +1,10 @@
-import { tokenRef, type TokenInput } from "./refs.js"
+import type { WhitehashProject } from "./browse.js"
 import {
+  type IndexedProject,
   indexedProjectMetadata,
   isIndexedProjectMetadata,
-  type IndexedProject,
 } from "./project-index.js"
-import type { WhitehashProject } from "./browse.js"
+import { type TokenInput, tokenRef } from "./refs.js"
 import type { WhitehashToken } from "./types.js"
 
 export const TOKEN_INDEX_FORMAT = "whitehash-token-index@1" as const

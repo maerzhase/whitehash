@@ -31,17 +31,17 @@ export function toExpress(handler: (request: Request) => Promise<Response>) {
         if (value != null) headers.set(name, Array.isArray(value) ? value.join(", ") : value)
       }
       const webResponse = await handler(
-        new Request(
-          `${protocol}://${host}${request.originalUrl ?? request.url}`,
-          { method: request.method, headers },
-        ),
+        new Request(`${protocol}://${host}${request.originalUrl ?? request.url}`, {
+          method: request.method,
+          headers,
+        }),
       )
       response.status(webResponse.status)
-      webResponse.headers.forEach((value, name) => response.setHeader(name, value))
+      webResponse.headers.forEach((value, name) => {
+        response.setHeader(name, value)
+      })
       response.send(
-        request.method === "HEAD"
-          ? undefined
-          : new Uint8Array(await webResponse.arrayBuffer()),
+        request.method === "HEAD" ? undefined : new Uint8Array(await webResponse.arrayBuffer()),
       )
     } catch (error) {
       next(error)

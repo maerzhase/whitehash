@@ -5,12 +5,7 @@
  */
 import { normalizeMetadata } from "./metadata.js"
 import { TEZOS_NETWORKS } from "./networks.js"
-import type {
-  ChainId,
-  ChainReaderConfig,
-  ProgressCallback,
-  WhitehashToken,
-} from "./types.js"
+import type { ChainId, ChainReaderConfig, ProgressCallback, WhitehashToken } from "./types.js"
 
 type TezosChain = Extract<ChainId, `tezos:${string}`>
 
@@ -86,10 +81,7 @@ async function fetchMetadataViaBigMap(
 ): Promise<Record<string, unknown> | null> {
   try {
     const url = `${baseUrl(chain, config)}/v1/contracts/${contract}/bigmaps/token_metadata/keys/${tokenId}`
-    const key = await tzktFetch<{ value?: { token_info?: Record<string, string> } }>(
-      url,
-      fetchImpl,
-    )
+    const key = await tzktFetch<{ value?: { token_info?: Record<string, string> } }>(url, fetchImpl)
     const encoded = key.value?.token_info?.[""]
     if (!encoded) return null
     const uri = hexToUtf8(encoded)

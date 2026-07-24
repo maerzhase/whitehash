@@ -1,20 +1,13 @@
 import type { Browser, Page } from "puppeteer-core"
 import { assertUrlAllowed } from "./allowlist.js"
 import { isBrowserProvider } from "./browser/provider.js"
-import { CaptureError, asCaptureError } from "./errors.js"
+import { asCaptureError, CaptureError } from "./errors.js"
 import { extractFeatures } from "./features.js"
 import { captureCanvas } from "./strategies/canvas.js"
 import { captureGif } from "./strategies/gif.js"
 import { captureViewport } from "./strategies/viewport.js"
-import {
-  installTriggerController,
-  waitForInitialTrigger,
-} from "./triggers.js"
-import {
-  CaptureMode,
-  type CaptureOptions,
-  type CaptureResult,
-} from "./types.js"
+import { installTriggerController, waitForInitialTrigger } from "./triggers.js"
+import { CaptureMode, type CaptureOptions, type CaptureResult } from "./types.js"
 import { validateCaptureSettings } from "./validate.js"
 
 function now(): number {
@@ -38,11 +31,7 @@ function assertOutputLimits(
   }
 }
 
-async function navigate(
-  page: Page,
-  url: string,
-  timeout: number,
-): Promise<void> {
+async function navigate(page: Page, url: string, timeout: number): Promise<void> {
   try {
     const response = await page.goto(url, {
       waitUntil: "domcontentloaded",
@@ -103,12 +92,7 @@ export async function capture(options: CaptureOptions): Promise<CaptureResult> {
       let width: number
       let height: number
       if (settings.gif) {
-        const gif = await captureGif(
-          page,
-          settings,
-          trigger,
-          options.maxTriggerWaitMs ?? 300_000,
-        )
+        const gif = await captureGif(page, settings, trigger, options.maxTriggerWaitMs ?? 300_000)
         image = gif.image
         width = gif.width
         height = gif.height
@@ -127,8 +111,7 @@ export async function capture(options: CaptureOptions): Promise<CaptureResult> {
       }
       assertOutputLimits(image, width, height, options)
       const captureMs = now() - captureStart
-      const features =
-        options.withFeatures === false ? [] : await extractFeatures(page)
+      const features = options.withFeatures === false ? [] : await extractFeatures(page)
 
       return {
         image,

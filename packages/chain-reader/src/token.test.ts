@@ -1,14 +1,25 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
 import { defaultResolverConfig } from "@whitehash/resolve"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { getTezosTokenProjectRefs, getToken } from "./token.js"
 
 afterEach(() => vi.unstubAllGlobals())
 
 describe("getToken", () => {
   it("reads a Tezos token through the universal typed-ref API", async () => {
-    const fetchImpl = vi.fn(async () => new Response(JSON.stringify([{
-      metadata: { name: "Example #1", iterationHash: "oo1", artifactUri: "ipfs://QmArtifact" },
-    }])))
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify([
+            {
+              metadata: {
+                name: "Example #1",
+                iterationHash: "oo1",
+                artifactUri: "ipfs://QmArtifact",
+              },
+            },
+          ]),
+        ),
+    )
     vi.stubGlobal("fetch", fetchImpl)
     const token = await getToken(
       { type: "token", chain: "tezos:mainnet", contract: "KT1Example", tokenId: "1" },
@@ -35,9 +46,14 @@ describe("getToken", () => {
       metadataUri: null,
       raw: null,
     }
-    const fetchMock = vi.fn(async (_url: string | URL | Request) => new Response(JSON.stringify({
-      value: { issuer_id: "65", iteration: "136" },
-    })))
+    const fetchMock = vi.fn(
+      async (_url: string | URL | Request) =>
+        new Response(
+          JSON.stringify({
+            value: { issuer_id: "65", iteration: "136" },
+          }),
+        ),
+    )
     const refs = await getTezosTokenProjectRefs(
       token,
       { resolver: defaultResolverConfig() },
@@ -45,8 +61,6 @@ describe("getToken", () => {
     )
 
     expect(refs.map(ref => ref.id)).toEqual(["v0:65", "v1:65", "v2:65", "v3:65"])
-    expect(String(fetchMock.mock.calls[0]![0])).toContain(
-      "/bigmaps/token_data/keys/16333",
-    )
+    expect(String(fetchMock.mock.calls[0]![0])).toContain("/bigmaps/token_data/keys/16333")
   })
 })

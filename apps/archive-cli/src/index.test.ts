@@ -51,11 +51,9 @@ describe("archive CLI arguments", () => {
   })
 
   it("infers friendly project prefixes and exposes direct discovery as one flag", () => {
-    expect(parseArgs([
-      "project",
-      "base:0x50c04A6B066d659Fe2F66F6388Cf8dD394036632",
-      "--direct",
-    ])).toEqual({
+    expect(
+      parseArgs(["project", "base:0x50c04A6B066d659Fe2F66F6388Cf8dD394036632", "--direct"]),
+    ).toEqual({
       kind: "index-project",
       project: "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632",
       chain: "eip155:8453",
@@ -66,24 +64,22 @@ describe("archive CLI arguments", () => {
   })
 
   it("parses Tezos and EVM token index commands", () => {
-    expect(parseArgs([
-      "token",
-      "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
-      "16333",
-    ])).toEqual({
+    expect(parseArgs(["token", "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE", "16333"])).toEqual({
       kind: "index-token",
       chain: "tezos:mainnet",
       contract: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
       tokenId: "16333",
       outFile: "token-index-16333.json",
     })
-    expect(parseArgs([
-      "token",
-      "base:0x50c04A6B066d659Fe2F66F6388Cf8dD394036632",
-      "2953",
-      "--out",
-      "dom2-2953.json",
-    ])).toEqual({
+    expect(
+      parseArgs([
+        "token",
+        "base:0x50c04A6B066d659Fe2F66F6388Cf8dD394036632",
+        "2953",
+        "--out",
+        "dom2-2953.json",
+      ]),
+    ).toEqual({
       kind: "index-token",
       chain: "eip155:8453",
       contract: "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632",
@@ -93,9 +89,9 @@ describe("archive CLI arguments", () => {
   })
 
   it("explains how to disambiguate an unprefixed EVM project", () => {
-    expect(() =>
-      parseArgs(["project", "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632"]),
-    ).toThrow("Prefix it with base: or ethereum:")
+    expect(() => parseArgs(["project", "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632"])).toThrow(
+      "Prefix it with base: or ethereum:",
+    )
   })
 
   it("keeps wallet archive and verification commands compatible", () => {

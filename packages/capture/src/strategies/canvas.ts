@@ -7,10 +7,7 @@ export interface CanvasCapture {
   height: number
 }
 
-export async function captureCanvas(
-  page: Page,
-  selector: string,
-): Promise<CanvasCapture> {
+export async function captureCanvas(page: Page, selector: string): Promise<CanvasCapture> {
   try {
     const value = await page.$eval(selector, element => {
       if (element.tagName !== "CANVAS") return null

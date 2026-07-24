@@ -9,18 +9,18 @@
  * so ownership is derived from `Transfer` logs and confirmed with `ownerOf`.
  */
 import {
+  type Address,
   createPublicClient,
   fallback,
   getAddress,
   http,
   isAddress,
-  zeroAddress,
-  type Address,
   type PublicClient,
+  zeroAddress,
 } from "viem"
 import { genArtAbi, issuerFactoryAbi } from "./abis.js"
-import { EVM_NETWORKS } from "./networks.js"
 import { normalizeMetadata } from "./metadata.js"
+import { EVM_NETWORKS } from "./networks.js"
 import type {
   ChainId,
   ChainReaderConfig,
@@ -192,9 +192,8 @@ export async function discoverEvmProjectTokenRefsViaRpc(
   const address = getAddress(contract)
   const network = EVM_NETWORKS[chain]
   const client = publicClient ?? makeClient(chain, config)
-  const head = config.evm?.maxBlock !== undefined
-    ? BigInt(config.evm.maxBlock)
-    : await client.getBlockNumber()
+  const head =
+    config.evm?.maxBlock !== undefined ? BigInt(config.evm.maxBlock) : await client.getBlockNumber()
 
   // FxGenArt721 deployments use a monotonic one-based token counter. Probe
   // both possible ERC-721 starts instead of assuming that convention. This
@@ -233,11 +232,8 @@ export async function discoverEvmProjectTokenRefsViaRpc(
         exists(1),
         exists(count),
       ])
-      const start = zeroExists && !supplyExists
-        ? 0
-        : !zeroExists && oneExists && supplyExists
-          ? 1
-          : null
+      const start =
+        zeroExists && !supplyExists ? 0 : !zeroExists && oneExists && supplyExists ? 1 : null
       if (start !== null) {
         return {
           tokens: Array.from({ length: count }, (_, index) => ({
@@ -261,9 +257,7 @@ export async function discoverEvmProjectTokenRefsViaRpc(
     BigInt(network.deployBlock),
     head,
   )
-  const initialChunk = BigInt(
-    config.evm?.logChunkSize ?? Number(head - deployment + 1n),
-  )
+  const initialChunk = BigInt(config.evm?.logChunkSize ?? Number(head - deployment + 1n))
   const logs = await getLogsAdaptive(
     (from, to) =>
       client.getLogs({
@@ -391,9 +385,7 @@ export async function getEvmWalletTokensViaRpc(
   })
   const chunk = BigInt(config.evm?.logChunkSize ?? DEFAULT_LOG_CHUNK)
   const head =
-    config.evm?.maxBlock !== undefined
-      ? BigInt(config.evm.maxBlock)
-      : await client.getBlockNumber()
+    config.evm?.maxBlock !== undefined ? BigInt(config.evm.maxBlock) : await client.getBlockNumber()
   const minCreated = Math.min(
     ...[...collections.values()].map(c => c.createdAtBlock || network.deployBlock),
   )
@@ -469,8 +461,7 @@ export async function getEvmWalletTokensViaRpc(
     await Promise.all(
       batch.map(async (c, i) => {
         const uriRes = uriResults[i]
-        const metadataUri =
-          uriRes && uriRes.status === "success" ? (uriRes.result as string) : null
+        const metadataUri = uriRes && uriRes.status === "success" ? (uriRes.result as string) : null
         const rawMeta = await fetchEvmMetadata(metadataUri, config)
         const norm = normalizeMetadata(rawMeta ?? {})
         tokens.push({
@@ -537,9 +528,7 @@ export async function fetchEvmMetadata(
       const meta = metadataUri.slice(0, comma)
       const payload = metadataUri.slice(comma + 1)
       const json = meta.includes("base64")
-        ? new TextDecoder().decode(
-            Uint8Array.from(atob(payload), ch => ch.charCodeAt(0)),
-          )
+        ? new TextDecoder().decode(Uint8Array.from(atob(payload), ch => ch.charCodeAt(0)))
         : decodeURIComponent(payload)
       return JSON.parse(json) as Record<string, unknown>
     }
