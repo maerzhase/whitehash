@@ -200,9 +200,9 @@ function HomePage() {
               <span className="text-muted">Straight from the source.</span>
             </h1>
             <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              A React API for reading fxhash projects and tokens across Tezos, Ethereum, and Base,
-              then resolving their IPFS and onchfs content—without depending on a centralized
-              platform backend.
+              A framework-agnostic API and React toolkit for reading fxhash projects and tokens
+              across Tezos, Ethereum, and Base, then resolving their IPFS and onchfs content—without
+              depending on a centralized platform backend.
             </p>
             <div className="mt-8 flex flex-wrap gap-2">
               <Button render={<Link href="/guide/getting-started" />}>Getting started</Button>
