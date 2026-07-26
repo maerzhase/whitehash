@@ -26,6 +26,12 @@ subdirectory may add to or override them for that subtree.
 - Reuse existing utilities and public contracts before introducing new abstractions.
 - Add or update focused tests for behavior changes and bug fixes. Prefer deterministic
   tests that do not require public networks or external services.
+- Treat documentation as part of every feature's definition of done. When developing
+  or changing a feature, update the relevant package README and `apps/docs` content,
+  examples, and API reference in the same change.
+- Keep `apps/docs/public/llms.txt` in sync with feature and API changes so coding
+  agents have an accurate machine-readable description of the toolkit, its usage,
+  and its documentation routes.
 - Integration tests that need browsers, credentials, or live infrastructure must be
   opt-in. Filesystem and local HTTP integration tests should run in the default suite
   when they are fast and isolated.
