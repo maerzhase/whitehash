@@ -1,9 +1,60 @@
 # @whitehash/archive
 
-Archive fxhash artwork owned by one or more wallets into a static, self-contained folder.
-Discovery uses public TzKT/Blockscout/RPC infrastructure. IPFS generators are downloaded
-as CAR files from trustless gateways and every CAR block hash is verified before UnixFS
-extraction. Onchfs generators are read directly from their public chain.
+Paste an identity-bearing fxhash token URL to create a verified, self-contained offline
+archive:
+
+```bash
+npx @whitehash/archive \
+  "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333"
+```
+
+The default output is `whitehash-token-16333/`, containing the artwork bytes, raw
+metadata, available images, integrity hashes, an offline wrapper, and a top-level
+gallery. To write the existing lightweight normalized JSON for a hosted website instead:
+
+```bash
+npx @whitehash/archive \
+  "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333" \
+  --json \
+  --out ./public/token.json
+```
+
+`--json` produces `whitehash-token-index@1`; it is not an offline copy of the artwork
+bytes. Identity-bearing URLs are parsed locally, and token data is read through public
+chain and content-addressed infrastructure without an fxhash-hosted endpoint. EVM
+combined-ID URLs require `--chain base` or `--chain ethereum`. Slug-only fxhash URLs
+can be resolved as an explicit hosted convenience while fxhash's service is available:
+
+```bash
+npx @whitehash/archive \
+  "https://fxhash.xyz/iteration/monogrid-1.1-ce-256" \
+  --resolver fxhash
+```
+
+The CLI reports that it is contacting fxhash, queries its public GraphQL API first,
+and falls back to the iteration page data. It extracts only the on-chain chain,
+contract, and token ID, then runs the ordinary verified archive pipeline. The resulting
+folder is fully offline, but this initial slug lookup depends on the current fxhash
+service; the page fallback can also be blocked by its browser security checkpoint.
+Without `--resolver fxhash`, slug-only URLs remain rejected. Identity-bearing URLs
+never use this hosted path.
+
+The explicit spelling is also available:
+
+```bash
+npx @whitehash/archive save \
+  "token/tezos:mainnet/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE/16333"
+```
+
+The resolver also works with `--json` and accepts `--out` normally:
+
+```bash
+npx @whitehash/archive \
+  "https://fxhash.xyz/iteration/monogrid-1.1-ce-256" \
+  --resolver fxhash \
+  --json \
+  --out ./public/token.json
+```
 
 ## Choose a task
 
@@ -30,6 +81,7 @@ Run the CLI without arguments whenever you need to see these starting points aga
 
 ```bash
 npx @whitehash/archive
+npx @whitehash/archive help save
 npx @whitehash/archive help project
 npx @whitehash/archive help token
 npx @whitehash/archive help wallet
@@ -118,5 +170,5 @@ Options:
 The command never deletes its output directory. It replaces files it owns and preserves
 unrelated files. Publication is not enabled yet.
 
-The older `index <project>` and implicit-address forms remain accepted for
-compatibility, but the resource commands above are the documented API.
+The existing `project`, `token`, `wallet`, and `verify` commands retain their behavior.
+The older `index <project>` and implicit-address forms remain accepted for compatibility.

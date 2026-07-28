@@ -9,6 +9,21 @@ site is fully static; `apps/onchfs-proxy` is the only optional server piece.
 
 ## Start with one artwork
 
+To preserve one artwork first, paste an identity-bearing fxhash token URL:
+
+```bash
+npx @whitehash/archive \
+  "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333"
+```
+
+This creates a verified offline folder containing the artwork bytes and integrity
+hashes. Add `--json` for a lightweight normalized token index intended for a hosted
+website; JSON alone is not an offline copy.
+
+For a slug-only iteration link, add `--resolver fxhash`. That optional convenience
+contacts fxhash's hosted service only to recover the on-chain identity, then creates
+the same verified offline archive.
+
 The [quickstart](./apps/docs/QUICKSTART.md) shows the core contract: mount the
 zero-config provider, read one token by identity, and hand it to `Artwork`.
 
@@ -58,7 +73,7 @@ browser-persistent caching. Configure only what you want to change.
 | App | Purpose |
 | --- | --- |
 | [`apps/docs`](./apps/docs) | Statically exported Next.js API docs plus live wallet/project/artwork showcases |
-| [`apps/archive-cli`](./apps/archive-cli) | Project/token index generation plus wallet-to-folder preservation with CAR verification and offline replay |
+| [`apps/archive-cli`](./apps/archive-cli) | Paste-first single-token archives and JSON indexes, plus project indexing and wallet preservation with CAR verification |
 | [`apps/onchfs-proxy`](./apps/onchfs-proxy) | Optional self-hostable HTTP bridge for `onchfs://` artwork |
 
 Supported networks are Tezos mainnet/ghostnet, Ethereum/Sepolia, and Base/Base Sepolia.
