@@ -1,5 +1,19 @@
 # @whitehash/archive
 
+## 0.1.0
+
+### Minor Changes
+
+- f879b13: Archive one fxhash token from an identity-bearing URL as either a verified offline
+  folder or portable JSON index, with optional hosted resolution for slug-only iteration
+  links.
+
+### Patch Changes
+
+- Updated dependencies [f879b13]
+- Updated dependencies [915d5a9]
+  - @whitehash/chain-reader@0.1.0
+
 ## 0.0.1
 
 ### Patch Changes

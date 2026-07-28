@@ -1,5 +1,17 @@
 # @whitehash/chain-reader
 
+## 0.1.0
+
+### Minor Changes
+
+- f879b13: Archive one fxhash token from an identity-bearing URL as either a verified offline
+  folder or portable JSON index, with optional hosted resolution for slug-only iteration
+  links.
+
+### Patch Changes
+
+- 915d5a9: Add Dragons to the curated mainnet project examples.
+
 ## 0.0.1
 
 ### Patch Changes
