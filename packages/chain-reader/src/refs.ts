@@ -13,6 +13,11 @@ export interface TokenRef {
   tokenId: string
 }
 
+export interface TokenCoordinates {
+  contract: string
+  tokenId: string
+}
+
 /** Project identity accepted by read APIs; `type` is only needed for mixed refs/routes. */
 export type ProjectInput = ProjectRef | Pick<ProjectRef, "chain" | "id">
 
@@ -34,6 +39,50 @@ export type ResolvedInput = WhitehashRef | AddressInput | ContentInput
 
 const decode = (value: string) => decodeURIComponent(value)
 const encode = (value: string) => encodeURIComponent(value)
+const TEZOS_CONTRACT = /^KT1[1-9A-HJ-NP-Za-km-z]{33}$/
+const EVM_CONTRACT = /^0x[0-9a-fA-F]{40}$/
+
+function validTokenId(value: string): boolean {
+  if (!value || value === "." || value === "..") return false
+  return ![...value].some(character => {
+    const code = character.charCodeAt(0)
+    return character === "/" || character === "\\" || code <= 31 || code === 127
+  })
+}
+
+function combinedTokenCoordinates(value: string): TokenCoordinates | null {
+  const match =
+    /^(KT1[1-9A-HJ-NP-Za-km-z]{33})-(.+)$/u.exec(value) ?? /^(0x[0-9a-fA-F]{40})-(.+)$/u.exec(value)
+  if (!match || !validTokenId(match[2]!)) return null
+  return { contract: match[1]!, tokenId: match[2]! }
+}
+
+/** Parse on-chain token coordinates from an identity-bearing fxhash URL without fetching. */
+export function parseFxhashTokenUrl(value: string): TokenCoordinates | null {
+  try {
+    const url = new URL(value)
+    if (url.hostname !== "fxhash.xyz" && url.hostname !== "www.fxhash.xyz") return null
+    const parts = url.pathname.split("/").filter(Boolean).map(decode)
+    let identity: string | undefined
+    if ((parts[0] === "gentk" || parts[0] === "objkt") && parts.length === 2) {
+      identity = parts[1]
+    } else if (parts[0] === "iteration" && parts[1] === "id" && parts.length === 3) {
+      identity = parts[2]
+    }
+    if (identity) return combinedTokenCoordinates(identity)
+    if (
+      parts[0] === "gentk" &&
+      parts.length === 3 &&
+      (TEZOS_CONTRACT.test(parts[1]!) || EVM_CONTRACT.test(parts[1]!)) &&
+      validTokenId(parts[2]!)
+    ) {
+      return { contract: parts[1]!, tokenId: parts[2]! }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
 
 export function formatRef(ref: WhitehashRef): string {
   if (ref.type === "project") return `project/${encode(ref.chain)}/${encode(ref.id)}`
@@ -113,6 +162,12 @@ export function resolveInput(value: string, options: { chain?: ChainId } = {}): 
   if (content) return content
 
   try {
+    const coordinates = parseFxhashTokenUrl(input)
+    if (coordinates) {
+      const chain =
+        options.chain ?? (coordinates.contract.startsWith("KT1") ? "tezos:mainnet" : "eip155:1")
+      return { type: "token", chain, ...coordinates }
+    }
     const url = new URL(input)
     const parts = url.pathname.split("/").filter(Boolean).map(decode)
     const tokenIndex = parts.findIndex(part => part === "gentk" || part === "token")
