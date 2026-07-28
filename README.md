@@ -111,6 +111,25 @@ The release workflow requires an `NPM_TOKEN` Actions secret with publish access 
 `@whitehash` npm scope. The private docs and proxy applications are versioned but are
 not published.
 
+## Repository skills
+
+The repository includes composable marketing skills for Whitehash voice, X thread
+planning, and deterministic social cards. The
+[`whitehash-x-launch`](./.agents/skills/whitehash-x-launch/SKILL.md) orchestrator combines
+all three into a complete campaign. Invoke it in Codex with:
+
+```text
+Use $whitehash-x-launch to create a launch thread for this feature.
+```
+
+Use the focused
+[`whitehash-marketing-voice`](./.agents/skills/whitehash-marketing-voice/SKILL.md),
+[`x-thread-plan`](./.agents/skills/x-thread-plan/SKILL.md), or
+[`whitehash-social-cards`](./.agents/skills/whitehash-social-cards/SKILL.md) skill when
+only one part of the workflow is needed. The orchestrator adapts the post count to the
+story, validates every post, reuses the real Whitehash logo, and defaults campaign
+drafts to the untracked `.private/artifacts/` directory.
+
 ## Versioning policy
 
 Whitehash follows semantic versioning: patches fix behavior without changing supported
