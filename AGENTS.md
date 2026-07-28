@@ -19,6 +19,14 @@ subdirectory may add to or override them for that subtree.
 ## Making changes
 
 - Read the nearest package README and existing tests before changing behavior.
+- Design and implement features with downstream library users in mind. Preserve
+  existing public APIs, behavior, interoperability, and reasonable upgrade paths.
+- Treat breaking changes as a last resort. Before introducing one, verify that a
+  backward-compatible alternative, deprecation period, or migration path is not
+  practical, and document the justification.
+- Clearly announce every breaking change in the changeset and relevant documentation
+  or release notes. Describe who is affected, what changed, and how consumers should
+  migrate.
 - Store temporary plans, handoff notes, and session reports in `.private/plans/`,
   and retain useful agent-generated audits under `.private/artifacts/`. The
   `.private/` directory is local-only and must never be committed.
