@@ -60,6 +60,7 @@ export {
 } from "./client.js"
 export {
   formatRef,
+  parseFxhashTokenUrl,
   parseRef,
   resolveInput,
   projectRef,
@@ -69,6 +70,7 @@ export {
   type ProjectRef,
   type ProjectInput,
   type TokenRef,
+  type TokenCoordinates,
   type TokenInput,
   type WhitehashRef,
   type ResolvedInput,

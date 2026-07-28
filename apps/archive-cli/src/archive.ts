@@ -19,6 +19,16 @@ export interface ArchiveOptions {
   onProgress?: (message: string) => void
 }
 
+export interface ArchiveTokenOptions {
+  chain: ChainId
+  contract: string
+  tokenId: string
+  outDir: string
+  gateways?: string[]
+  fetch?: typeof globalThis.fetch
+  onProgress?: (message: string) => void
+}
+
 export interface ArchivedToken {
   chain: ChainId
   contract: string
@@ -292,28 +302,21 @@ export async function verifyArchive(root: string): Promise<{ tokens: number; fil
   return { tokens: manifest.tokens.length, files }
 }
 
-export async function archiveWallets(options: ArchiveOptions): Promise<ArchiveManifest> {
-  const fetcher = options.fetch ?? globalThis.fetch
-  const gateways = options.gateways ?? [...DEFAULT_IPFS_GATEWAYS]
-  const client = createWhitehashClient({
-    resolver: { ipfsGateways: gateways, onchfs: null },
-  })
+interface WriteArchiveOptions {
+  tokens: WhitehashToken[]
+  addresses: string[]
+  outDir: string
+  gateways: string[]
+  fetcher: typeof globalThis.fetch
+  fetchUri: (uri: string, options: { chain: ChainId }) => Promise<Response>
+  onProgress?: (message: string) => void
+}
+
+async function writeArchive(options: WriteArchiveOptions): Promise<ArchiveManifest> {
   const outDir = resolve(options.outDir)
   await mkdir(outDir, { recursive: true })
-  const discovered = new Map<string, WhitehashToken>()
-  for (const address of options.addresses) {
-    options.onProgress?.(`Reading ${address}`)
-    const tokens = await client.getWalletTokens(address, {
-      chains: options.chains,
-      onProgress: event => options.onProgress?.(`  ${event.chain}: ${event.message}`),
-    })
-    for (const token of tokens)
-      discovered.set(`${token.chain}/${token.contract}/${token.tokenId}`, token)
-  }
-  const selected = [...discovered.values()].slice(0, options.limit)
-  if (selected.length === 0) throw new Error("No supported artwork tokens found")
   const archived: ArchivedToken[] = []
-  for (const [index, token] of selected.entries()) {
+  for (const [index, token] of options.tokens.entries()) {
     const generatorUri = token.generatorUri ?? token.artifactUri
     if (!generatorUri) continue
     const parts = contentParts(generatorUri)
@@ -321,17 +324,17 @@ export async function archiveWallets(options: ArchiveOptions): Promise<ArchiveMa
     const tokenDir = join(outDir, localPath)
     const artifactDir = join(tokenDir, "artifact")
     await mkdir(artifactDir, { recursive: true })
-    options.onProgress?.(`[${index + 1}/${selected.length}] ${token.name ?? localPath}`)
+    options.onProgress?.(`[${index + 1}/${options.tokens.length}] ${token.name ?? localPath}`)
     await writeFile(join(tokenDir, "metadata.json"), stringify(token.raw))
-    await archiveImage(token, "thumbnail", token.thumbnailUri, tokenDir, client.fetchUri).catch(
+    await archiveImage(token, "thumbnail", token.thumbnailUri, tokenDir, options.fetchUri).catch(
       error => options.onProgress?.(`  thumbnail skipped: ${String(error)}`),
     )
-    await archiveImage(token, "display", token.displayUri, tokenDir, client.fetchUri).catch(error =>
-      options.onProgress?.(`  display skipped: ${String(error)}`),
+    await archiveImage(token, "display", token.displayUri, tokenDir, options.fetchUri).catch(
+      error => options.onProgress?.(`  display skipped: ${String(error)}`),
     )
     let files: number
     if (parts.scheme === "ipfs") {
-      const car = await fetchCar(parts.cid, gateways, fetcher)
+      const car = await fetchCar(parts.cid, options.gateways, options.fetcher)
       const extracted = extractCar(car.bytes, parts.cid)
       await writeExtractedCar(extracted, artifactDir)
       files = extracted.files.size
@@ -367,3 +370,63 @@ export async function archiveWallets(options: ArchiveOptions): Promise<ArchiveMa
   await verifyArchive(outDir)
   return manifest
 }
+
+export async function archiveWallets(options: ArchiveOptions): Promise<ArchiveManifest> {
+  const fetcher = options.fetch ?? globalThis.fetch
+  const gateways = options.gateways ?? [...DEFAULT_IPFS_GATEWAYS]
+  const client = createWhitehashClient({
+    resolver: { ipfsGateways: gateways, onchfs: null },
+  })
+  const discovered = new Map<string, WhitehashToken>()
+  for (const address of options.addresses) {
+    options.onProgress?.(`Reading ${address}`)
+    const tokens = await client.getWalletTokens(address, {
+      chains: options.chains,
+      onProgress: event => options.onProgress?.(`  ${event.chain}: ${event.message}`),
+    })
+    for (const token of tokens)
+      discovered.set(`${token.chain}/${token.contract}/${token.tokenId}`, token)
+  }
+  const selected = [...discovered.values()].slice(0, options.limit)
+  if (selected.length === 0) throw new Error("No supported artwork tokens found")
+  return writeArchive({
+    tokens: selected,
+    addresses: options.addresses,
+    outDir: options.outDir,
+    gateways,
+    fetcher,
+    fetchUri: client.fetchUri,
+    onProgress: options.onProgress,
+  })
+}
+
+/** Read exactly one normalized token and preserve it as a verified offline archive. */
+export async function archiveToken(options: ArchiveTokenOptions): Promise<ArchiveManifest> {
+  const gateways = options.gateways ?? [...DEFAULT_IPFS_GATEWAYS]
+  const client = createWhitehashClient({
+    resolver: { ipfsGateways: gateways, onchfs: null },
+  })
+  const token = await client.getToken({
+    chain: options.chain,
+    contract: options.contract,
+    tokenId: options.tokenId,
+  })
+  if (!token) {
+    throw new Error(`No supported token found for ${options.contract} #${options.tokenId}`)
+  }
+  return writeArchive({
+    tokens: [token],
+    addresses: [],
+    outDir: options.outDir,
+    gateways,
+    fetcher: options.fetch ?? globalThis.fetch,
+    fetchUri: client.fetchUri,
+    onProgress: options.onProgress,
+  })
+}
+
+export { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
+export type {
+  FxhashHostedResolverOptions,
+  ResolvedFxhashToken,
+} from "./fxhash-resolver.js"

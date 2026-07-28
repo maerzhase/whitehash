@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest"
-import { formatRef, parseRef, projectRef, resolveInput, shortAddress, tokenRef } from "./refs.js"
+import {
+  formatRef,
+  parseFxhashTokenUrl,
+  parseRef,
+  projectRef,
+  resolveInput,
+  shortAddress,
+  tokenRef,
+} from "./refs.js"
+
+const tezosContract = "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE"
+const evmContract = "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632"
 
 describe("whitehash refs", () => {
   it("round-trips project and token refs", () => {
@@ -21,6 +32,41 @@ describe("whitehash refs", () => {
       chain: "tezos:mainnet",
       tokenId: "16333",
     })
+  })
+
+  it.each([
+    [`https://www.fxhash.xyz/gentk/${tezosContract}-16333`, tezosContract, "16333"],
+    [`https://fxhash.xyz/objkt/${tezosContract}-16333`, tezosContract, "16333"],
+    [`https://fxhash.xyz/iteration/id/${tezosContract}-16333`, tezosContract, "16333"],
+    [`https://fxhash.xyz/gentk/${evmContract}-2953`, evmContract, "2953"],
+    [`https://fxhash.xyz/gentk/${tezosContract}/16333`, tezosContract, "16333"],
+  ])("parses identity-bearing fxhash token URL %s", (url, contract, tokenId) => {
+    expect(parseFxhashTokenUrl(url)).toEqual({ contract, tokenId })
+  })
+
+  it("ignores query strings and fragments when parsing token identity", () => {
+    expect(
+      parseFxhashTokenUrl(`https://fxhash.xyz/gentk/${tezosContract}-16333?preview=1#state`),
+    ).toEqual({ contract: tezosContract, tokenId: "16333" })
+    expect(resolveInput(`https://fxhash.xyz/objkt/${tezosContract}-16333`)).toEqual({
+      type: "token",
+      chain: "tezos:mainnet",
+      contract: tezosContract,
+      tokenId: "16333",
+    })
+  })
+
+  it.each([
+    "https://fxhash.xyz/gentk/slug/example",
+    "https://fxhash.xyz/iteration/example",
+    "https://fxhash.xyz/project/example",
+    "https://fxhash.xyz/gentk/KT1invalid-1",
+    `https://fxhash.xyz/gentk/${tezosContract}-`,
+    `https://example.invalid/gentk/${tezosContract}-16333`,
+    `https://fxhash.xyz/gentk/${tezosContract}-%2e%2e`,
+    `https://fxhash.xyz/gentk/${tezosContract}-bad%2Fid`,
+  ])("rejects non-identity fxhash URL %s", url => {
+    expect(parseFxhashTokenUrl(url)).toBeNull()
   })
 
   it("shortens long addresses for display", () => {

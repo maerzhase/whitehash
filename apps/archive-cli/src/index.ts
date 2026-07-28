@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import { archiveWallets, verifyArchive } from "./archive.js"
+import { archiveToken, archiveWallets, verifyArchive } from "./archive.js"
+import { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
 import { writeProjectIndex } from "./project-index.js"
 import { writeTokenIndex } from "./token-index.js"
-import { parseRef, type ChainId } from "@whitehash/chain-reader"
+import { parseFxhashTokenUrl, parseRef, type ChainId } from "@whitehash/chain-reader"
 import { resolveChainId } from "@whitehash/core"
 import { pathToFileURL } from "node:url"
 
@@ -10,20 +11,43 @@ const HELP = `whitehash archive
 Create portable indexes and preserve wallet collections from public chain data.
 
 Start here
+  whitehash-archive "https://www.fxhash.xyz/gentk/KT1…-16333"
+  whitehash-archive "https://fxhash.xyz/iteration/project-slug-42" --resolver fxhash
   whitehash-archive project v2:13944
   whitehash-archive token KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE 16333
   whitehash-archive wallet tz1…
 
 Commands
+  save                Archive one token URL or ref; add --json for a portable index
   project             Write one JSON index containing a project and its iterations
   token               Write one JSON index containing a token
   wallet              Download owned artwork into an offline gallery
   verify              Verify an existing offline wallet archive
 
 Learn one command
+  whitehash-archive help save
   whitehash-archive help project
   whitehash-archive help token
   whitehash-archive help wallet`
+
+const SAVE_HELP = `Archive one fxhash token from an identity-bearing URL or Whitehash ref
+
+Usage
+  whitehash-archive <token-input> [--chain <chain>] [--out <folder>]
+  whitehash-archive save <token-input> [--chain <chain>] [--out <folder>]
+  whitehash-archive <token-input> --json [--chain <chain>] [--out <file>]
+
+Examples
+  whitehash-archive "https://www.fxhash.xyz/gentk/KT1…-16333"
+  whitehash-archive "token/tezos:mainnet/KT1…/16333" --json
+  whitehash-archive "https://fxhash.xyz/gentk/0x…-2953" --chain base
+  whitehash-archive "https://fxhash.xyz/iteration/project-slug-42" --resolver fxhash
+
+Options
+  --json              Write a portable token JSON index instead of an offline archive
+  --out <path>        Output folder in archive mode, or file in JSON mode
+  --chain <chain>     Required for EVM identity URLs; accepts a name or full chain ID
+  --resolver fxhash   Resolve a slug-only iteration through fxhash's hosted service`
 
 const PROJECT_HELP = `Index one fxhash project
 
@@ -109,9 +133,27 @@ interface IndexTokenCommand {
   outFile: string
 }
 
+interface SaveTokenCommand {
+  kind: "save-token"
+  chain: ChainId
+  contract: string
+  tokenId: string
+  output: "archive" | "json"
+  out: string
+}
+
+interface ResolveSaveTokenCommand {
+  kind: "resolve-save-token"
+  input: string
+  chain?: ChainId
+  output: "archive" | "json"
+  out?: string
+  resolver: "fxhash"
+}
+
 interface HelpCommand {
   kind: "help"
-  topic?: "project" | "token" | "wallet"
+  topic?: "save" | "project" | "token" | "wallet"
 }
 
 interface VerifyCommand {
@@ -123,6 +165,8 @@ type Command =
   | ArchiveCommand
   | IndexProjectCommand
   | IndexTokenCommand
+  | SaveTokenCommand
+  | ResolveSaveTokenCommand
   | VerifyCommand
   | HelpCommand
 
@@ -232,12 +276,180 @@ function tokenInput(
   return { chain: explicitChain, contract: contractValue, tokenId: tokenIdValue }
 }
 
+function safeTokenId(tokenId: string): string {
+  return (
+    tokenId
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "token"
+  )
+}
+
 function tokenOutput(tokenId: string): string {
-  const safe = tokenId
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-  return `token-index-${safe || "token"}.json`
+  return `token-index-${safeTokenId(tokenId)}.json`
+}
+
+function tokenArchiveOutput(tokenId: string): string {
+  return `whitehash-token-${safeTokenId(tokenId)}`
+}
+
+const SLUG_ONLY_ERROR =
+  "This fxhash URL contains only a slug, not an on-chain token identity. Use --resolver fxhash to resolve it through fxhash's hosted service, or use a token URL containing <contract>-<tokenId>, a Whitehash token ref, or pass the contract and token ID."
+
+function isFxhashUrl(value: string): boolean {
+  try {
+    const url = new URL(value)
+    return url.hostname === "fxhash.xyz" || url.hostname === "www.fxhash.xyz"
+  } catch {
+    return false
+  }
+}
+
+function isSlugOnlyFxhashUrl(value: string): boolean {
+  try {
+    const url = new URL(value)
+    if (url.hostname !== "fxhash.xyz" && url.hostname !== "www.fxhash.xyz") return false
+    const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent)
+    return (
+      (parts[0] === "iteration" && parts[1] !== "id") ||
+      (parts[0] === "gentk" && parts[1] === "slug") ||
+      parts[0] === "project"
+    )
+  } catch {
+    return false
+  }
+}
+
+function isResolvableFxhashIterationUrl(value: string): boolean {
+  try {
+    const url = new URL(value)
+    if (url.hostname !== "fxhash.xyz" && url.hostname !== "www.fxhash.xyz") return false
+    const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent)
+    return (
+      (parts[0] === "iteration" && parts.length === 2) ||
+      (parts[0] === "gentk" && parts[1] === "slug" && parts.length === 3)
+    )
+  } catch {
+    return false
+  }
+}
+
+function isFxhashProjectUrl(value: string): boolean {
+  try {
+    const url = new URL(value)
+    return (
+      (url.hostname === "fxhash.xyz" || url.hostname === "www.fxhash.xyz") &&
+      url.pathname.split("/").filter(Boolean)[0] === "project"
+    )
+  } catch {
+    return false
+  }
+}
+
+function saveTokenInput(value: string, explicitChain?: ChainId) {
+  if (/^(?:whitehash:\/\/)?\/?token\//.test(value)) {
+    const ref = parseRef(value, "token")
+    if (explicitChain && explicitChain !== ref.chain) {
+      usage(`Token ref ${ref.chain} conflicts with --chain ${explicitChain}.`)
+    }
+    return { chain: ref.chain, contract: ref.contract, tokenId: ref.tokenId }
+  }
+  const coordinates = parseFxhashTokenUrl(value)
+  if (!coordinates) {
+    if (isSlugOnlyFxhashUrl(value)) usage(SLUG_ONLY_ERROR)
+    usage(
+      isFxhashUrl(value)
+        ? "This fxhash URL does not contain a supported on-chain token identity."
+        : "Save expects an identity-bearing fxhash token URL or serialized Whitehash token ref.",
+    )
+  }
+  if (coordinates.contract.startsWith("KT1")) {
+    if (explicitChain && !explicitChain.startsWith("tezos:")) {
+      usage(`A KT1 token contract is Tezos, but --chain selected ${explicitChain}.`)
+    }
+    return { chain: explicitChain ?? "tezos:mainnet", ...coordinates }
+  }
+  if (!explicitChain) {
+    usage(
+      "An EVM token URL needs a chain. Pass --chain base, --chain ethereum, or a full chain ID.",
+    )
+  }
+  if (!explicitChain.startsWith("eip155:")) {
+    usage(`An EVM token URL cannot use Tezos chain ${explicitChain}.`)
+  }
+  return { chain: explicitChain, ...coordinates }
+}
+
+function parseSaveToken(args: string[]): SaveTokenCommand | ResolveSaveTokenCommand {
+  const input = args[0]
+  if (!input) usage('Missing token input. Run "whitehash-archive help save".')
+  let explicitChain: ChainId | undefined
+  let out: string | undefined
+  let output: SaveTokenCommand["output"] = "archive"
+  let resolver: "fxhash" | undefined
+  for (let index = 1; index < args.length; index += 1) {
+    const arg = args[index]!
+    if (arg === "--json") output = "json"
+    else if (arg === "--out") {
+      const value = args[++index]
+      if (!value) usage("Expected a path after --out.")
+      out = value
+    } else if (arg === "--chain") explicitChain = chainId(args[++index])
+    else if (arg === "--resolver") {
+      const value = args[++index]
+      if (value !== "fxhash") usage('--resolver currently accepts only "fxhash".')
+      resolver = value
+    } else usage(`Unknown save option "${arg}".`)
+  }
+  if (isFxhashProjectUrl(input)) {
+    usage("This fxhash project URL identifies a collection, not one token. Use an iteration URL.")
+  }
+  if (isResolvableFxhashIterationUrl(input)) {
+    if (!resolver) usage(SLUG_ONLY_ERROR)
+    return {
+      kind: "resolve-save-token",
+      input,
+      chain: explicitChain,
+      output,
+      out,
+      resolver,
+    }
+  }
+  const token = saveTokenInput(input, explicitChain)
+  return {
+    kind: "save-token",
+    ...token,
+    output,
+    out:
+      out ?? (output === "json" ? tokenOutput(token.tokenId) : tokenArchiveOutput(token.tokenId)),
+  }
+}
+
+async function runSaveToken(command: SaveTokenCommand): Promise<void> {
+  if (command.output === "json") {
+    console.log(`Indexing ${command.contract} #${command.tokenId} on ${command.chain}`)
+    await writeTokenIndex({
+      chain: command.chain,
+      contract: command.contract,
+      tokenId: command.tokenId,
+      outFile: command.out,
+    })
+    console.log(`Wrote token index to ${command.out}`)
+    console.log("Next: load the JSON with parseTokenIndex().")
+    return
+  }
+  console.log(`Archiving ${command.contract} #${command.tokenId} on ${command.chain}`)
+  const manifest = await archiveToken({
+    chain: command.chain,
+    contract: command.contract,
+    tokenId: command.tokenId,
+    outDir: command.out,
+    onProgress: message => console.log(message),
+  })
+  console.log(`Archived ${manifest.tokens.length} token to ${command.out}`)
+  console.log(
+    `Next: open ${command.out}/index.html or run whitehash-archive verify ${command.out}.`,
+  )
 }
 
 export function parseArgs(args: string[]): Command {
@@ -247,10 +459,30 @@ export function parseArgs(args: string[]): Command {
   if (args[0] === "help") {
     const words = args.slice(1)
     const topic = words.at(-1)
-    if (topic !== undefined && topic !== "project" && topic !== "token" && topic !== "wallet") {
+    if (
+      topic !== undefined &&
+      topic !== "save" &&
+      topic !== "project" &&
+      topic !== "token" &&
+      topic !== "wallet"
+    ) {
       usage(`No help topic named "${words.join(" ")}".`)
     }
     return { kind: "help", topic }
+  }
+  if (args[0] === "save") {
+    const saveArgs = args.slice(1)
+    if (saveArgs[0] === "--help" || saveArgs[0] === "-h") {
+      return { kind: "help", topic: "save" }
+    }
+    return parseSaveToken(saveArgs)
+  }
+  if (
+    /^(?:whitehash:\/\/)?\/?token\//.test(args[0]!) ||
+    parseFxhashTokenUrl(args[0]!) ||
+    isFxhashUrl(args[0]!)
+  ) {
+    return parseSaveToken(args)
   }
   const canonicalProject = args[0] === "project"
   const aliasedProject = args[0] === "index" && args[1] === "project"
@@ -373,11 +605,13 @@ export async function main(args: string[]): Promise<void> {
     console.log(
       command.topic === "project"
         ? PROJECT_HELP
-        : command.topic === "token"
-          ? TOKEN_HELP
-          : command.topic === "wallet"
-            ? WALLET_HELP
-            : HELP,
+        : command.topic === "save"
+          ? SAVE_HELP
+          : command.topic === "token"
+            ? TOKEN_HELP
+            : command.topic === "wallet"
+              ? WALLET_HELP
+              : HELP,
     )
     return
   }
@@ -410,6 +644,31 @@ export async function main(args: string[]): Promise<void> {
     console.log("Next: load the JSON with parseTokenIndex().")
     return
   }
+  if (command.kind === "resolve-save-token") {
+    const token = await resolveFxhashHostedTokenUrl({
+      url: command.input,
+      chain: command.chain,
+      onProgress: message => console.log(message),
+    })
+    if (command.chain && command.chain !== token.chain) {
+      usage(`fxhash resolved ${token.chain}, but --chain selected ${command.chain}.`)
+    }
+    console.log(`Resolved to ${token.contract} #${token.tokenId} on ${token.chain}`)
+    const out =
+      command.out ??
+      (command.output === "json" ? tokenOutput(token.tokenId) : tokenArchiveOutput(token.tokenId))
+    await runSaveToken({
+      kind: "save-token",
+      ...token,
+      output: command.output,
+      out,
+    })
+    return
+  }
+  if (command.kind === "save-token") {
+    await runSaveToken(command)
+    return
+  }
   console.log(
     `Archiving ${command.addresses.length} wallet${command.addresses.length === 1 ? "" : "s"}`,
   )
@@ -436,7 +695,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   })
 }
 
-export { archiveWallets, verifyArchive } from "./archive.js"
+export { archiveToken, archiveWallets, verifyArchive } from "./archive.js"
+export type { ArchiveTokenOptions } from "./archive.js"
+export { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
+export type {
+  FxhashHostedResolverOptions,
+  ResolvedFxhashToken,
+} from "./fxhash-resolver.js"
 export { extractCar, writeExtractedCar } from "./car.js"
 export { writeProjectIndex } from "./project-index.js"
 export { writeTokenIndex } from "./token-index.js"

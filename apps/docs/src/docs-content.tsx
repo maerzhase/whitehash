@@ -1238,9 +1238,10 @@ const wallet = useWalletTokens(address, { client })`}
     return (
       <>
         <Callout>
-          <strong>One mental model:</strong> use <code>project</code> to index a collection and its
-          iterations, <code>token</code> to index one artwork, and <code>wallet</code> only when you
-          need a complete offline gallery.
+          <strong>One mental model:</strong> paste an identity-bearing token URL for a verified
+          offline archive, add <code>--json</code> for a lightweight website index, use{" "}
+          <code>project</code> for a collection index, and use <code>wallet</code> for a complete
+          offline collection.
         </Callout>
         <DocsSection title="How the JSON formats align">
           <div className="docs-prose">
@@ -1399,18 +1400,30 @@ return token ? (
         <DocsSection title="Index a token">
           <div className="docs-prose">
             <p>
-              When you already know the contract and token ID, write the smaller{" "}
-              <code>whitehash-token-index@1</code> format. A Tezos <code>KT1</code> contract implies
-              mainnet; prefix EVM contracts with <code>base:</code> or <code>ethereum:</code>.
+              Paste an identity-bearing token URL with <code>--json</code> to write the smaller{" "}
+              <code>whitehash-token-index@1</code> format for a hosted website. This normalized JSON
+              retains content-addressed URIs; it does not contain the artwork bytes.
             </p>
           </div>
           <CodeBlock
             className="mt-4"
             language="bash"
-            code={`npx @whitehash/archive token \\
+            code={`npx @whitehash/archive \\
+  "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333" \\
+  --json \\
+  --out ./public/token.json
+
+# The existing coordinate form remains available:
+npx @whitehash/archive token \\
   KT1U6EHmNxJTkvaWJ4ThczG4FSDaHC21ssvi 784640 \\
   --out ./public/monogrid-1.json`}
           />
+          <Callout className="mt-5">
+            EVM combined-ID URLs need <code>--chain base</code> or <code>--chain ethereum</code>.
+            For a slug-only iteration URL, add <code>--resolver fxhash</code>. That explicit hosted
+            convenience recovers the chain, contract, and token ID from fxhash&apos;s hosted service
+            before writing the JSON.
+          </Callout>
           <CodeBlock
             className="mt-4"
             language="json"
@@ -1527,9 +1540,43 @@ const current = ref
         <DocsSection title="Archive complete artwork">
           <div className="docs-prose">
             <p>
-              Project indexes keep normalized metadata and content-addressed URIs. Wallet archives
-              go further: they download IPFS CAR files or read onchfs bytes from chain, write
-              preview assets, and produce integrity hashes plus an offline gallery.
+              Paste an identity-bearing fxhash token URL to download IPFS CAR files or read onchfs
+              bytes from chain, write available preview assets, and produce integrity hashes plus an
+              offline wrapper. The identity is parsed locally without an fxhash-hosted service.
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="bash"
+            code={`npx @whitehash/archive \\
+  "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333"
+
+npx @whitehash/archive verify ./whitehash-token-16333`}
+          />
+          <div className="docs-prose mt-5">
+            <p>
+              Slug-only iteration links do not contain an on-chain identity. While the fxhash
+              website remains available, resolve one explicitly and then run the same archive
+              pipeline:
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="bash"
+            code={`npx @whitehash/archive \\
+  "https://fxhash.xyz/iteration/monogrid-1.1-ce-256" \\
+  --resolver fxhash`}
+          />
+          <Callout className="mt-5">
+            Hosted resolution is optional and clearly reported. It may stop working if fxhash
+            changes its API or page structure, or presents a browser security checkpoint. The
+            completed archive remains fully offline; identity-bearing token URLs do not use this
+            resolver.
+          </Callout>
+          <div className="docs-prose mt-5">
+            <p>
+              For collection-scale preservation, the existing wallet command uses the same archive
+              writer and format:
             </p>
           </div>
           <CodeBlock

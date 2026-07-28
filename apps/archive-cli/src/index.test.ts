@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
 import { parseArgs } from "./index.js"
 
+const tezosUrl = "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333"
+const evmUrl = "https://www.fxhash.xyz/gentk/0x50c04A6B066d659Fe2F66F6388Cf8dD394036632-2953"
+
 describe("archive CLI arguments", () => {
   it("shows general and command-specific help without an error", () => {
     expect(parseArgs([])).toEqual({ kind: "help" })
@@ -13,6 +16,107 @@ describe("archive CLI arguments", () => {
       kind: "help",
       topic: "token",
     })
+    expect(parseArgs(["save", "--help"])).toEqual({
+      kind: "help",
+      topic: "save",
+    })
+  })
+
+  it("archives an identity-bearing Tezos URL through shorthand or save", () => {
+    const expected = {
+      kind: "save-token",
+      chain: "tezos:mainnet",
+      contract: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
+      tokenId: "16333",
+      output: "archive",
+      out: "whitehash-token-16333",
+    }
+    expect(parseArgs([tezosUrl])).toEqual(expected)
+    expect(parseArgs(["save", tezosUrl])).toEqual(expected)
+  })
+
+  it("writes token JSON with its own default or an explicit output file", () => {
+    expect(parseArgs([tezosUrl, "--json"])).toMatchObject({
+      kind: "save-token",
+      output: "json",
+      out: "token-index-16333.json",
+    })
+    expect(parseArgs([tezosUrl, "--json", "--out", "./public/token.json"])).toMatchObject({
+      kind: "save-token",
+      output: "json",
+      out: "./public/token.json",
+    })
+  })
+
+  it("accepts a serialized Whitehash token ref and preserves its chain", () => {
+    expect(
+      parseArgs(["whitehash://token/eip155:8453/0x50c04A6B066d659Fe2F66F6388Cf8dD394036632/2953"]),
+    ).toMatchObject({
+      kind: "save-token",
+      chain: "eip155:8453",
+      contract: "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632",
+      tokenId: "2953",
+    })
+  })
+
+  it("requires and validates explicit chain identity for URL inputs", () => {
+    expect(() => parseArgs([evmUrl])).toThrow("EVM token URL needs a chain")
+    expect(parseArgs([evmUrl, "--chain", "base"])).toMatchObject({
+      kind: "save-token",
+      chain: "eip155:8453",
+    })
+    expect(() => parseArgs([tezosUrl, "--chain", "base"])).toThrow("KT1 token contract is Tezos")
+    expect(() =>
+      parseArgs([
+        "token/eip155:8453/0x50c04A6B066d659Fe2F66F6388Cf8dD394036632/2953",
+        "--chain",
+        "ethereum",
+      ]),
+    ).toThrow("conflicts")
+  })
+
+  it("rejects slug-only and project fxhash URLs without treating them as wallets", () => {
+    expect(() => parseArgs(["https://fxhash.xyz/iteration/my-project"])).toThrow(
+      "--resolver fxhash",
+    )
+    expect(() => parseArgs(["https://fxhash.xyz/gentk/slug/my-token"])).toThrow("--resolver fxhash")
+    expect(() => parseArgs(["https://fxhash.xyz/project/my-project"])).toThrow(
+      "collection, not one token",
+    )
+  })
+
+  it("opts slug-only iteration URLs into hosted identity resolution", () => {
+    expect(
+      parseArgs(["https://fxhash.xyz/iteration/monogrid-1.1-ce-256", "--resolver", "fxhash"]),
+    ).toEqual({
+      kind: "resolve-save-token",
+      input: "https://fxhash.xyz/iteration/monogrid-1.1-ce-256",
+      chain: undefined,
+      output: "archive",
+      out: undefined,
+      resolver: "fxhash",
+    })
+    expect(
+      parseArgs([
+        "save",
+        "https://fxhash.xyz/gentk/slug/monogrid-1.1-ce-256",
+        "--resolver",
+        "fxhash",
+        "--json",
+        "--out",
+        "./token.json",
+        "--chain",
+        "tezos",
+      ]),
+    ).toMatchObject({
+      kind: "resolve-save-token",
+      chain: "tezos:mainnet",
+      output: "json",
+      out: "./token.json",
+    })
+    expect(() =>
+      parseArgs(["https://fxhash.xyz/iteration/monogrid-1.1-ce-256", "--resolver", "unknown"]),
+    ).toThrow('only "fxhash"')
   })
 
   it("parses project index commands", () => {
