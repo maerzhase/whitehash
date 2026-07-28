@@ -1,0 +1,4 @@
+interface:
+  display_name: "Whitehash Marketing Voice"
+  short_description: "Write credible, distinctive Whitehash marketing copy"
+  default_prompt: "Use $whitehash-marketing-voice to revise this copy in the Whitehash brand voice."

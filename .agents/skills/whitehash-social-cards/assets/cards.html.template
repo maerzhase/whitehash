@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{CAMPAIGN_TITLE}}</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #050505;
+        color: #f7f3ea;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        width: 1280px;
+        height: 720px;
+        margin: 0;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 84% 16%, rgba(211, 232, 226, 0.1), transparent 30%),
+          radial-gradient(circle at 10% 92%, rgba(225, 203, 161, 0.09), transparent 32%), #050505;
+      }
+      .card {
+        display: none;
+        width: 100%;
+        height: 100%;
+        padding: 48px 66px;
+        position: relative;
+      }
+      .card.active {
+        display: block;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #9f9c95;
+        font-size: 15px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        color: #f7f3ea;
+        font-size: 17px;
+        font-weight: 680;
+        letter-spacing: -0.025em;
+        text-transform: lowercase;
+      }
+      .brand img {
+        width: 34px;
+        height: 34px;
+        object-fit: contain;
+      }
+      h1 {
+        margin: 38px 0 27px;
+        font-size: 51px;
+        line-height: 1.03;
+        letter-spacing: -0.048em;
+        font-weight: 650;
+      }
+      h1 span,
+      .accent {
+        color: #a9d7d2;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 0.8fr 1.2fr;
+        align-items: center;
+        gap: 62px;
+        height: calc(100% - 45px);
+      }
+      .hero-logo {
+        display: grid;
+        place-items: center;
+        height: 490px;
+      }
+      .hero-logo img {
+        width: 360px;
+        height: 360px;
+        object-fit: contain;
+        filter: drop-shadow(0 30px 35px rgba(0, 0, 0, 0.5));
+      }
+      .hero-copy h1 {
+        margin-top: 0;
+        font-size: 66px;
+        max-width: 700px;
+      }
+      .hero-copy p {
+        max-width: 630px;
+        color: #aaa69e;
+        font-size: 23px;
+        line-height: 1.45;
+        margin: 0;
+      }
+      .eyebrow {
+        color: #d9c6a4;
+        font: 16px/1.2 "SFMono-Regular", Consolas, monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+      }
+      .terminal,
+      .panel {
+        border: 1px solid #2d2d2d;
+        border-radius: 17px;
+        overflow: hidden;
+        background: rgba(11, 11, 11, 0.91);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+      }
+      pre {
+        margin: 0;
+        padding: 25px 29px;
+        font: 18px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        white-space: pre-wrap;
+      }
+      .muted {
+        color: #77746e;
+      }
+      .ok {
+        color: #dcc8a5;
+      }
+      .choice-grid,
+      .api-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+      .choice,
+      .fact {
+        padding: 24px;
+        border: 1px solid #2d2d2d;
+        border-radius: 15px;
+        background: rgba(11, 11, 11, 0.82);
+      }
+      .choice {
+        min-height: 310px;
+      }
+      .choice h2 {
+        margin: 13px 0 15px;
+        font-size: 29px;
+        letter-spacing: -0.035em;
+      }
+      .choice p,
+      .fact span {
+        color: #a7a39b;
+        font-size: 18px;
+        line-height: 1.45;
+      }
+      .facts {
+        display: grid;
+        gap: 12px;
+      }
+      .fact b {
+        display: block;
+        margin-bottom: 5px;
+      }
+      footer {
+        position: absolute;
+        left: 66px;
+        right: 66px;
+        bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        color: #65625d;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Keep only the cards needed for this campaign. -->
+    <section class="card" data-card="hero">
+      <div class="hero">
+        <div class="hero-logo"><img src="./logo.png" alt="" /></div>
+        <div class="hero-copy">
+          <div class="eyebrow">{{HERO_EYEBROW}}</div>
+          <h1>{{HERO_HEADLINE}}<br /><span>{{HERO_ACCENT_LINE}}</span></h1>
+          <p>{{HERO_SUBLINE}}</p>
+        </div>
+      </div>
+      <footer><span>{{HERO_FOOTER}}</span><span>whitehash.dev</span></footer>
+    </section>
+
+    <section class="card" data-card="cli">
+      <header>
+        <div class="brand"><img src="./logo.png" alt="" />whitehash</div>
+        <div>{{CLI_LABEL}}</div>
+      </header>
+      <h1>{{CLI_HEADLINE}}<br /><span>{{CLI_ACCENT_LINE}}</span></h1>
+      <div class="terminal">
+        <pre><span class="muted">┌─ {{CLI_TASK}}</span>
+│  ❯ {{CLI_COMMAND_LINE_1}}
+│    {{CLI_COMMAND_LINE_2}}
+│
+<span class="ok">└─ ✓ {{CLI_RESULT}}</span></pre>
+      </div>
+      <footer><span>{{CLI_FOOTER}}</span><span>whitehash.dev</span></footer>
+    </section>
+
+    <section class="card" data-card="outputs">
+      <header>
+        <div class="brand"><img src="./logo.png" alt="" />whitehash</div>
+        <div>{{OUTPUTS_LABEL}}</div>
+      </header>
+      <h1>{{OUTPUTS_HEADLINE}}<br /><span>{{OUTPUTS_ACCENT_LINE}}</span></h1>
+      <div class="choice-grid">
+        <div class="choice">
+          <h2>{{OUTPUT_A_TITLE}}</h2>
+          <p>{{OUTPUT_A_DESCRIPTION}}</p>
+          <pre>❯ {{OUTPUT_A_COMMAND}}</pre>
+        </div>
+        <div class="choice">
+          <h2>{{OUTPUT_B_TITLE}}</h2>
+          <p>{{OUTPUT_B_DESCRIPTION}}</p>
+          <pre>❯ {{OUTPUT_B_COMMAND}}</pre>
+        </div>
+      </div>
+      <footer><span>{{OUTPUTS_FOOTER}}</span><span>whitehash.dev</span></footer>
+    </section>
+
+    <section class="card" data-card="api">
+      <header>
+        <div class="brand"><img src="./logo.png" alt="" />whitehash</div>
+        <div>{{API_LABEL}}</div>
+      </header>
+      <h1>{{API_HEADLINE}}<br /><span>{{API_ACCENT_LINE}}</span></h1>
+      <div class="api-grid">
+        <div class="panel"><pre>{{API_CODE}}</pre></div>
+        <div class="facts">
+          <div class="fact"><b>{{FACT_1_TITLE}}</b><span>{{FACT_1_BODY}}</span></div>
+          <div class="fact"><b>{{FACT_2_TITLE}}</b><span>{{FACT_2_BODY}}</span></div>
+          <div class="fact"><b>{{FACT_3_TITLE}}</b><span>{{FACT_3_BODY}}</span></div>
+        </div>
+      </div>
+      <footer><span>{{API_FOOTER}}</span><span>whitehash.dev</span></footer>
+    </section>
+
+    <script>
+      const requested = new URLSearchParams(location.search).get("card") || "hero"
+      document.querySelector(`[data-card="${requested}"]`)?.classList.add("active")
+    </script>
+  </body>
+</html>
