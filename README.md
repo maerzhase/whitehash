@@ -17,8 +17,14 @@ npx @whitehash/archive \
 ```
 
 This creates a verified offline folder containing the artwork bytes and integrity
-hashes. Add `--json` for a lightweight normalized token index intended for a hosted
+hashes. Here, “verified” means deterministic local hashes, completeness, references,
+and path safety—not a fresh blockchain lookup or signed proof. Add `--json` for a
+lightweight normalized token index intended for a hosted
 website; JSON alone is not an offline copy.
+
+Add `--onchain` to `npx @whitehash/archive verify <folder>` only when you explicitly
+want a network-backed comparison with current provider-observed token state. It does not
+verify ownership or historical state at the archive creation time.
 
 For a slug-only iteration link, add `--resolver fxhash`. That optional convenience
 contacts fxhash's hosted service only to recover the on-chain identity, then creates

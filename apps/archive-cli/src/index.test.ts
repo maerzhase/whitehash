@@ -228,5 +228,23 @@ describe("archive CLI arguments", () => {
       kind: "verify",
       root: "./archive",
     })
+    expect(parseArgs(["verify", "./archive", "--onchain"])).toEqual({
+      kind: "verify",
+      root: "./archive",
+      onchain: true,
+    })
+    expect(parseArgs(["verify", "--onchain", "./archive"])).toEqual({
+      kind: "verify",
+      root: "./archive",
+      onchain: true,
+    })
+    expect(parseArgs(["verify", "--help"])).toEqual({
+      kind: "help",
+      topic: "verify",
+    })
+    expect(() => parseArgs(["verify", "--onchain"])).toThrow("Missing archive folder")
+    expect(() => parseArgs(["verify", "./archive", "--chain", "base"])).toThrow(
+      "Unknown verify option",
+    )
   })
 })
