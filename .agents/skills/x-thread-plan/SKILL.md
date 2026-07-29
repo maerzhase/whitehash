@@ -18,7 +18,9 @@ Read `references/planning.md` completely before drafting.
 2. Choose an adaptive narrative. Do not target a predetermined number of posts.
 3. Copy `assets/thread.md` to the campaign directory and add, merge, or remove numbered
    sections as the story requires.
-4. Draft one primary idea per post. Keep commands and API names copy-pasteable.
+4. Draft one primary idea per post. Lead with the outcome or next action, keep
+   “project” and “token” as the product terms, and keep commands and API names
+   copy-pasteable.
 5. Place media only where it teaches or anchors a meaningful beat. Add useful alt text
    for every attachment.
 6. Add posting notes for release prerequisites, link replacement, and intentionally

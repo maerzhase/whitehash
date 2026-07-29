@@ -82,7 +82,7 @@ export interface ApiEntry {
 }
 
 // Ordered by relevance to the core job (render fxhash art): hooks → the
-// Artwork component → drop-in blocks. Generic primitives come last — they
+// Artwork component -> drop-in blocks. Generic primitives come last because they
 // exist so the design system is complete, not as the pitch.
 export const API_ENTRIES: ApiEntry[] = [
   {
@@ -718,7 +718,7 @@ return <img src={image.src} onError={image.onError} alt="" />`}
                 {[
                   [
                     <code>Artwork.Root</code>,
-                    "The container. Required — owns play state, live-view status, and the token context every other part reads.",
+                    "The container. Required. Owns play state, live-view status, and the token context every other part reads.",
                     <>
                       <code>token: WhitehashToken</code> (required), <code>className</code>
                     </>,
@@ -778,7 +778,7 @@ return <img src={image.src} onError={image.onError} alt="" />`}
   <Artwork.PlayButton />
 </Artwork.Root>
 
-// Inside your own card — parts are position-independent
+// Inside your own card. Parts are position-independent.
 <Card.Root>
   <Card.Media>
     <Artwork.Root token={token} className="size-full rounded-none border-0">
@@ -793,8 +793,8 @@ return <img src={image.src} onError={image.onError} alt="" />`}
           <div className="docs-prose">
             <p>
               From the token alone, <code>Root</code> derives: the preview URL (gateways in your
-              configured order), the live URL (<code>artworkUrl</code> — v1 seed applied,
-              ipfs/onchfs resolved), and the status — <code>ok</code>, <code>unrevealed</code>{" "}
+              configured order), the live URL (<code>artworkUrl</code>, v1 seed applied,
+              ipfs/onchfs resolved), and the status: <code>ok</code>, <code>unrevealed</code>{" "}
               (placeholder token), or <code>needs-onchfs</code> (artifact is on-chain but no
               resolver is enabled). The iframe always ships{" "}
               <code>sandbox="allow-scripts allow-same-origin allow-modals"</code> plus the
@@ -1020,8 +1020,8 @@ function FirstArtwork() {
           <div className="docs-prose mt-4">
             <p>
               The image appears first. <strong>Run live</strong> swaps in the correctly seeded
-              artifact inside a restricted iframe. If the piece is unrevealed—or needs onchfs before
-              it can run—the component says so instead of failing silently.
+              artifact inside a restricted iframe. If the piece is unrevealed or needs onchfs before
+              it can run, the component says so instead of failing silently.
             </p>
           </div>
         </DocsSection>
@@ -1623,7 +1623,7 @@ npx @whitehash/archive verify ./whitehash-archive`}
     return (
       <>
         <Callout>
-          <strong>What it reproduces:</strong> the fxhash capture contract—load one artwork in
+          <strong>What it reproduces:</strong> the fxhash capture contract: load one artwork in
           Chromium, wait for a delay or <code>fxpreview()</code>, capture the viewport or intrinsic
           canvas, and read its declared features. You choose the browser host and storage provider.
         </Callout>
@@ -1670,7 +1670,7 @@ console.log(result.features, result.triggeredBy, result.timing)`}
             rows={[
               [
                 <code>VIEWPORT</code>,
-                <>Requested resolution, 256–2048 px per axis</>,
+                <>Requested resolution, 256-2048 px per axis</>,
                 <>Exact viewport PNG</>,
                 <>Composition includes DOM, CSS, SVG, or WebGL</>,
               ],
@@ -1682,7 +1682,7 @@ console.log(result.features, result.triggeredBy, result.timing)`}
               ],
               [
                 <code>CUSTOM</code>,
-                <>—</>,
+                <>Not applicable</>,
                 <>Rejected server-side</>,
                 <>Client-side DOM capture needs a separate harness</>,
               ],

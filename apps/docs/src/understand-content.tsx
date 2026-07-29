@@ -7,7 +7,7 @@ import { Badge, Input } from "@whitehash/ui"
 import { Callout, CodeBlock, DocsHeading, DocsPage, DocsSection } from "./components/docs-chrome"
 
 /**
- * The "Understand" section — the transparency layer. Every fact whitehash
+ * The "Understand" section, the transparency layer. Every fact whitehash
  * surfaces is traced here to its on-chain or content-addressed source, in one
  * consistent vocabulary. These pages answer, one click from the docs home:
  * where the image URL comes from, where the contract addresses come from, and
@@ -35,7 +35,7 @@ export const UNDERSTAND_ENTRIES: UnderstandEntry[] = [
     slug: "sources",
     title: "Where the data comes from",
     description:
-      "Where ownership, descriptions, images, and contract addresses come from — and how to check them.",
+      "Where ownership, descriptions, images, and contract addresses come from, and how to check them.",
   },
   {
     slug: "urls",
@@ -80,7 +80,7 @@ function Table({ head, rows }: { head: string[]; rows: React.ReactNode[][] }) {
   )
 }
 
-/* — 1. Overview: the minimum mental model — */
+/* 1. Overview: the minimum mental model */
 function Overview() {
   return (
     <DocsPage>
@@ -145,7 +145,7 @@ function Overview() {
   )
 }
 
-/* — 2. Data model — */
+/* 2. Data model */
 function DataModel() {
   return (
     <DocsPage>
@@ -173,7 +173,7 @@ const selected = projects[0]
 const result = useProject({ chain: selected.chain, id: selected.id })`}
         />
       </DocsSection>
-      <DocsSection title="WhitehashToken — one minted iteration">
+      <DocsSection title="WhitehashToken: one token">
         <Table
           head={["Field", "Source", "Null when"]}
           rows={[
@@ -196,7 +196,7 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
             [
               <code>artifactUri</code>,
               <>
-                Metadata — the executable generator URL (<code>ipfs://</code>/<code>onchfs://</code>
+                Metadata: the executable generator URL (<code>ipfs://</code>/<code>onchfs://</code>
                 ) with render state
               </>,
               "metadata omits it",
@@ -205,12 +205,12 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
               <>
                 <code>displayUri</code> / <code>thumbnailUri</code>
               </>,
-              "Metadata — static preview images",
+              "Metadata: static preview images",
               "no preview published",
             ],
             [
               <code>generatorUri</code>,
-              "Metadata — the project’s reusable generator, without render params",
+              "Metadata: the project’s reusable generator, without render params",
               "not published (common on old v1)",
             ],
             [
@@ -223,7 +223,7 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
           ]}
         />
       </DocsSection>
-      <DocsSection title="WhitehashProject — one generative project">
+      <DocsSection title="WhitehashProject: one generative project">
         <Table
           head={["Field", "Source", "Null when"]}
           rows={[
@@ -268,7 +268,7 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
   )
 }
 
-/* — 3. Sources / provenance — */
+/* 3. Sources / provenance */
 const TEZOS_ADDRESSES: [string, string, string][] = [
   ["gentk v1", "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE", "KT1ExHjELnDuat9io3HkDcrBhHmek7h8EVXG"],
   ["gentk v2", "KT1U6EHmNxJTkvaWJ4ThczG4FSDaHC21ssvi", "KT1NkZho1yRkDdQnN4Mz93sDYyY2pPrEHTNs"],
@@ -360,13 +360,13 @@ function Sources() {
       </DocsSection>
       <Callout>
         Contract addresses live in <code>@whitehash/chain-reader</code> (<code>networks.ts</code>).
-        This table is the same data — if the two ever diverge, the code is the source of truth.
+        This table is the same data. If the two ever diverge, the code is the source of truth.
       </Callout>
     </DocsPage>
   )
 }
 
-/* — 4. How URLs are built (interactive) — */
+/* 4. How URLs are built (interactive) */
 function UrlAnatomy() {
   const { client } = useWhitehash()
   const [value, setValue] = useState(
@@ -394,21 +394,21 @@ function UrlAnatomy() {
         />
         <div className="docs-prose mt-4">
           <p>
-            <strong>storage</strong> — <code>ipfs://</code> or <code>onchfs://</code> tells Whitehash
+            <strong>storage</strong>: <code>ipfs://</code> or <code>onchfs://</code> tells Whitehash
             where to find the generator files.
           </p>
           <p>
             <strong>
               seed (<code>fxhash</code>)
             </strong>{" "}
-            — tells the generator which edition to draw. Older Tezos work stores it separately;
+            tells the generator which edition to draw. Older Tezos work stores it separately;
             Whitehash adds it when needed.
           </p>
           <p>
             <strong>
               fragment (<code>#0x…</code>)
             </strong>{" "}
-            — extra settings for the generator. Whitehash keeps them because removing them can
+            extra settings for the generator. Whitehash keeps them because removing them can
             change the artwork.
           </p>
         </div>
@@ -474,7 +474,7 @@ function UrlAnatomy() {
   )
 }
 
-/* — 5. Glossary — */
+/* 5. Glossary */
 function Glossary() {
   return (
     <DocsPage>
