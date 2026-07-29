@@ -529,9 +529,7 @@ function Glossary() {
         />
       </DocsSection>
       <Callout>
-        The code still uses the official field names where you need them. The explanations around
-        those names are written for people who are new to the toolkit as well as people who already
-        know the underlying systems.
+        Need the exact field names? The API reference shows each field in context with examples.
       </Callout>
     </DocsPage>
   )
