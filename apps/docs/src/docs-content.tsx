@@ -1556,6 +1556,25 @@ npx @whitehash/archive verify ./whitehash-token-16333`}
           />
           <div className="docs-prose mt-5">
             <p>
+              The ordinary <code>verify</code> command is deterministic and offline: it checks
+              hashes, required files, local references, and path safety. Add the explicit opt-in
+              flag below to compare the recorded token snapshot with current public chain data.
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="bash"
+            code={`npx @whitehash/archive verify ./whitehash-token-16333 --onchain`}
+          />
+          <Callout className="mt-5">
+            Live verification reports match, mismatch, unavailable provider, or unverifiable legacy
+            archive. It reads the exact recorded chain, contract, and token ID and never guesses an
+            EVM chain. The result is current provider-observed state, not a signature, ownership
+            check, provider consensus, or historical proof at the archive&rsquo;s creation time.
+            Reveal and metadata references may legitimately change.
+          </Callout>
+          <div className="docs-prose mt-5">
+            <p>
               Slug-only iteration links do not contain an on-chain identity. While the fxhash
               website remains available, resolve one explicitly and then run the same archive
               pipeline:

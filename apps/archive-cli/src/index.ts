@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import { archiveToken, archiveWallets, verifyArchive } from "./archive.js"
+import { archiveToken, archiveWallets, verifyArchive, verifyArchiveOnchain } from "./archive.js"
 import { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
 import { writeProjectIndex } from "./project-index.js"
 import { writeTokenIndex } from "./token-index.js"
 import { parseFxhashTokenUrl, parseRef, type ChainId } from "@whitehash/chain-reader"
-import { resolveChainId } from "@whitehash/core"
+import { chainLabel, resolveChainId } from "@whitehash/core"
 import { pathToFileURL } from "node:url"
 
 const HELP = `whitehash archive
@@ -22,13 +22,14 @@ Commands
   project             Write one JSON index containing a project and its iterations
   token               Write one JSON index containing a token
   wallet              Download owned artwork into an offline gallery
-  verify              Verify an existing offline wallet archive
+  verify              Verify an archive offline; add --onchain for a current chain comparison
 
 Learn one command
   whitehash-archive help save
   whitehash-archive help project
   whitehash-archive help token
-  whitehash-archive help wallet`
+  whitehash-archive help wallet
+  whitehash-archive help verify`
 
 const SAVE_HELP = `Archive one fxhash token from an identity-bearing URL or Whitehash ref
 
@@ -102,6 +103,23 @@ Options
   --out <folder>       Output folder (default: whitehash-archive)
   --limit <n>          Archive only the first n discovered tokens`
 
+const VERIFY_HELP = `Verify an offline archive
+
+Usage
+  whitehash-archive verify <archive-folder>
+  whitehash-archive verify <archive-folder> --onchain
+
+Without flags, verify checks local hashes, files, references, and path safety
+without network access. --onchain first runs that unchanged offline verification,
+then reads each exact recorded chain, contract, and token ID through Whitehash's
+configured public infrastructure and compares current normalized references with
+the archive snapshot.
+
+The onchain result is current provider-observed state, not a signed proof,
+provider consensus, ownership check, or historical verification at the archive
+creation time. Provider failures are reported as unavailable; legacy archives
+without a recorded snapshot are reported as unverifiable.`
+
 class UsageError extends Error {}
 
 function usage(message: string): never {
@@ -153,12 +171,67 @@ interface ResolveSaveTokenCommand {
 
 interface HelpCommand {
   kind: "help"
-  topic?: "save" | "project" | "token" | "wallet"
+  topic?: "save" | "project" | "token" | "wallet" | "verify"
 }
 
 interface VerifyCommand {
   kind: "verify"
   root: string
+  onchain?: true
+}
+
+type VerificationResult = Awaited<ReturnType<typeof verifyArchiveOnchain>>
+
+export function formatOfflineResult(result: { tokens: number; files: number }): string {
+  const tokenWord = result.tokens === 1 ? "token" : "tokens"
+  const fileWord = result.files === 1 ? "file" : "files"
+  return [
+    "✓ Archive is intact",
+    `  ${result.tokens} ${tokenWord} · ${result.files} ${fileWord} checked`,
+    "  Local hashes, files, references, and paths all passed.",
+  ].join("\n")
+}
+
+export function formatOnchainResult(result: VerificationResult): string {
+  const lines = [formatOfflineResult(result.offline), "", "Current chain comparison"]
+  for (const token of result.tokens) {
+    const label = chainLabel(token.chain as ChainId)
+    const title =
+      token.status === "match"
+        ? "✓ Matches the archived snapshot"
+        : token.status === "mismatch"
+          ? "! Differs from the archived snapshot"
+          : token.status === "unavailable"
+            ? "? Could not check this token"
+            : "? No saved snapshot to compare"
+    lines.push(`${title}\n  ${label} · token ${token.tokenId}\n  Contract: ${token.contract}`)
+    lines.push(`  ${token.message}`)
+    for (const check of token.checks.filter(check => check.status === "mismatch")) {
+      lines.push(
+        `  Difference: ${check.field} (saved ${JSON.stringify(check.archived)}, current ${JSON.stringify(check.current)})`,
+      )
+    }
+  }
+  lines.push(
+    "",
+    "What this means",
+    "  This compares the archive with current public provider data.",
+    "  It does not check ownership or historical block state, and it is not a signed proof.",
+  )
+  if (result.status === "unavailable") {
+    lines.push("", "Try again when the configured RPC, indexer, or content provider is available.")
+  } else if (result.status === "mismatch") {
+    lines.push(
+      "",
+      "A difference can be a legitimate change in current chain state; it does not by itself mean the local archive is corrupt.",
+    )
+  } else if (result.status === "unverifiable") {
+    lines.push(
+      "",
+      "This archive predates saved comparison data. Create a new archive to enable future checks.",
+    )
+  }
+  return lines.join("\n")
 }
 
 type Command =
@@ -464,7 +537,8 @@ export function parseArgs(args: string[]): Command {
       topic !== "save" &&
       topic !== "project" &&
       topic !== "token" &&
-      topic !== "wallet"
+      topic !== "wallet" &&
+      topic !== "verify"
     ) {
       usage(`No help topic named "${words.join(" ")}".`)
     }
@@ -563,11 +637,22 @@ export function parseArgs(args: string[]): Command {
 
   if (args[0] === "verify" || args[0] === "--verify") {
     const canonical = args[1] === "archive"
-    const root = args[canonical ? 2 : 1]
+    const verifyArgs = args.slice(canonical ? 2 : 1)
+    if (verifyArgs.includes("--help") || verifyArgs.includes("-h")) {
+      return { kind: "help", topic: "verify" }
+    }
+    let root: string | undefined
+    let onchain: true | undefined
+    for (const arg of verifyArgs) {
+      if (arg === "--onchain") onchain = true
+      else if (arg.startsWith("-")) usage(`Unknown verify option "${arg}".`)
+      else if (root === undefined) root = arg
+      else usage(`Unexpected verify argument "${arg}".`)
+    }
     if (!root) {
       usage('Missing archive folder. Try "whitehash-archive verify archive ./whitehash-archive".')
     }
-    return { kind: "verify", root }
+    return { kind: "verify", root, ...(onchain ? { onchain } : {}) }
   }
 
   const canonicalWallet = args[0] === "archive" && args[1] === "wallet"
@@ -611,13 +696,21 @@ export async function main(args: string[]): Promise<void> {
             ? TOKEN_HELP
             : command.topic === "wallet"
               ? WALLET_HELP
-              : HELP,
+              : command.topic === "verify"
+                ? VERIFY_HELP
+                : HELP,
     )
     return
   }
   if (command.kind === "verify") {
+    if (command.onchain) {
+      const result = await verifyArchiveOnchain(command.root)
+      console.log(formatOnchainResult(result))
+      if (result.status !== "match") process.exitCode = 1
+      return
+    }
     const result = await verifyArchive(command.root)
-    console.log(`Verified ${result.tokens} tokens and ${result.files} files.`)
+    console.log(formatOfflineResult(result))
     return
   }
   if (command.kind === "index-project") {
@@ -695,8 +788,21 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   })
 }
 
-export { archiveToken, archiveWallets, verifyArchive } from "./archive.js"
-export type { ArchiveTokenOptions } from "./archive.js"
+export {
+  archiveToken,
+  archiveWallets,
+  verifyArchive,
+  verifyArchiveOnchain,
+} from "./archive.js"
+export type {
+  ArchiveTokenOptions,
+  OnchainArchiveVerification,
+  OnchainFieldCheck,
+  OnchainTokenReader,
+  OnchainTokenVerification,
+  OnchainVerificationStatus,
+  VerifyArchiveOnchainOptions,
+} from "./archive.js"
 export { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
 export type {
   FxhashHostedResolverOptions,

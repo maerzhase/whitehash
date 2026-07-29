@@ -1,35 +1,36 @@
 # {{CAMPAIGN_TITLE}}
 
 Format: X/Twitter thread. Add or remove numbered sections to create the shortest
-complete story. Do not treat the starter section count as a target.
+complete story. Use one sparse hero, then information-dense numbered product slides.
+Do not make the hero and slides share the same composition.
 
-## 1
+## 1 - hero
 
 {{PROBLEM_AND_OUTCOME_HOOK}}
 
-Media: `01-hero.jpg`
+Media: `01-hero.png`
 
 Alt: {{HERO_ALT_TEXT}}
 
-## 2
+## 2 - product slide
 
 {{SMALLEST_WORKING_COMMAND_AND_PLAIN_LANGUAGE_EXPLANATION}}
 
-Media: `02-cli.jpg`
+Media: `02-slide.png`
 
-Alt: {{CLI_ALT_TEXT}}
+Alt: {{SLIDE_2_ALT_TEXT}}
 
-## 3
+## 3 - product slide
 
 {{WHAT_THE_PRODUCT_DOES_OR_OUTPUT_MENTAL_MODEL}}
 
-## 4
+Media: `03-slide.png`
+
+Alt: {{SLIDE_3_ALT_TEXT}}
+
+## Optional — trust boundary, API, or call to action
 
 {{TRUST_BOUNDARY_LIMITATION_OR_PROGRAMMATIC_API}}
-
-## 5
-
-{{CALL_TO_ACTION_AND_RELEASE_LINKS}}
 
 ## Posting notes
 

@@ -1,5 +1,14 @@
 # @whitehash/ui
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [f879b13]
+- Updated dependencies [915d5a9]
+  - @whitehash/chain-reader@0.0.2
+  - @whitehash/react@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes

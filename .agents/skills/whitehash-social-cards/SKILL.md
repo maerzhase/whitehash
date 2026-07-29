@@ -26,10 +26,12 @@ the card teaches a concrete integration choice.
    `apps/docs/app/opengraph-image.tsx`, `apps/docs/src/app.css`, and
    `apps/docs/public/logo-original.png` for CI drift.
 2. Copy `assets/cards.html.template` into the output directory as `cards.html`. Copy
-   `apps/docs/public/logo-original.png` beside it as `logo.png`.
-3. Treat the supplied hero composition as locked CI. Replace its placeholders without
-   restructuring it unless the user explicitly requests a new direction. Keep only the
-   other card sections the story needs.
+   both `apps/docs/public/logo.png` and `apps/docs/public/logo-original.png` beside it,
+   plus the Geist Sans and Geist Mono variable fonts referenced by the template.
+3. Treat the supplied hero composition as locked CI. It is sparse and mark-led. Replace
+   its placeholders without restructuring it unless the user explicitly requests a new
+   direction. Slides use the separate numbered header, headline, panel, and footer
+   composition. Keep only the other card sections the story needs.
 4. Prefer HTML/CSS for logos, typography, code, comparisons, trees, and diagrams. Use
    image generation only when a true illustration or photographic bitmap adds meaning.
 5. Serve the output directory over localhost and capture each `?card=<id>` view at

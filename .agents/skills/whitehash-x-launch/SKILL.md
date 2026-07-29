@@ -56,7 +56,7 @@ The script composes assets owned by the focused skills and copies:
 
 - `thread.md`, an adaptive thread skeleton;
 - `cards.html`, modular deterministic card layouts;
-- the high-resolution Whitehash logo from `apps/docs/public/logo-original.png`.
+- both logo variants and the Geist font files required by the card template.
 
 The scaffold refuses to overwrite a non-empty directory.
 

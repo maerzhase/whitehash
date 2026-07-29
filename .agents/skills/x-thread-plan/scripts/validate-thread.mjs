@@ -12,7 +12,7 @@ const threadPath = resolve(process.cwd(), fileArg)
 const threadDir = dirname(threadPath)
 const source = await readFile(threadPath, "utf8")
 const sectionPattern =
-  /^##\s+(\d+)\s*\n\n([\s\S]*?)(?=^##\s+\d+\s*$|^##\s+Posting notes\s*$|(?![\s\S]))/gm
+  /^##\s+(\d+)(?:\s+[^\n]+)?\s*\n\n([\s\S]*?)(?=^##\s+\d+(?:\s+[^\n]+)?\s*$|^##\s+Posting notes\s*$|(?![\s\S]))/gm
 const sections = [...source.matchAll(sectionPattern)]
 const errors = []
 

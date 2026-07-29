@@ -68,7 +68,7 @@ The high-level client is created with `createWhitehashClient(config)`. Its princ
 ## Apps in this repository
 
 - `apps/docs`: statically exported Next.js documentation and live showcases. It is assembled from `@whitehash/ui` and demonstrates real wallet, project, token, artwork, onchfs, and variation flows.
-- `apps/archive-cli`: writes portable project iteration or single-token indexes with one shared normalized project summary (including published capture settings), complete normalized token data, and original metadata; it also creates verified, self-contained wallet archives with previews, generator assets, integrity data, and offline replay wrappers.
+- `apps/archive-cli`: writes portable project iteration or single-token indexes with one shared normalized project summary (including published capture settings), complete normalized token data, and original metadata; it also creates self-contained wallet archives with previews, generator assets, integrity data, and offline replay wrappers. `verify` checks hashes, completeness, references, and path safety offline by default. Its opt-in `--onchain` flag compares recorded token references and reveal state with current provider-observed chain-reader results; it is not an ownership check, historical proof, signature, or provider consensus.
 - `apps/onchfs-proxy`: optional self-hostable Hono service for resolving onchfs artwork through public Tezos and EVM RPCs. It is the project's only server component.
 
 ## Guidance for code-generating LLMs
