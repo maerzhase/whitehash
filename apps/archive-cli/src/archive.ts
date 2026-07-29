@@ -370,14 +370,37 @@ export async function verifyArchive(root: string): Promise<{ tokens: number; fil
       string
     >
     const actual = await fileHashes(tokenDir)
-    if (JSON.stringify(actual) !== JSON.stringify(expected))
-      throw new Error(`Integrity mismatch: ${token.path}`)
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      const mismatchedFiles = [
+        ...new Set([...Object.keys(expected), ...Object.keys(actual)]),
+      ].filter(path => expected[path] !== actual[path])
+      const listedFiles = mismatchedFiles.slice(0, 12).map(path => `  - ${path}`)
+      if (mismatchedFiles.length > 12)
+        listedFiles.push(`  - …and ${mismatchedFiles.length - 12} more`)
+      throw new Error(
+        `Archive verification failed: local files do not match their recorded integrity hashes.\n\n` +
+          `Token: ${token.path}\n\n` +
+          `Files to inspect:\n${listedFiles.join("\n")}\n\n` +
+          `What to do next:\n` +
+          `  1. Restore those files, or recreate the archive from the token.\n` +
+          `  2. For example: whitehash-archive save <token-url> --out ./new-archive\n` +
+          `  3. Run the verifier again after restoring or recreating the archive.\n\n` +
+          `(Integrity mismatch: ${token.path})`,
+      )
+    }
     if (token.provenance) {
       const localProvenance = JSON.parse(
         await readFile(join(tokenDir, "provenance.json"), "utf8"),
       ) as ArchivedTokenProvenance
       if (JSON.stringify(localProvenance) !== JSON.stringify(token.provenance)) {
-        throw new Error(`Provenance mismatch: ${token.path}`)
+        throw new Error(
+          `Archive verification failed: the saved provenance record does not match the manifest.\n\n` +
+            `Token: ${token.path}\n\n` +
+            `What to do next:\n` +
+            `  1. Restore the original provenance.json and manifest.json files.\n` +
+            `  2. Run the verifier again after restoring the files.\n\n` +
+            `(Provenance mismatch: ${token.path})`,
+        )
       }
     }
     files += Object.keys(actual).length

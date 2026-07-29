@@ -182,6 +182,18 @@ The ordinary verifier is deterministic and fully offline:
 npx @whitehash/archive verify ./whitehash-archive
 ```
 
+On success, the CLI explains what it checked in plain language:
+
+```text
+✓ Archive is intact
+  1 token · 11 files checked
+  Local hashes, files, references, and paths all passed.
+```
+
+If a file no longer matches its recorded hash, verification names the token and the
+files to inspect, then suggests restoring the original archive or recreating it from
+the token before trying again.
+
 It checks local integrity hashes, required files, complete local references, and path
 safety. It does not contact a blockchain, verify ownership, authenticate a signature,
 or prove what chain state existed when the archive was created.

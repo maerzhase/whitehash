@@ -4,7 +4,7 @@ import { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
 import { writeProjectIndex } from "./project-index.js"
 import { writeTokenIndex } from "./token-index.js"
 import { parseFxhashTokenUrl, parseRef, type ChainId } from "@whitehash/chain-reader"
-import { resolveChainId } from "@whitehash/core"
+import { chainLabel, resolveChainId } from "@whitehash/core"
 import { pathToFileURL } from "node:url"
 
 const HELP = `whitehash archive
@@ -178,6 +178,60 @@ interface VerifyCommand {
   kind: "verify"
   root: string
   onchain?: true
+}
+
+type VerificationResult = Awaited<ReturnType<typeof verifyArchiveOnchain>>
+
+export function formatOfflineResult(result: { tokens: number; files: number }): string {
+  const tokenWord = result.tokens === 1 ? "token" : "tokens"
+  const fileWord = result.files === 1 ? "file" : "files"
+  return [
+    "✓ Archive is intact",
+    `  ${result.tokens} ${tokenWord} · ${result.files} ${fileWord} checked`,
+    "  Local hashes, files, references, and paths all passed.",
+  ].join("\n")
+}
+
+export function formatOnchainResult(result: VerificationResult): string {
+  const lines = [formatOfflineResult(result.offline), "", "Current chain comparison"]
+  for (const token of result.tokens) {
+    const label = chainLabel(token.chain as ChainId)
+    const title =
+      token.status === "match"
+        ? "✓ Matches the archived snapshot"
+        : token.status === "mismatch"
+          ? "! Differs from the archived snapshot"
+          : token.status === "unavailable"
+            ? "? Could not check this token"
+            : "? No saved snapshot to compare"
+    lines.push(`${title}\n  ${label} · token ${token.tokenId}\n  Contract: ${token.contract}`)
+    lines.push(`  ${token.message}`)
+    for (const check of token.checks.filter(check => check.status === "mismatch")) {
+      lines.push(
+        `  Difference: ${check.field} (saved ${JSON.stringify(check.archived)}, current ${JSON.stringify(check.current)})`,
+      )
+    }
+  }
+  lines.push(
+    "",
+    "What this means",
+    "  This compares the archive with current public provider data.",
+    "  It does not check ownership or historical block state, and it is not a signed proof.",
+  )
+  if (result.status === "unavailable") {
+    lines.push("", "Try again when the configured RPC, indexer, or content provider is available.")
+  } else if (result.status === "mismatch") {
+    lines.push(
+      "",
+      "A difference can be a legitimate change in current chain state; it does not by itself mean the local archive is corrupt.",
+    )
+  } else if (result.status === "unverifiable") {
+    lines.push(
+      "",
+      "This archive predates saved comparison data. Create a new archive to enable future checks.",
+    )
+  }
+  return lines.join("\n")
 }
 
 type Command =
@@ -651,29 +705,12 @@ export async function main(args: string[]): Promise<void> {
   if (command.kind === "verify") {
     if (command.onchain) {
       const result = await verifyArchiveOnchain(command.root)
-      console.log(
-        `Offline verification passed: ${result.offline.tokens} tokens and ${result.offline.files} files.`,
-      )
-      for (const token of result.tokens) {
-        console.log(
-          `${token.status.toUpperCase()} ${token.chain}/${token.contract}/${token.tokenId}`,
-        )
-        console.log(`  ${token.message}`)
-        for (const check of token.checks.filter(check => check.status === "mismatch")) {
-          console.log(
-            `  ${check.field}: archived=${JSON.stringify(check.archived)} current=${JSON.stringify(check.current)}`,
-          )
-        }
-      }
-      console.log(
-        "Scope: current provider-observed token state. Ownership was not checked; historical verification is unavailable.",
-      )
-      console.log(result.trust)
+      console.log(formatOnchainResult(result))
       if (result.status !== "match") process.exitCode = 1
       return
     }
     const result = await verifyArchive(command.root)
-    console.log(`Verified ${result.tokens} tokens and ${result.files} files.`)
+    console.log(formatOfflineResult(result))
     return
   }
   if (command.kind === "index-project") {

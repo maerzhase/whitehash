@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { parseArgs } from "./index.js"
+import { formatOfflineResult, formatOnchainResult, parseArgs } from "./index.js"
 
 const tezosUrl = "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333"
 const evmUrl = "https://www.fxhash.xyz/gentk/0x50c04A6B066d659Fe2F66F6388Cf8dD394036632-2953"
@@ -246,5 +246,44 @@ describe("archive CLI arguments", () => {
     expect(() => parseArgs(["verify", "./archive", "--chain", "base"])).toThrow(
       "Unknown verify option",
     )
+  })
+})
+
+describe("archive verification output", () => {
+  it("explains a successful offline verification in plain language", () => {
+    expect(formatOfflineResult({ tokens: 1, files: 11 })).toBe(
+      [
+        "✓ Archive is intact",
+        "  1 token · 11 files checked",
+        "  Local hashes, files, references, and paths all passed.",
+      ].join("\n"),
+    )
+  })
+
+  it("explains an onchain match and its limits", () => {
+    const output = formatOnchainResult({
+      status: "match",
+      offline: { tokens: 1, files: 11 },
+      scope: "current",
+      historical: "unavailable",
+      ownership: "not-checked",
+      trust: "unused legacy detail",
+      tokens: [
+        {
+          chain: "tezos:mainnet",
+          contract: "KT1abc",
+          tokenId: "16333",
+          status: "match",
+          checks: [],
+          observedAt: "2026-07-29T00:00:00.000Z",
+          message:
+            "Current provider-observed identity and recorded state match the archived snapshot.",
+        },
+      ],
+    })
+    expect(output).toContain("✓ Matches the archived snapshot")
+    expect(output).toContain("Tezos · token 16333")
+    expect(output).toContain("This compares the archive with current public provider data.")
+    expect(output).not.toContain("unused legacy detail")
   })
 })
