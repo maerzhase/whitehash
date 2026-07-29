@@ -82,72 +82,68 @@ export interface ApiEntry {
 }
 
 // Ordered by relevance to the core job (render fxhash art): hooks → the
-// Artwork component → drop-in blocks. Generic primitives come last — they
+// Artwork component -> drop-in blocks. Generic primitives come last because they
 // exist so the design system is complete, not as the pitch.
 export const API_ENTRIES: ApiEntry[] = [
   {
     slug: "whitehash-provider",
     name: "WhitehashProvider",
     group: "React hooks",
-    description: "Configure the client, network mode, and cache for every hook and component.",
+    description: "Set up Whitehash once, then use it throughout your app.",
   },
   {
     slug: "use-whitehash",
     name: "useWhitehash",
     group: "React hooks",
-    description: "Read the configured client, cache, and network mode.",
+    description: "Access your Whitehash client and its current settings.",
   },
   {
     slug: "use-token",
     name: "useToken",
     group: "React hooks",
-    description: "Read one normalized token directly from its chain, contract, and token ID.",
+    description: "Load one token from its network, collection, and edition number.",
   },
   {
     slug: "use-wallet-tokens",
     name: "useWalletTokens",
     group: "React hooks",
-    description:
-      "Detect an address family, query the relevant chain contracts, normalize owned tokens, and expose cache-first progress per chain.",
+    description: "Find the tokens owned by a collector address across supported networks.",
   },
   {
     slug: "use-projects",
     name: "useProjects",
     group: "React hooks",
-    description:
-      "Paginate projects and progressively hydrate missing preview fields on every chain.",
+    description: "Browse projects and preview images across supported networks.",
   },
   {
     slug: "use-project",
     name: "useProject",
     group: "React hooks",
-    description: "Read project details and minted iterations from its chain and ID.",
+    description: "Load a project and list its tokens.",
   },
   {
     slug: "use-gateway-image",
     name: "useGatewayImage",
     group: "React hooks",
-    description:
-      "Resolve a protocol-native image URI and advance through your ordered IPFS gateways whenever an image fails.",
+    description: "Load an IPFS image and try another gateway if the first one is unavailable.",
   },
   {
     slug: "use-artwork-frame",
     name: "useArtworkFrame",
     group: "React hooks",
-    description: "Own live-artwork play state and secure iframe attributes.",
+    description: "Control live artwork playback in a protected browser frame.",
   },
   {
     slug: "artwork",
     name: "Artwork",
     group: "Domain",
-    description:
-      "The component this toolkit exists for: preview image, live sandboxed execution, and reveal state for one token — composable part by part.",
+    description: "Show a token’s preview, live artwork, and reveal status.",
   },
   {
     slug: "token-details",
     name: "TokenDetails",
     group: "Domain",
-    description: "A full token detail view: artwork, provenance fields, and features.",
+    description: "Show a token with its artwork, details, and traits.",
   },
   ...[
     "WalletGallery",
@@ -718,7 +714,7 @@ return <img src={image.src} onError={image.onError} alt="" />`}
                 {[
                   [
                     <code>Artwork.Root</code>,
-                    "The container. Required — owns play state, live-view status, and the token context every other part reads.",
+                    "The container. Required. Owns play state, live-view status, and the token context every other part reads.",
                     <>
                       <code>token: WhitehashToken</code> (required), <code>className</code>
                     </>,
@@ -778,7 +774,7 @@ return <img src={image.src} onError={image.onError} alt="" />`}
   <Artwork.PlayButton />
 </Artwork.Root>
 
-// Inside your own card — parts are position-independent
+// Inside your own card. Parts are position-independent.
 <Card.Root>
   <Card.Media>
     <Artwork.Root token={token} className="size-full rounded-none border-0">
@@ -793,10 +789,10 @@ return <img src={image.src} onError={image.onError} alt="" />`}
           <div className="docs-prose">
             <p>
               From the token alone, <code>Root</code> derives: the preview URL (gateways in your
-              configured order), the live URL (<code>artworkUrl</code> — v1 seed applied,
-              ipfs/onchfs resolved), and the status — <code>ok</code>, <code>unrevealed</code>{" "}
-              (placeholder token), or <code>needs-onchfs</code> (artifact is on-chain but no
-              resolver is enabled). The iframe always ships{" "}
+              configured order), the live URL (<code>artworkUrl</code>, v1 seed applied, ipfs/onchfs
+              resolved), and the status: <code>ok</code>, <code>unrevealed</code> (placeholder
+              token), or <code>needs-onchfs</code> (artifact is on-chain but no resolver is
+              enabled). The iframe always ships{" "}
               <code>sandbox="allow-scripts allow-same-origin allow-modals"</code> plus the
               device-permission allowlist generative pieces expect.
             </p>
@@ -813,22 +809,20 @@ const GUIDES: Record<
 > = {
   "getting-started": {
     title: "Getting started",
-    description: "Render one real fxhash artwork with a resilient preview and sandboxed live view.",
+    description: "Put a real fxhash artwork on a React page.",
     code: `npm install @whitehash/ui @whitehash/react`,
     language: "bash",
   },
   configuration: {
     title: "Configuration",
-    description:
-      "Start with the bundled third-party endpoints. Override one dependency at a time as your application needs it.",
+    description: "Start with the defaults, then change only the services you need to control.",
     code: `<WhitehashProvider>
   <App />
 </WhitehashProvider>`,
   },
   cli: {
     title: "Archive CLI",
-    description:
-      "Index a project or token into portable JSON, or preserve a wallet as an offline archive.",
+    description: "Save a project, token, or collector’s artwork for a website or offline archive.",
     code: `# Index a project's metadata and every iteration
 npx @whitehash/archive project v2:13944
 
@@ -839,8 +833,7 @@ npx @whitehash/archive token \\
   },
   theming: {
     title: "Theming and tokens",
-    description:
-      "Override variables; do not fork component styles. These are the complete public design tokens.",
+    description: "Change colors, spacing, and type without rewriting the components.",
     code: `:root {
   --color-canvas: #000;
   --color-surface: #000;
@@ -870,8 +863,7 @@ npx @whitehash/archive token \\
   },
   onchfs: {
     title: "Render onchfs artwork",
-    description:
-      "Resolve onchfs content from Tezos, Ethereum, or Base and run it in a browser iframe—without an fxhash endpoint or Whitehash-hosted backend.",
+    description: "Run artwork stored on Tezos, Ethereum, or Base directly in the browser.",
     code: `"use client"
 
 import { useEffect } from "react"
@@ -894,8 +886,7 @@ export function OnchfsRegistration() {
   },
   variations: {
     title: "Explore variations",
-    description:
-      "Drive the original content-addressed generator with a different seed or declared fx(params), entirely in the browser.",
+    description: "Try the original generator with a different seed or settings in the browser.",
     code: `import { BlockchainType, createRuntimeConnector } from "@whitehash/runtime"
 import { ArtworkIframe, useRuntimeController } from "@whitehash/runtime/react"
 
@@ -917,7 +908,7 @@ return <ArtworkIframe ref={runtime.ref} />`,
   capture: {
     title: "Capture engine",
     description:
-      "Render deterministic PNG or GIF captures from generative artwork in headless Chromium, with fxhash-compatible triggers and feature extraction.",
+      "Create repeatable PNG or GIF images from generative artwork in a background browser.",
     code: `pnpm add @whitehash/capture puppeteer-core`,
     language: "bash",
   },
@@ -1020,8 +1011,8 @@ function FirstArtwork() {
           <div className="docs-prose mt-4">
             <p>
               The image appears first. <strong>Run live</strong> swaps in the correctly seeded
-              artifact inside a restricted iframe. If the piece is unrevealed—or needs onchfs before
-              it can run—the component says so instead of failing silently.
+              artifact inside a restricted iframe. If the piece is unrevealed or needs onchfs before
+              it can run, the component says so instead of failing silently.
             </p>
           </div>
         </DocsSection>
@@ -1623,7 +1614,7 @@ npx @whitehash/archive verify ./whitehash-archive`}
     return (
       <>
         <Callout>
-          <strong>What it reproduces:</strong> the fxhash capture contract—load one artwork in
+          <strong>What it reproduces:</strong> the fxhash capture contract: load one artwork in
           Chromium, wait for a delay or <code>fxpreview()</code>, capture the viewport or intrinsic
           canvas, and read its declared features. You choose the browser host and storage provider.
         </Callout>
@@ -1670,7 +1661,7 @@ console.log(result.features, result.triggeredBy, result.timing)`}
             rows={[
               [
                 <code>VIEWPORT</code>,
-                <>Requested resolution, 256–2048 px per axis</>,
+                <>Requested resolution, 256-2048 px per axis</>,
                 <>Exact viewport PNG</>,
                 <>Composition includes DOM, CSS, SVG, or WebGL</>,
               ],
@@ -1682,7 +1673,7 @@ console.log(result.features, result.triggeredBy, result.timing)`}
               ],
               [
                 <code>CUSTOM</code>,
-                <>—</>,
+                <>Not applicable</>,
                 <>Rejected server-side</>,
                 <>Client-side DOM capture needs a separate harness</>,
               ],

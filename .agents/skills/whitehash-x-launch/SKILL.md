@@ -62,8 +62,8 @@ The scaffold refuses to overwrite a non-empty directory.
 ### 4. Draft the thread
 
 Follow `x-thread-plan` and `whitehash-marketing-voice`. Explain internal names such as
-“paste first” in plain language. Keep the offline archive and hostable JSON outcomes
-distinct.
+“paste first” with a concrete example or outcome. Keep the offline archive and hostable
+JSON outcomes distinct.
 
 ### 5. Build visual cards
 

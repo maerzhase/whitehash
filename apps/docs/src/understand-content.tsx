@@ -7,7 +7,7 @@ import { Badge, Input } from "@whitehash/ui"
 import { Callout, CodeBlock, DocsHeading, DocsPage, DocsSection } from "./components/docs-chrome"
 
 /**
- * The "Understand" section — the transparency layer. Every fact whitehash
+ * The "Understand" section, the transparency layer. Every fact whitehash
  * surfaces is traced here to its on-chain or content-addressed source, in one
  * consistent vocabulary. These pages answer, one click from the docs home:
  * where the image URL comes from, where the contract addresses come from, and
@@ -24,30 +24,28 @@ export const UNDERSTAND_ENTRIES: UnderstandEntry[] = [
   {
     slug: "overview",
     title: "How Whitehash works",
-    description: "The three ideas you need before using the guides and API reference.",
+    description: "A short tour of the ideas behind Whitehash before you meet the code.",
   },
   {
     slug: "data-model",
     title: "Projects and tokens",
-    description: "A project is the generator; a token is one minted iteration.",
+    description: "A project is a generative artwork release; a token is one edition from it.",
   },
   {
     slug: "sources",
     title: "Where the data comes from",
     description:
-      "Provenance for ownership, metadata, and every contract address — with how to verify it yourself.",
+      "Where ownership, descriptions, images, and contract addresses come from, and how to check them.",
   },
   {
     slug: "urls",
     title: "How URLs are built",
-    description:
-      "Anatomy of an artifact URI and exactly how Whitehash turns it into a fetchable URL.",
+    description: "How a stored artwork reference becomes a URL your browser can open.",
   },
   {
     slug: "glossary",
     title: "Glossary",
-    description:
-      "One word per concept, mapped to fxhash's own vocabulary and the on-chain reality.",
+    description: "The few blockchain and generative-art words you will see in the docs.",
   },
 ]
 
@@ -80,21 +78,21 @@ function Table({ head, rows }: { head: string[]; rows: React.ReactNode[][] }) {
   )
 }
 
-/* — 1. Overview: the minimum mental model — */
+/* 1. Overview: the minimum mental model */
 function Overview() {
   return (
     <DocsPage>
       <DocsHeading
         eyebrow="Understand"
         title="How Whitehash works"
-        description="Three ideas explain the API: projects generate tokens, previews are not live artwork, and reads go directly to public RPCs, indexers, and gateways."
+        description="Three ideas are enough to get started: projects contain tokens, a preview is not the live artwork, and Whitehash reads public records."
       />
-      <DocsSection title="1. A project generates tokens">
+      <DocsSection title="1. A project contains tokens">
         <div className="docs-prose">
           <p>
-            A <strong>project</strong> is a generative release. A <strong>token</strong> is one
-            minted iteration with its own identity and deterministic seed. Whitehash exposes both
-            directly instead of hiding them behind a generic collection object.
+            A <strong>project</strong> is a generative artwork release. A <strong>token</strong> is
+            one edition from that project. Each token has its own identity and seed, so it can be
+            found and recreated later.
           </p>
         </div>
         <CodeBlock
@@ -104,22 +102,22 @@ function Overview() {
   └─ token { chain, contract, tokenId }`}
         />
       </DocsSection>
-      <DocsSection title="2. A preview is not the artwork">
+      <DocsSection title="2. A preview is not the live artwork">
         <div className="docs-prose">
           <p>
-            <code>displayUri</code> and <code>thumbnailUri</code> are static images.{" "}
-            <code>artifactUri</code> is executable HTML. <code>Artwork</code> shows the preview
-            first, then builds the correctly seeded live URL and runs it in a restricted iframe.
+            <code>displayUri</code> and <code>thumbnailUri</code> are ordinary preview images.{" "}
+            <code>artifactUri</code> points to the live generator. <code>Artwork</code> shows the
+            image first, then opens the live edition in a protected browser frame.
           </p>
         </div>
       </DocsSection>
-      <DocsSection title="3. One shape across every chain">
+      <DocsSection title="3. One consistent shape across networks">
         <div className="docs-prose">
           <p>
-            Tezos, Ethereum, and Base store and index fxhash work differently. Whitehash reads known
-            contracts through configurable third-party services, normalizes the results into{" "}
-            <code>WhitehashProject</code> and <code>WhitehashToken</code>, and resolves IPFS or
-            onchfs content without a Whitehash-hosted backend.
+            Tezos, Ethereum, and Base store their records differently. Whitehash does the
+            translation for you, so your app gets the same <code>WhitehashProject</code> or{" "}
+            <code>WhitehashToken</code> whichever network the work comes from. It then finds the
+            files on IPFS or onchfs without a Whitehash-hosted backend.
           </p>
         </div>
         <CodeBlock
@@ -145,21 +143,22 @@ function Overview() {
   )
 }
 
-/* — 2. Data model — */
+/* 2. Data model */
 function DataModel() {
   return (
     <DocsPage>
       <DocsHeading
         eyebrow="Understand"
         title="Projects and tokens"
-        description="Two domain objects carry the API: a project is the generator; a token is one minted iteration."
+        description="Two objects cover most use cases: a project groups related artwork; a token is one edition."
       />
-      <DocsSection title="Identity lives on the object">
+      <DocsSection title="Every project and token has an address">
         <div className="docs-prose">
           <p>
-            Tokens identify themselves with <code>chain</code>, <code>contract</code>, and{" "}
-            <code>tokenId</code>. Projects use <code>chain</code> and <code>id</code>. Pass those
-            fields directly to read APIs.
+            A token’s address is three values: its <code>chain</code> (network),{" "}
+            <code>contract</code> (collection), and <code>tokenId</code> (edition number). A project
+            uses <code>chain</code> and <code>id</code>. Pass those values directly to the read
+            APIs.
           </p>
         </div>
         <CodeBlock
@@ -173,7 +172,7 @@ const selected = projects[0]
 const result = useProject({ chain: selected.chain, id: selected.id })`}
         />
       </DocsSection>
-      <DocsSection title="WhitehashToken — one minted iteration">
+      <DocsSection title="WhitehashToken: one token">
         <Table
           head={["Field", "Source", "Null when"]}
           rows={[
@@ -196,8 +195,8 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
             [
               <code>artifactUri</code>,
               <>
-                Metadata — the executable generator URL (<code>ipfs://</code>/<code>onchfs://</code>
-                ) with render state
+                Metadata: the executable generator URL (<code>ipfs://</code>/<code>onchfs://</code>)
+                with render state
               </>,
               "metadata omits it",
             ],
@@ -205,12 +204,12 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
               <>
                 <code>displayUri</code> / <code>thumbnailUri</code>
               </>,
-              "Metadata — static preview images",
+              "Metadata: static preview images",
               "no preview published",
             ],
             [
               <code>generatorUri</code>,
-              "Metadata — the project’s reusable generator, without render params",
+              "Metadata: the project’s reusable generator, without render params",
               "not published (common on old v1)",
             ],
             [
@@ -223,7 +222,7 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
           ]}
         />
       </DocsSection>
-      <DocsSection title="WhitehashProject — one generative project">
+      <DocsSection title="WhitehashProject: one generative project">
         <Table
           head={["Field", "Source", "Null when"]}
           rows={[
@@ -268,7 +267,7 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
   )
 }
 
-/* — 3. Sources / provenance — */
+/* 3. Sources / provenance */
 const TEZOS_ADDRESSES: [string, string, string][] = [
   ["gentk v1", "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE", "KT1ExHjELnDuat9io3HkDcrBhHmek7h8EVXG"],
   ["gentk v2", "KT1U6EHmNxJTkvaWJ4ThczG4FSDaHC21ssvi", "KT1NkZho1yRkDdQnN4Mz93sDYyY2pPrEHTNs"],
@@ -291,9 +290,9 @@ function Sources() {
       <DocsHeading
         eyebrow="Understand"
         title="Where the data comes from"
-        description="Every fact Whitehash shows comes from a chain, public indexer, RPC, or content-addressed file. Every trusted address is listed here and verifiable on a block explorer."
+        description="Whitehash does not invent the records it shows. Here is where the ownership, text, images, and artwork files come from."
       />
-      <DocsSection title="Facts and their sources">
+      <DocsSection title="What we look up, and where">
         <Table
           head={["Fact", "Read from"]}
           rows={[
@@ -301,15 +300,15 @@ function Sources() {
             [
               <>Ownership (Ethereum / Base)</>,
               <>
-                Blockscout token holdings intersected with the discovered fxhash collection set
-                (JSON-RPC <code>Transfer</code>-log fallback)
+                Blockscout holdings matched against the fxhash collections Whitehash knows about
+                (with a direct blockchain fallback)
               </>,
             ],
             [
               <>Token metadata</>,
               <>
-                Tezos <code>token_metadata</code> big map / EVM <code>tokenURI</code>, then the
-                content-addressed JSON via your IPFS gateways
+                Tezos <code>token_metadata</code> / EVM <code>tokenURI</code>, then the JSON file
+                through your IPFS gateways
               </>,
             ],
             [
@@ -325,8 +324,7 @@ function Sources() {
       <DocsSection title="Tezos contracts">
         <div className="docs-prose">
           <p>
-            These FA2 gentk and issuer contracts are fxhash&rsquo;s own deployments, vendored into
-            the toolkit. Verify any of them on{" "}
+            These are the fxhash contracts Whitehash knows how to read. You can check any of them on{" "}
             <a className="docs-text-link" href="https://tzkt.io" target="_blank" rel="noreferrer">
               tzkt.io
             </a>
@@ -345,8 +343,9 @@ function Sources() {
       <DocsSection title="EVM issuer factories">
         <div className="docs-prose">
           <p>
-            Each network has one <code>FxIssuerFactory</code>; collections are discovered from its{" "}
-            <code>ProjectCreated</code> events since deploy block. Verify on the relevant explorer.
+            Each network has one <code>FxIssuerFactory</code>, which records when new projects are
+            created. Whitehash reads those records from the start of the factory’s history. Verify
+            any address on the relevant explorer.
           </p>
         </div>
         <Table
@@ -360,13 +359,13 @@ function Sources() {
       </DocsSection>
       <Callout>
         Contract addresses live in <code>@whitehash/chain-reader</code> (<code>networks.ts</code>).
-        This table is the same data — if the two ever diverge, the code is the source of truth.
+        This table is the same data. If the two ever diverge, the code is the source of truth.
       </Callout>
     </DocsPage>
   )
 }
 
-/* — 4. How URLs are built (interactive) — */
+/* 4. How URLs are built (interactive) */
 function UrlAnatomy() {
   const { client } = useWhitehash()
   const [value, setValue] = useState(
@@ -384,9 +383,9 @@ function UrlAnatomy() {
       <DocsHeading
         eyebrow="Understand"
         title="How URLs are built"
-        description="A token's render URL carries the seed and parameters that make one iteration deterministic. Here is how Whitehash constructs and resolves it."
+        description="The live artwork URL carries the information needed to show the right edition. Here is how Whitehash builds it."
       />
-      <DocsSection title="Anatomy of an artifact URI">
+      <DocsSection title="What is in a live artwork link?">
         <CodeBlock
           language="text"
           code={`ipfs://Qm…generator…/?fxhash=oo…&fxiteration=136&fxminter=tz1…&fxchain=tezos#0x…params…
@@ -394,26 +393,26 @@ function UrlAnatomy() {
         />
         <div className="docs-prose mt-4">
           <p>
-            <strong>scheme</strong> — <code>ipfs://</code> or <code>onchfs://</code> decides how the
-            bytes are fetched.
+            <strong>storage</strong>: <code>ipfs://</code> or <code>onchfs://</code> tells Whitehash
+            where to find the generator files.
           </p>
           <p>
             <strong>
               seed (<code>fxhash</code>)
             </strong>{" "}
-            — makes the iteration deterministic. For gentk-v1, the seed is <em>not</em> in the URI;
-            Whitehash reads it from the separate <code>iterationHash</code> metadata field and
-            appends it. v2/v3 and EVM embed it.
+            tells the generator which edition to draw. Older Tezos work stores it separately;
+            Whitehash adds it when needed.
           </p>
           <p>
             <strong>
               fragment (<code>#0x…</code>)
             </strong>{" "}
-            — encoded fx(params). Preserved verbatim; dropping it changes the artwork.
+            extra settings for the generator. Whitehash keeps them because removing them can change
+            the artwork.
           </p>
         </div>
       </DocsSection>
-      <DocsSection title="From URI to fetchable URL">
+      <DocsSection title="From stored reference to browser URL">
         <Table
           head={["Input", "resolveUri result"]}
           rows={[
@@ -449,8 +448,8 @@ function UrlAnatomy() {
       <DocsSection title="Try it">
         <div className="docs-prose">
           <p>
-            Paste an <code>ipfs://</code>, <code>onchfs://</code>, or bare-CID value. This runs the
-            real <code>resolveUri</code> from your configured client.
+            Paste an <code>ipfs://</code>, <code>onchfs://</code>, or bare-CID value. This shows the
+            browser URL Whitehash would use to load it.
           </p>
         </div>
         <Input className="mt-4" value={value} onChange={e => setValue(e.target.value)} />
@@ -474,72 +473,61 @@ function UrlAnatomy() {
   )
 }
 
-/* — 5. Glossary — */
+/* 5. Glossary */
 function Glossary() {
   return (
     <DocsPage>
       <DocsHeading
         eyebrow="Understand"
         title="Glossary"
-        description="Whitehash uses one term per concept, aligned with fxhash vocabulary across the API, components, and docs."
+        description="Here are the few terms that may be unfamiliar when you first use Whitehash."
       />
       <DocsSection title="One language">
         <Table
-          head={["Whitehash term", "fxhash / on-chain reality"]}
+          head={["Term", "What it means"]}
           rows={[
             [
               <strong>project</strong>,
-              <>
-                A generative artwork release. fxhash calls this a <em>Generative Token</em>; on
-                Tezos it is an issuer-ledger entry, on EVM its own collection contract.
-              </>,
+              <>A generative artwork release that can contain many tokens (editions).</>,
             ],
             [
               <strong>token</strong>,
-              <>
-                One minted iteration. fxhash&rsquo;s <em>gentk</em> / objkt; an FA2 or ERC-721
-                token.
-              </>,
+              <>One edition from a project. On the blockchain it is represented by a token.</>,
             ],
             [
               <strong>iteration</strong>,
-              <>The edition number within a project (token #136 of 500).</>,
+              <>The edition number within a project, such as #136 of 500.</>,
             ],
             [
               <strong>seed</strong>,
               <>
-                The hash that makes an iteration deterministic. fxhash: <code>fxhash</code> / the{" "}
-                <code>iterationHash</code> metadata field.
+                A value that tells the generator which edition to draw. The same seed should produce
+                the same result.
               </>,
             ],
             [
               <strong>artifact</strong>,
               <>
-                The executable generator HTML (<code>artifactUri</code>). Distinct from the preview
+                The live generator files (<code>artifactUri</code>), separate from the preview
                 image.
               </>,
             ],
             [
               <strong>display / thumbnail</strong>,
-              <>
-                Static preview images (<code>displayUri</code> / <code>thumbnailUri</code>) —
-                fxhash&rsquo;s own metadata field names.
-              </>,
+              <>The still images shown before the live artwork loads.</>,
             ],
             [
               <strong>ref</strong>,
               <>
-                An optional serialized form of project or token identity, useful for routes and
-                paste fields. Normal read APIs accept the object&rsquo;s identity fields directly.
+                A compact text version of a project or token address, useful in URLs and paste
+                fields. Normal read APIs accept the values directly.
               </>,
             ],
           ]}
         />
       </DocsSection>
       <Callout>
-        Words we deliberately avoid: &ldquo;collection&rdquo; for a project (except where it
-        literally means the EVM collection contract), and &ldquo;piece/artwork&rdquo; as a synonym
-        for token. One concept, one word.
+        Need the exact field names? The API reference shows each field in context with examples.
       </Callout>
     </DocsPage>
   )

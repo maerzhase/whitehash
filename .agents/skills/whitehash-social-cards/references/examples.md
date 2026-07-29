@@ -17,6 +17,10 @@ The primary and secondary lines should each fit on one line at 1280×720. Keep t
 complete hook to roughly 4–12 words. Support copy should be one sentence and no more
 than two rendered lines.
 
+Lead with what someone can do or keep. Use the repository’s product terms, including
+“project” and “token,” and explain any supporting term in context. Do not spend headline
+space describing the audience or announcing that the copy is simple.
+
 ## Good decisions
 
 - Use the actual hash mark as the dominant visual instead of illustrating an abstract

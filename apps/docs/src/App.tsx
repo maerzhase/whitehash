@@ -200,9 +200,9 @@ function HomePage() {
               <span className="text-muted">Straight from the source.</span>
             </h1>
             <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              A framework-agnostic API and React toolkit for reading fxhash projects and tokens
-              across Tezos, Ethereum, and Base, then resolving their IPFS and onchfs content—without
-              depending on a centralized platform backend.
+              Add fxhash generative art to a site, explore a collection, or save a work for later.
+              Whitehash reads projects, tokens, and collector galleries from Tezos, Ethereum, and
+              Base, then shows the preview or runs the live artwork.
             </p>
             <div className="mt-8 flex flex-wrap gap-2">
               <Button render={<Link href="/guide/getting-started" />}>Getting started</Button>
@@ -231,18 +231,18 @@ function HomePage() {
           {[
             [
               "01",
-              "Read",
-              "Start with a token, wallet, or project. Every chain resolves to one predictable data shape.",
+              "Start",
+              "Use a token, collector address, or project. Whitehash returns the same fields every time.",
             ],
             [
               "02",
-              "Resolve",
-              "Load content-addressed IPFS and onchfs artwork through replaceable gateways and RPCs.",
+              "Load",
+              "Load the artwork from IPFS or onchfs, with backup services when one is unavailable.",
             ],
             [
               "03",
-              "Render",
-              "Show a resilient preview, then run the correctly seeded artwork in a restricted iframe.",
+              "Run",
+              "Show a preview first, then run the right edition in a protected browser frame.",
             ],
           ].map(([number, title, copy]) => (
             <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0">
@@ -261,16 +261,16 @@ function HomePage() {
       <section className="border-t border-line">
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.85fr_1.15fr] lg:py-32">
           <div>
-            <div className="section-kicker">One direct path</div>
+            <div className="section-kicker">Show one artwork</div>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
               Token in.
               <br />
               Artwork out.
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
-              Read one token by chain, contract, and ID. <code>Artwork</code> handles gateway
-              fallback, the correctly seeded live artifact, iframe security, and explicit reveal
-              states.
+              Give Whitehash a token’s network, collection address, and edition number.{" "}
+              <code>Artwork</code> shows its image, loads the live edition, and explains when a work
+              is not ready to run.
             </p>
             <p className="mt-4 max-w-md text-sm leading-6 text-faint">
               Starting from a wallet or project? Those discovery APIs return the same{" "}
@@ -319,16 +319,15 @@ result.features    // declared token traits
 result.triggeredBy // event, console, or delay`}
           />
           <div>
-            <div className="section-kicker">Headless capture</div>
+            <div className="section-kicker">Capture artwork</div>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
               Artwork URL in.
               <br />
               Pixels out.
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
-              Run the original generator in headless Chromium, wait for its <code>fxpreview()</code>{" "}
-              signal, and produce a deterministic viewport, canvas, or GIF capture with declared
-              features.
+              Run the original generator in a background browser and save a repeatable image or GIF
+              with its traits.
             </p>
             <p className="mt-4 max-w-md text-sm leading-6 text-faint">
               Use local Chrome in development, serverless Chromium on functions, or an isolated
@@ -350,31 +349,31 @@ result.triggeredBy // event, console, or delay`}
 
       <section className="border-t border-line">
         <div className="mx-auto max-w-[1200px] px-4 py-24 sm:px-6 lg:py-28">
-          <div className="section-kicker">No required backend</div>
+          <div className="section-kicker">Built on public data</div>
           <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
-            Public data. Replaceable dependencies.
+            See where your artwork comes from.
           </h2>
           <p className="mt-5 max-w-2xl leading-7 text-muted">
-            Whitehash reads known contracts, normalizes their differences, and resolves
-            content-addressed artwork. Every RPC, indexer, gateway, and trusted contract is visible
-            and configurable.
+            Whitehash reads public records and artwork files from the networks and storage systems
+            where they live. The services and contract addresses are visible, configurable, and easy
+            to verify.
           </p>
           <div className="mt-10 border-t border-line">
             {(
               [
                 [
                   "Projects and tokens",
-                  "The two stable shapes carried through every API.",
+                  "The two things you work with: a project and one edition.",
                   "/understand/data-model",
                 ],
                 [
                   "Where the data comes from",
-                  "Every fxhash contract and external read path, listed.",
+                  "See where each piece of information comes from.",
                   "/understand/sources",
                 ],
                 [
                   "How artwork URLs are built",
-                  "Seeds, parameters, IPFS, and onchfs resolution.",
+                  "How Whitehash turns a stored artwork reference into a browser URL.",
                   "/understand/urls",
                 ],
               ] as const
@@ -448,7 +447,7 @@ function CapabilityShowcase() {
     <div className="gallery-shell py-24 lg:py-32">
       <header className="gallery-heading mx-auto max-w-[1440px] px-4 sm:px-6">
         <div>
-          <div className="section-kicker">Rendering field test</div>
+          <div className="section-kicker">Try real artwork</div>
           <h2 className="gallery-tagline mt-5 max-w-5xl font-display font-semibold">
             One renderer.
             <br />
@@ -456,8 +455,8 @@ function CapabilityShowcase() {
           </h2>
         </div>
         <p className="max-w-sm text-sm leading-6 text-muted sm:text-base sm:leading-7">
-          Random editions from real projects put every path through its paces—from legacy IPFS and
-          plotter work to onchfs, GPU, audio, and GIF output.
+          These are real editions from real projects, including older IPFS pieces and works that use
+          graphics cards, sound, or animation.
         </p>
       </header>
 

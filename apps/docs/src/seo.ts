@@ -11,7 +11,7 @@ export const SITE_ORIGIN = (
 
 export const SITE_NAME = "whitehash"
 export const SITE_DESCRIPTION =
-  "Read, render, explore, and preserve fxhash generative art directly from Tezos, Ethereum, Base, IPFS, and onchfs."
+  "Put fxhash generative art on the web or save it for later, using public data from Tezos, Ethereum, Base, IPFS, and onchfs."
 
 export const API_SLUGS = [
   "whitehash-provider",
@@ -51,12 +51,11 @@ export interface PageSeo {
 export const GUIDE_SEO: Record<string, PageSeo> = {
   "getting-started": {
     title: "Getting started",
-    description: "Render a real fxhash artwork with a resilient preview and sandboxed live view.",
+    description: "Put a real fxhash artwork on a React page with a preview and live view.",
   },
   configuration: {
     title: "Configuration",
-    description:
-      "Configure Whitehash RPCs, indexers, IPFS gateways, caching, and network behavior.",
+    description: "Configure the services, gateways, cache, and networks Whitehash uses.",
   },
   cli: {
     title: "Archive CLI",
@@ -74,13 +73,11 @@ export const GUIDE_SEO: Record<string, PageSeo> = {
   },
   variations: {
     title: "Explore variations",
-    description:
-      "Run an original content-addressed generator with a different seed or declared fx(params).",
+    description: "Run an original generator with a different seed or fx(params).",
   },
   capture: {
     title: "Capture engine",
-    description:
-      "Create deterministic PNG or GIF captures from generative artwork in headless Chromium.",
+    description: "Create repeatable PNG or GIF captures from generative artwork.",
   },
 }
 
@@ -88,42 +85,40 @@ export const UNDERSTAND_SEO: Record<string, PageSeo> = {
   overview: {
     title: "How Whitehash works",
     description:
-      "Learn how Whitehash reads projects and tokens and renders content-addressed generative art.",
+      "Learn the simple model behind Whitehash: projects make editions, and tokens identify those editions.",
   },
   "data-model": {
     title: "Projects and tokens",
     description:
-      "Understand the cross-chain project and token data models that power the Whitehash API.",
+      "Understand the two things Whitehash works with: projects and individual artwork editions.",
   },
   sources: {
     title: "Where the data comes from",
-    description:
-      "Trace Whitehash ownership, metadata, projects, and artwork bytes to their public sources.",
+    description: "See where Whitehash gets ownership, descriptions, images, and artwork files.",
   },
   urls: {
     title: "How artwork URLs are built",
     description:
-      "See how Whitehash combines seeds, parameters, IPFS, and onchfs into deterministic artwork URLs.",
+      "See how Whitehash turns a stored artwork reference into a browser-ready live artwork URL.",
   },
   glossary: {
     title: "Generative art glossary",
-    description:
-      "Definitions for the fxhash, blockchain, and generative-art concepts used by Whitehash.",
+    description: "Definitions for the blockchain and generative-art words used by Whitehash.",
   },
 }
 
 const API_DESCRIPTIONS: Record<string, string> = {
   "whitehash-provider": "Configure the Whitehash client, network mode, and cache for React.",
   "use-whitehash": "Access the configured Whitehash client, cache, and network mode.",
-  "use-token": "Read one normalized fxhash token from its chain, contract, and token ID.",
+  "use-token": "Load one fxhash token from its network, collection, and edition number.",
   "use-wallet-tokens":
     "Read and normalize the fxhash tokens owned by a Tezos or EVM wallet address.",
   "use-projects": "Browse fxhash projects across supported Tezos and EVM chains.",
   "use-project": "Read an fxhash project and browse its minted generative-art iterations.",
-  "use-gateway-image": "Resolve IPFS images with ordered, automatic gateway fallback.",
+  "use-gateway-image": "Load IPFS images with automatic gateway fallback.",
   "use-artwork-frame": "Control secure live-artwork iframe state in React.",
-  artwork: "Render an fxhash token preview and its live, deterministically seeded artwork.",
-  "token-details": "Display normalized token provenance, artwork, and generative traits.",
+  artwork: "Show an fxhash token preview and its live artwork.",
+  "token-details": "Show a token’s artwork, source details, and generative traits.",
   "wallet-gallery": "Build a navigable gallery of generative-art tokens owned by a wallet.",
   "project-browser": "Browse fxhash projects across supported networks.",
   "project-gallery": "Display a project and its minted generative-art iterations.",
