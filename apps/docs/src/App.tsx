@@ -230,7 +230,7 @@ function HomePage() {
             <div className="mt-8 flex flex-wrap gap-2">
               <Button render={<Link href="/guide/getting-started" />}>Getting started</Button>
               <Button variant="secondary" render={<a href="#discover" />}>
-                Discover artwork
+                Browse art
               </Button>
             </div>
           </div>
@@ -372,13 +372,6 @@ return token && (
               isolated remote browser. Add storage and per-key locks only when your endpoint needs
               them.
             </p>
-            <div className="mt-6 flex flex-wrap gap-2 font-mono text-[11px] text-muted">
-              {["viewport", "canvas", "GIF", "features", "Request → Response"].map(label => (
-                <span key={label} className="rounded-sm border border-line bg-canvas px-2.5 py-1.5">
-                  {label}
-                </span>
-              ))}
-            </div>
             <Link className="docs-text-link mt-7 inline-block" href="/guide/capture">
               Build a capture endpoint →
             </Link>
