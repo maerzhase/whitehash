@@ -22,11 +22,15 @@
 ## Voice
 
 - Sound direct, calm, technically credible, and lightly playful.
-- Be gentle. Do not label the reader a beginner, dummy, or nontechnical user.
-- Prefer concrete outcomes and working examples over adjectives.
+- Write for people building with, making, collecting, or exploring generative art.
+- Be welcoming without labeling the reader a beginner, dummy, nontechnical user, or
+  calling attention to the writing style.
+- Lead with a concrete outcome or action. Prefer working examples over adjectives.
+- Keep “project” and “token” as the canonical product terms. Use “edition” only to
+  clarify what one token represents.
 - Avoid hype words such as “revolutionary,” “game-changing,” and “magic.”
 - Avoid em dashes. Use a period, colon, parentheses, or a new sentence.
-- Explain project jargon the first time it appears.
+- Explain unfamiliar product or blockchain terms at their first useful appearance.
 - Use Whitehash wordplay sparingly. One strong line is better than repeated jokes.
 - Do not imitate a named individual’s style.
 
@@ -45,7 +49,9 @@
 Confirm that:
 
 - the first sentence names a real problem or useful outcome;
+- the next action is obvious from the headline, link, or example;
 - the desired action is obvious;
+- “project” and “token” retain their product meanings;
 - each technical claim is supported by source or tests;
 - dependencies and limitations are disclosed without burying the value;
 - wordplay supports the message instead of competing with it;

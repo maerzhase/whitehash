@@ -18,12 +18,14 @@ Read `references/voice.md` completely before writing or revising copy.
    product claims.
 3. Separate confirmed facts from inference. Qualify external dependencies where the
    reader encounters them.
-4. Draft the clearest useful version first, then add at most one memorable or playful
-   line.
-5. Remove hype, unexplained jargon, audience labels, and claims broader than the
+4. Lead with the useful outcome or next action. Draft the clearest useful version first,
+   then add at most one memorable or playful line.
+5. Keep the product vocabulary stable. Use “project” and “token” as the canonical terms;
+   explain “edition” as a supporting gloss when it helps.
+6. Remove hype, unexplained jargon, audience labels, and claims broader than the
    evidence.
-6. Confirm that commands, API names, links, outputs, and limitations remain exact.
-7. For copy stored in a file, run:
+7. Confirm that commands, API names, links, outputs, and limitations remain exact.
+8. For copy stored in a file, run:
 
 ```bash
 node scripts/validate-copy.mjs <copy-file>
