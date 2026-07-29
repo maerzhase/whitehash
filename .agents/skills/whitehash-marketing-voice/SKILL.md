@@ -7,9 +7,10 @@ description: Write or revise Whitehash marketing copy with a direct, calm, techn
 
 Make Whitehash copy recognizable without weakening technical accuracy.
 
-## Required reference
+## Required references
 
-Read `references/voice.md` completely before writing or revising copy.
+Read `references/voice.md` and `references/positioning.md` completely before writing
+or revising copy.
 
 ## Workflow
 

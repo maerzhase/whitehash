@@ -23,11 +23,16 @@ orchestrator.
 
 ### 1. Establish product truth
 
+Use `../whitehash-marketing-voice/references/positioning.md` as the positioning
+starting point. Pick the CLI preservation journey or the API/React rendering journey
+before choosing the narrative.
+
 Read the repository `AGENTS.md`, relevant README files, implementation, tests, release
 note, and current Git status. Determine:
 
 - the user problem and new capability;
 - the shortest successful user journey;
+- whether the story is local preservation or online rendering/integration;
 - default behavior and opt-in behavior;
 - exact commands and public APIs;
 - meaningful limitations and external dependencies;

@@ -28,6 +28,7 @@ import {
   Spinner,
   Textarea,
   TokenDetails,
+  Tooltip,
   WalletGallery,
   WalletSearch,
 } from "@whitehash/ui"
@@ -167,6 +168,7 @@ export const API_ENTRIES: ApiEntry[] = [
     "Input",
     "Textarea",
     "Dialog",
+    "Tooltip",
     "Spinner",
     "Skeleton",
     "Separator",
@@ -303,6 +305,7 @@ const USAGE: Record<string, string> = {
   Card: `<Card.Root>\n  <Card.Media />\n  <Card.Body><Card.Title>Title</Card.Title></Card.Body>\n</Card.Root>`,
   Field: `<Field.Root>\n  <Field.Label>Wallet</Field.Label>\n  <Field.Control render={<Input />} />\n</Field.Root>`,
   Dialog: `<Dialog open={open} onOpenChange={setOpen}>\n  <Dialog.Content><Dialog.Title>Title</Dialog.Title></Dialog.Content>\n</Dialog>`,
+  Tooltip: `<Tooltip.Root>\n  <Tooltip.Trigger>3 chains</Tooltip.Trigger>\n  <Tooltip.Content>Tezos · Ethereum · Base</Tooltip.Content>\n</Tooltip.Root>`,
   Artwork: `<Artwork.Root token={token}>\n  <Artwork.Image />\n  <Artwork.Live />\n  <Artwork.PlayButton />\n  <Artwork.StatusBadge />\n</Artwork.Root>`,
   TokenDetails: `<TokenDetails token={token} />`,
   WalletGallery: `<WalletGallery address="tz1…" onOpenToken={setToken} />`,
@@ -423,6 +426,13 @@ function ComponentDemo({ name }: { name: string }) {
           </Dialog.Content>
         </Dialog>
       </>
+    )
+  if (name === "Tooltip")
+    return (
+      <Tooltip.Root>
+        <Tooltip.Trigger render={<Button variant="secondary" />}>Hover or focus</Tooltip.Trigger>
+        <Tooltip.Content>Tezos · Ethereum · Base</Tooltip.Content>
+      </Tooltip.Root>
     )
   if (name === "Spinner") return <Spinner />
   if (name === "Skeleton") return <Skeleton className="h-16 w-full" />

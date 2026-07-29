@@ -17,6 +17,11 @@ Read these files completely before editing or rendering cards:
 
 ## Workflow
 
+Use the positioning reference from `../whitehash-marketing-voice/references/positioning.md`.
+Choose one of its two journeys for each card sequence: CLI preservation or API/React
+online rendering. Lead with the result and show Web3 or infrastructure terms only when
+the card teaches a concrete integration choice.
+
 1. Confirm the message, platform, aspect ratio, exact copy, and commands. Inspect
    `apps/docs/app/opengraph-image.tsx`, `apps/docs/src/app.css`, and
    `apps/docs/public/logo-original.png` for CI drift.

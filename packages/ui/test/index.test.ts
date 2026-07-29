@@ -3,6 +3,7 @@ import { cn } from "../src/lib/cn.js"
 import { buttonVariants } from "../src/components/button.js"
 import { badgeVariants } from "../src/components/badge.js"
 import { isWalletAddress } from "../src/components/address-search.js"
+import { Tooltip } from "../src/components/tooltip.js"
 
 describe("cn", () => {
   it("merges and dedupes conflicting Tailwind classes (last wins)", () => {
@@ -35,6 +36,15 @@ describe("badgeVariants", () => {
   })
   it("supports status variants", () => {
     expect(badgeVariants({ variant: "danger" })).toContain("text-danger")
+  })
+})
+
+describe("Tooltip", () => {
+  it("exposes the Base UI compound parts", () => {
+    expect(Tooltip.Root).toBeDefined()
+    expect(Tooltip.Provider).toBeDefined()
+    expect(Tooltip.Trigger).toBeDefined()
+    expect(Tooltip.Content).toBeDefined()
   })
 })
 

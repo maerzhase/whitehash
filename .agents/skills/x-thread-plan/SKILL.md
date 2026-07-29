@@ -13,6 +13,11 @@ Read `references/planning.md` completely before drafting.
 
 ## Workflow
 
+Use `../whitehash-marketing-voice/references/positioning.md` to establish the product
+promise and audience. Select one primary journey for the thread: CLI to offline archive,
+or API/React to online rendering. A thread may mention the other journey, but do not
+blend their outputs into one vague “archive” claim.
+
 1. Collect the confirmed problem, outcome, shortest working journey, important modes,
    trust boundaries, limitations, release state, and desired call to action.
 2. Choose an adaptive narrative. Do not target a predetermined number of posts.

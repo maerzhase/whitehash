@@ -1,15 +1,20 @@
 # whitehash
 
-An open-source toolkit for showing and preserving fxhash generative art from **Tezos, Ethereum,
-and Base**. Give Whitehash a token, project, or collector address and it finds the artwork,
-metadata, ownership, and live generator directly from public blockchain data. Use the ready-made
-React components, or use the plain TypeScript libraries underneath them.
+An open-source toolkit for keeping fxhash generative art available without relying on third-party
+infrastructure. Preserve a token locally as a verified offline archive with the CLI, or load and
+render it in your own website, gallery, database, or collection with the API and React layers.
+
+Whitehash reads artwork, metadata, ownership, and live generator information from **Tezos,
+Ethereum, and Base** through public chain and configurable content infrastructure. Use the
+ready-made React components, or use the plain TypeScript libraries underneath them.
 
 You do not need an API key, backend, wallet connection, or `@fxhash/*` dependency. Whitehash does
 not require an fxhash-hosted endpoint either. The docs site is fully static; the optional
 `apps/onchfs-proxy` app is only needed for some onchfs deployments.
 
-## Start with one artwork
+## Choose your path
+
+### Preserve locally
 
 To save one artwork for later, paste its fxhash token URL:
 
@@ -24,6 +29,8 @@ offline copy of the artwork.
 
 If your link only has a project slug, add `--resolver fxhash`. Whitehash will use fxhash once to
 look up the token identity, then create the same verified offline archive.
+
+### Render and integrate online
 
 The [quickstart](./apps/docs/QUICKSTART.md) gets one artwork on screen in three steps: install two
 packages, add the provider, and pass a token to `Artwork`.

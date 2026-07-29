@@ -18,6 +18,7 @@ import {
   Skeleton,
   Spinner,
   TokenDetails,
+  Tooltip,
   WalletGallery,
   WhitehashProvider,
 } from "@whitehash/ui"
@@ -191,8 +192,30 @@ function HomePage() {
         <div className="hero-inner relative z-10 mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-[1200px] items-center gap-14 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-20">
           <div className="hero-copy max-w-2xl">
             <div className="mb-7 flex items-center gap-2 font-mono text-xs text-muted">
-              <span className="size-1.5 rounded-full bg-success shadow-[0_0_14px_var(--color-success)]" />{" "}
-              Open source · Tezos, Ethereum &amp; Base
+              <img src="/logo-original.png" alt="" aria-hidden="true" className="h-3 w-auto" />
+              <Tooltip.Provider delay={250}>
+                <span className="flex flex-wrap items-center gap-x-1">
+                  <span>Open source</span>
+                  <span aria-hidden>·</span>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger className="border-b border-dotted border-current bg-transparent p-0 font-[inherit] text-inherit transition-colors hover:text-fg focus-visible:text-fg focus-visible:outline-none">
+                      3 chains
+                    </Tooltip.Trigger>
+                    <Tooltip.Content className="whitespace-nowrap font-mono">
+                      Tezos · Ethereum · Base
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                  <span aria-hidden>·</span>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger className="border-b border-dotted border-current bg-transparent p-0 font-[inherit] text-inherit transition-colors hover:text-fg focus-visible:text-fg focus-visible:outline-none">
+                      2 storage systems
+                    </Tooltip.Trigger>
+                    <Tooltip.Content className="whitespace-nowrap font-mono">
+                      IPFS · onchfs
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                </span>
+              </Tooltip.Provider>
             </div>
             <h1 className="font-display text-5xl font-semibold leading-[0.96] tracking-[-0.065em] sm:text-7xl lg:text-[5.25rem]">
               Generative art.
@@ -200,9 +223,9 @@ function HomePage() {
               <span className="text-muted">Straight from the source.</span>
             </h1>
             <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              Add fxhash generative art to a site, explore a collection, or save a work for later.
-              Whitehash reads projects, tokens, and collector galleries from Tezos, Ethereum, and
-              Base, then shows the preview or runs the live artwork.
+              Keep fxhash artwork available without relying on fxhash infrastructure. Preserve a
+              token locally as an offline archive, or render it in your own website with the API and
+              React components.
             </p>
             <div className="mt-8 flex flex-wrap gap-2">
               <Button render={<Link href="/guide/getting-started" />}>Getting started</Button>
@@ -212,9 +235,11 @@ function HomePage() {
             </div>
           </div>
           <div className="hero-visual">
-            <div className="mb-3 flex items-center justify-between font-mono text-[11px] text-faint">
-              <span>live component</span>
-              <span>tezos:mainnet</span>
+            <div className="mb-3 flex items-center justify-between gap-4 text-xs text-muted">
+              <span className="truncate">{SAMPLE_TOKEN.name}</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-faint">
+                {showcaseChainLabel(SAMPLE_TOKEN.chain)}
+              </span>
             </div>
             <Artwork.Root token={SAMPLE_TOKEN} className="hero-artwork">
               <Artwork.Image />
@@ -231,18 +256,18 @@ function HomePage() {
           {[
             [
               "01",
-              "Start",
-              "Use a token, collector address, or project. Whitehash returns the same fields every time.",
+              "Preserve",
+              "Save a self-contained offline archive with one CLI command, ready to keep and verify.",
             ],
             [
               "02",
-              "Load",
-              "Load the artwork from IPFS or onchfs, with backup services when one is unavailable.",
+              "Integrate",
+              "Load and render artwork in your own website, gallery, database, or collection.",
             ],
             [
               "03",
-              "Run",
-              "Show a preview first, then run the right edition in a protected browser frame.",
+              "Configure",
+              "Choose the chains, gateways, indexers, and storage services your project depends on.",
             ],
           ].map(([number, title, copy]) => (
             <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0">
@@ -261,25 +286,35 @@ function HomePage() {
       <section className="border-t border-line">
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.85fr_1.15fr] lg:py-32">
           <div>
-            <div className="section-kicker">Show one artwork</div>
+            <div className="section-kicker">Preserve art</div>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
               Token in.
               <br />
-              Artwork out.
+              Archive out.
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
-              Give Whitehash a token’s network, collection address, and edition number.{" "}
-              <code>Artwork</code> shows its image, loads the live edition, and explains when a work
-              is not ready to run.
+              Turn an identity-bearing fxhash token URL into a verified, self-contained offline
+              archive. Keep the artwork bytes, metadata, and offline wrapper together.
             </p>
             <p className="mt-4 max-w-md text-sm leading-6 text-faint">
-              Starting from a wallet or project? Those discovery APIs return the same{" "}
-              <code>WhitehashToken</code>.
+              Add <code>--json</code> when you need a lightweight token index for a hosted website.
+              JSON alone is not an offline copy of the artwork.
             </p>
-            <Link className="docs-text-link mt-6 inline-block" href="/guide/getting-started">
-              Build your first artwork →
+            <Link className="docs-text-link mt-6 inline-block" href="/guide/cli">
+              Use the CLI to preserve art →
             </Link>
           </div>
+          <CodeBlock
+            language="bash"
+            code={
+              'npx @whitehash/archive \\\n  "https://www.fxhash.xyz/gentk/KT1…-16333" \\\n  --out ./my-artwork\n\n# verify it later\nnpx @whitehash/archive verify ./my-artwork'
+            }
+          />
+        </div>
+      </section>
+
+      <section className="border-t border-line">
+        <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-32">
           <CodeBlock
             language="tsx"
             code={`const { token } = useToken({
@@ -296,11 +331,58 @@ return token && (
   </Artwork.Root>
 )`}
           />
+          <div>
+            <div className="section-kicker">Display art</div>
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+              Token in.
+              <br />
+              Artwork out.
+            </h2>
+            <p className="mt-5 max-w-md leading-7 text-muted">
+              Pass a token’s network, collection address, and edition number. The{" "}
+              <code>Artwork</code> component handles the preview, live edition, and status so you
+              can put the work on your site without rebuilding the rendering flow.
+            </p>
+            <p className="mt-4 max-w-md text-sm leading-6 text-faint">
+              Starting from a wallet or project? Those discovery APIs return the same{" "}
+              <code>WhitehashToken</code>.
+            </p>
+            <Link className="docs-text-link mt-6 inline-block" href="/guide/getting-started">
+              Start building with React →
+            </Link>
+          </div>
         </div>
       </section>
 
       <section className="border-t border-line bg-surface">
-        <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-32">
+        <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:py-32">
+          <div>
+            <div className="section-kicker">Capture art</div>
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+              Artwork URL in.
+              <br />
+              Pixels out.
+            </h2>
+            <p className="mt-5 max-w-md leading-7 text-muted">
+              The capture engine runs the original generator in a controlled browser session and
+              returns a repeatable PNG or GIF with its declared traits.
+            </p>
+            <p className="mt-4 max-w-md text-sm leading-6 text-faint">
+              Run it with local Chrome in development, serverless Chromium on functions, or an
+              isolated remote browser. Add storage and per-key locks only when your endpoint needs
+              them.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2 font-mono text-[11px] text-muted">
+              {["viewport", "canvas", "GIF", "features", "Request → Response"].map(label => (
+                <span key={label} className="rounded-sm border border-line bg-canvas px-2.5 py-1.5">
+                  {label}
+                </span>
+              ))}
+            </div>
+            <Link className="docs-text-link mt-7 inline-block" href="/guide/capture">
+              Build a capture endpoint →
+            </Link>
+          </div>
           <CodeBlock
             language="tsx"
             code={`const result = await capture({
@@ -318,32 +400,6 @@ result.image       // PNG or GIF
 result.features    // declared token traits
 result.triggeredBy // event, console, or delay`}
           />
-          <div>
-            <div className="section-kicker">Capture artwork</div>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
-              Artwork URL in.
-              <br />
-              Pixels out.
-            </h2>
-            <p className="mt-5 max-w-md leading-7 text-muted">
-              Run the original generator in a background browser and save a repeatable image or GIF
-              with its traits.
-            </p>
-            <p className="mt-4 max-w-md text-sm leading-6 text-faint">
-              Use local Chrome in development, serverless Chromium on functions, or an isolated
-              remote browser. Add storage and per-key locks only when your endpoint needs them.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-2 font-mono text-[11px] text-muted">
-              {["viewport", "canvas", "GIF", "features", "Request → Response"].map(label => (
-                <span key={label} className="rounded-sm border border-line bg-canvas px-2.5 py-1.5">
-                  {label}
-                </span>
-              ))}
-            </div>
-            <Link className="docs-text-link mt-7 inline-block" href="/guide/capture">
-              Build a capture endpoint →
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -354,9 +410,9 @@ result.triggeredBy // event, console, or delay`}
             See where your artwork comes from.
           </h2>
           <p className="mt-5 max-w-2xl leading-7 text-muted">
-            Whitehash reads public records and artwork files from the networks and storage systems
-            where they live. The services and contract addresses are visible, configurable, and easy
-            to verify.
+            Public records and artwork files come from the networks and storage systems where they
+            live. Nothing is hidden behind a required backend: the services and contract addresses
+            are visible, configurable, and easy to verify.
           </p>
           <div className="mt-10 border-t border-line">
             {(
@@ -373,7 +429,7 @@ result.triggeredBy // event, console, or delay`}
                 ],
                 [
                   "How artwork URLs are built",
-                  "How Whitehash turns a stored artwork reference into a browser URL.",
+                  "How a stored artwork reference becomes a browser URL.",
                   "/understand/urls",
                 ],
               ] as const
@@ -390,6 +446,27 @@ result.triggeredBy // event, console, or delay`}
                 </span>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-line bg-surface">
+        <div className="mx-auto grid max-w-[1200px] items-center gap-6 px-4 py-14 sm:px-6 md:grid-cols-[.9fr_1.1fr] md:gap-12 md:py-16">
+          <div>
+            <div className="section-kicker">LLM-ready</div>
+            <h2 className="mt-3 flex items-center gap-[0.28em] text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">
+              <img src="/logo-original.png" alt="whitehash" className="size-[0.82em] shrink-0" />
+              <span>for your agents.</span>
+            </h2>
+          </div>
+          <div>
+            <p className="max-w-xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
+              Point coding agents to one machine-readable map of the concepts, packages,
+              documentation routes, and working examples.
+            </p>
+            <Link className="docs-text-link mt-4 inline-block" href="/llms">
+              Read llms.txt →
+            </Link>
           </div>
         </div>
       </section>
@@ -447,7 +524,11 @@ function CapabilityShowcase() {
     <div className="gallery-shell py-24 lg:py-32">
       <header className="gallery-heading mx-auto max-w-[1440px] px-4 sm:px-6">
         <div>
-          <div className="section-kicker">Try real artwork</div>
+          <div className="section-kicker">
+            Fresh{" "}
+            <img src="/logo-original.png" alt="whitehash" className="inline-block h-3 w-auto" />{" "}
+            from the chain
+          </div>
           <h2 className="gallery-tagline mt-5 max-w-5xl font-display font-semibold">
             One renderer.
             <br />
@@ -455,8 +536,8 @@ function CapabilityShowcase() {
           </h2>
         </div>
         <p className="max-w-sm text-sm leading-6 text-muted sm:text-base sm:leading-7">
-          These are real editions from real projects, including older IPFS pieces and works that use
-          graphics cards, sound, or animation.
+          Browse live fxhash projects, not screenshots. Render work from IPFS and on-chain storage
+          with previews, animation, sound, and live rendering intact.
         </p>
       </header>
 
@@ -476,6 +557,7 @@ function CapabilityShowcase() {
           rotate(event.deltaX > 0 ? 1 : -1)
         }}
         onPointerDown={event => {
+          if (event.target instanceof Element && event.target.closest(".carousel-arrow")) return
           pointerStart.current = event.clientX
           event.currentTarget.setPointerCapture(event.pointerId)
         }}
@@ -555,7 +637,10 @@ function CapabilityShowcase() {
         </button>
       </div>
       <div className="carousel-hint mx-auto max-w-[1440px] px-4 sm:px-6">
-        <span>Swipe, use arrow keys, or choose a work</span>
+        <span className="hidden sm:inline">
+          Swipe, use arrow keys, or click the arrows to browse
+        </span>
+        <span className="sm:hidden">Swipe to browse</span>
         <span aria-hidden>↔</span>
       </div>
     </div>

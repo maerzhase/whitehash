@@ -2,6 +2,9 @@
 
 ## Product truth
 
+- Whitehash's central promise is to keep fxhash generative art available without relying
+  on third-party infrastructure. The two user journeys are CLI-to-offline-archive and
+  API/React-to-online-rendering.
 - Inspect implementation and tests before making technical claims.
 - Separate verified facts from inference.
 - Describe `verify` precisely. Archive verification checks local file hashes,
