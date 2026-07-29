@@ -200,9 +200,9 @@ function HomePage() {
               <span className="text-muted">Straight from the source.</span>
             </h1>
             <p className="mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              A toolkit for putting fxhash generative art on the web. Read projects, tokens, and
-              collector galleries from Tezos, Ethereum, and Base, then show the preview or run the
-              live artwork—without relying on a central platform backend.
+              Add fxhash generative art to a site, explore a collection, or save a work for later.
+              Whitehash reads projects, tokens, and collector galleries from Tezos, Ethereum, and
+              Base, then shows the preview or runs the live artwork.
             </p>
             <div className="mt-8 flex flex-wrap gap-2">
               <Button render={<Link href="/guide/getting-started" />}>Getting started</Button>
@@ -231,18 +231,18 @@ function HomePage() {
           {[
             [
               "01",
-              "Read",
-              "Start with a token, collector address, or project. Whitehash gives you the same shape every time.",
+              "Start",
+              "Use a token, collector address, or project. Whitehash returns the same fields every time.",
             ],
             [
               "02",
-              "Resolve",
-              "Find the artwork files through IPFS or onchfs, with backup services when one is unavailable.",
+              "Load",
+              "Load the artwork from IPFS or onchfs, with backup services when one is unavailable.",
             ],
             [
               "03",
-              "Render",
-              "Show a preview first, then run the real artwork with the right edition in a safe browser frame.",
+              "Run",
+              "Show a preview first, then run the right edition in a protected browser frame.",
             ],
           ].map(([number, title, copy]) => (
             <div key={number} className="py-9 lg:px-8 first:pl-0 last:pr-0">
@@ -261,16 +261,16 @@ function HomePage() {
       <section className="border-t border-line">
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.85fr_1.15fr] lg:py-32">
           <div>
-            <div className="section-kicker">One direct path</div>
+            <div className="section-kicker">Show one artwork</div>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
               Token in.
               <br />
               Artwork out.
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
-              Give Whitehash a token’s network, collection address, and edition number. <code>Artwork</code>
-              handles backup image sources, the correct live edition, browser safety, and clear
-              unrevealed states.
+              Give Whitehash a token’s network, collection address, and edition number.{" "}
+              <code>Artwork</code> shows its image, loads the live edition, and explains when a work
+              is not ready to run.
             </p>
             <p className="mt-4 max-w-md text-sm leading-6 text-faint">
               Starting from a wallet or project? Those discovery APIs return the same{" "}
@@ -319,15 +319,15 @@ result.features    // declared token traits
 result.triggeredBy // event, console, or delay`}
           />
           <div>
-            <div className="section-kicker">Headless capture</div>
+            <div className="section-kicker">Capture artwork</div>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
               Artwork URL in.
               <br />
               Pixels out.
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
-              Run the original generator in a background browser and save a repeatable screenshot,
-              canvas image, or GIF with its declared traits.
+              Run the original generator in a background browser and save a repeatable image or GIF
+              with its traits.
             </p>
             <p className="mt-4 max-w-md text-sm leading-6 text-faint">
               Use local Chrome in development, serverless Chromium on functions, or an isolated
@@ -349,14 +349,14 @@ result.triggeredBy // event, console, or delay`}
 
       <section className="border-t border-line">
         <div className="mx-auto max-w-[1200px] px-4 py-24 sm:px-6 lg:py-28">
-          <div className="section-kicker">No required backend</div>
+          <div className="section-kicker">Built on public data</div>
           <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
-            Public data. Replaceable dependencies.
+            See where your artwork comes from.
           </h2>
           <p className="mt-5 max-w-2xl leading-7 text-muted">
-            Whitehash reads the public records, smooths over the differences between networks,
-            and finds the artwork files. The services and contract addresses it uses are visible
-            and can be replaced.
+            Whitehash reads public records and artwork files from the networks and storage systems
+            where they live. The services and contract addresses are visible, configurable, and
+            easy to verify.
           </p>
           <div className="mt-10 border-t border-line">
             {(

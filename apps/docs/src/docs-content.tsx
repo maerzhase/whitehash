@@ -89,65 +89,65 @@ export const API_ENTRIES: ApiEntry[] = [
     slug: "whitehash-provider",
     name: "WhitehashProvider",
     group: "React hooks",
-    description: "Set up Whitehash once so the rest of your app can use it.",
+    description: "Set up Whitehash once, then use it throughout your app.",
   },
   {
     slug: "use-whitehash",
     name: "useWhitehash",
     group: "React hooks",
-    description: "Access the Whitehash setup from inside your app.",
+    description: "Access your Whitehash client and its current settings.",
   },
   {
     slug: "use-token",
     name: "useToken",
     group: "React hooks",
-    description: "Load one artwork edition from its network, collection, and edition number.",
+    description: "Load one token from its network, collection, and edition number.",
   },
   {
     slug: "use-wallet-tokens",
     name: "useWalletTokens",
     group: "React hooks",
     description:
-      "Find the artwork owned by a collector address, even when it spans multiple networks.",
+      "Find the tokens owned by a collector address across supported networks.",
   },
   {
     slug: "use-projects",
     name: "useProjects",
     group: "React hooks",
     description:
-      "Browse projects and their preview images across supported networks.",
+      "Browse projects and preview images across supported networks.",
   },
   {
     slug: "use-project",
     name: "useProject",
     group: "React hooks",
-    description: "Load a project and list the editions made from it.",
+    description: "Load a project and list its tokens.",
   },
   {
     slug: "use-gateway-image",
     name: "useGatewayImage",
     group: "React hooks",
     description:
-      "Load an IPFS image and try a backup gateway if the first one is unavailable.",
+      "Load an IPFS image and try another gateway if the first one is unavailable.",
   },
   {
     slug: "use-artwork-frame",
     name: "useArtworkFrame",
     group: "React hooks",
-    description: "Control the play button and safe browser frame for live artwork.",
+    description: "Control live artwork playback in a protected browser frame.",
   },
   {
     slug: "artwork",
     name: "Artwork",
     group: "Domain",
     description:
-      "Show an edition’s preview, run its live artwork, and explain its reveal status.",
+      "Show a token’s preview, live artwork, and reveal status.",
   },
   {
     slug: "token-details",
     name: "TokenDetails",
     group: "Domain",
-    description: "Show an edition with its artwork, details, and traits.",
+    description: "Show a token with its artwork, details, and traits.",
   },
   ...[
     "WalletGallery",
@@ -813,14 +813,14 @@ const GUIDES: Record<
 > = {
   "getting-started": {
     title: "Getting started",
-    description: "Put one real fxhash artwork on a React page.",
+    description: "Put a real fxhash artwork on a React page.",
     code: `npm install @whitehash/ui @whitehash/react`,
     language: "bash",
   },
   configuration: {
     title: "Configuration",
     description:
-      "Use the defaults to get started, then change only the services you want to control.",
+      "Start with the defaults, then change only the services you need to control.",
     code: `<WhitehashProvider>
   <App />
 </WhitehashProvider>`,
@@ -828,7 +828,7 @@ const GUIDES: Record<
   cli: {
     title: "Archive CLI",
     description:
-      "Save a project, one edition, or a collector’s artwork for a website or offline archive.",
+      "Save a project, token, or collector’s artwork for a website or offline archive.",
     code: `# Index a project's metadata and every iteration
 npx @whitehash/archive project v2:13944
 
@@ -840,7 +840,7 @@ npx @whitehash/archive token \\
   theming: {
     title: "Theming and tokens",
     description:
-      "Change the colors, spacing, and type without rewriting the components.",
+      "Change colors, spacing, and type without rewriting the components.",
     code: `:root {
   --color-canvas: #000;
   --color-surface: #000;
@@ -871,7 +871,7 @@ npx @whitehash/archive token \\
   onchfs: {
     title: "Render onchfs artwork",
     description:
-      "Run artwork stored on Tezos, Ethereum, or Base in the browser without a required platform backend.",
+      "Run artwork stored on Tezos, Ethereum, or Base directly in the browser.",
     code: `"use client"
 
 import { useEffect } from "react"
@@ -895,7 +895,7 @@ export function OnchfsRegistration() {
   variations: {
     title: "Explore variations",
     description:
-      "Try the original generator with a different seed or settings, entirely in the browser.",
+      "Try the original generator with a different seed or settings in the browser.",
     code: `import { BlockchainType, createRuntimeConnector } from "@whitehash/runtime"
 import { ArtworkIframe, useRuntimeController } from "@whitehash/runtime/react"
 
