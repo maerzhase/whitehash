@@ -89,65 +89,65 @@ export const API_ENTRIES: ApiEntry[] = [
     slug: "whitehash-provider",
     name: "WhitehashProvider",
     group: "React hooks",
-    description: "Configure the client, network mode, and cache for every hook and component.",
+    description: "Set up Whitehash once so the rest of your app can use it.",
   },
   {
     slug: "use-whitehash",
     name: "useWhitehash",
     group: "React hooks",
-    description: "Read the configured client, cache, and network mode.",
+    description: "Access the Whitehash setup from inside your app.",
   },
   {
     slug: "use-token",
     name: "useToken",
     group: "React hooks",
-    description: "Read one normalized token directly from its chain, contract, and token ID.",
+    description: "Load one artwork edition from its network, collection, and edition number.",
   },
   {
     slug: "use-wallet-tokens",
     name: "useWalletTokens",
     group: "React hooks",
     description:
-      "Detect an address family, query the relevant chain contracts, normalize owned tokens, and expose cache-first progress per chain.",
+      "Find the artwork owned by a collector address, even when it spans multiple networks.",
   },
   {
     slug: "use-projects",
     name: "useProjects",
     group: "React hooks",
     description:
-      "Paginate projects and progressively hydrate missing preview fields on every chain.",
+      "Browse projects and their preview images across supported networks.",
   },
   {
     slug: "use-project",
     name: "useProject",
     group: "React hooks",
-    description: "Read project details and minted iterations from its chain and ID.",
+    description: "Load a project and list the editions made from it.",
   },
   {
     slug: "use-gateway-image",
     name: "useGatewayImage",
     group: "React hooks",
     description:
-      "Resolve a protocol-native image URI and advance through your ordered IPFS gateways whenever an image fails.",
+      "Load an IPFS image and try a backup gateway if the first one is unavailable.",
   },
   {
     slug: "use-artwork-frame",
     name: "useArtworkFrame",
     group: "React hooks",
-    description: "Own live-artwork play state and secure iframe attributes.",
+    description: "Control the play button and safe browser frame for live artwork.",
   },
   {
     slug: "artwork",
     name: "Artwork",
     group: "Domain",
     description:
-      "The component this toolkit exists for: preview image, live sandboxed execution, and reveal state for one token — composable part by part.",
+      "Show an edition’s preview, run its live artwork, and explain its reveal status.",
   },
   {
     slug: "token-details",
     name: "TokenDetails",
     group: "Domain",
-    description: "A full token detail view: artwork, provenance fields, and features.",
+    description: "Show an edition with its artwork, details, and traits.",
   },
   ...[
     "WalletGallery",
@@ -813,14 +813,14 @@ const GUIDES: Record<
 > = {
   "getting-started": {
     title: "Getting started",
-    description: "Render one real fxhash artwork with a resilient preview and sandboxed live view.",
+    description: "Put one real fxhash artwork on a React page.",
     code: `npm install @whitehash/ui @whitehash/react`,
     language: "bash",
   },
   configuration: {
     title: "Configuration",
     description:
-      "Start with the bundled third-party endpoints. Override one dependency at a time as your application needs it.",
+      "Use the defaults to get started, then change only the services you want to control.",
     code: `<WhitehashProvider>
   <App />
 </WhitehashProvider>`,
@@ -828,7 +828,7 @@ const GUIDES: Record<
   cli: {
     title: "Archive CLI",
     description:
-      "Index a project or token into portable JSON, or preserve a wallet as an offline archive.",
+      "Save a project, one edition, or a collector’s artwork for a website or offline archive.",
     code: `# Index a project's metadata and every iteration
 npx @whitehash/archive project v2:13944
 
@@ -840,7 +840,7 @@ npx @whitehash/archive token \\
   theming: {
     title: "Theming and tokens",
     description:
-      "Override variables; do not fork component styles. These are the complete public design tokens.",
+      "Change the colors, spacing, and type without rewriting the components.",
     code: `:root {
   --color-canvas: #000;
   --color-surface: #000;
@@ -871,7 +871,7 @@ npx @whitehash/archive token \\
   onchfs: {
     title: "Render onchfs artwork",
     description:
-      "Resolve onchfs content from Tezos, Ethereum, or Base and run it in a browser iframe—without an fxhash endpoint or Whitehash-hosted backend.",
+      "Run artwork stored on Tezos, Ethereum, or Base in the browser without a required platform backend.",
     code: `"use client"
 
 import { useEffect } from "react"
@@ -895,7 +895,7 @@ export function OnchfsRegistration() {
   variations: {
     title: "Explore variations",
     description:
-      "Drive the original content-addressed generator with a different seed or declared fx(params), entirely in the browser.",
+      "Try the original generator with a different seed or settings, entirely in the browser.",
     code: `import { BlockchainType, createRuntimeConnector } from "@whitehash/runtime"
 import { ArtworkIframe, useRuntimeController } from "@whitehash/runtime/react"
 
@@ -917,7 +917,7 @@ return <ArtworkIframe ref={runtime.ref} />`,
   capture: {
     title: "Capture engine",
     description:
-      "Render deterministic PNG or GIF captures from generative artwork in headless Chromium, with fxhash-compatible triggers and feature extraction.",
+      "Create repeatable PNG or GIF images from generative artwork in a background browser.",
     code: `pnpm add @whitehash/capture puppeteer-core`,
     language: "bash",
   },

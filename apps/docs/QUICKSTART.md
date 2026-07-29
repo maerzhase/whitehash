@@ -1,8 +1,7 @@
 # whitehash quickstart
 
-Render one fxhash token with its static preview and correctly seeded live artwork.
-You need React 18.3 or newer. You do not need an API key, backend, wallet connection,
-or fxhash dependency.
+Put one fxhash artwork on a React page. You need React 18.3 or newer. You do not need an API key,
+backend, wallet connection, or fxhash dependency.
 
 ## 1. Install
 
@@ -12,9 +11,9 @@ pnpm add @whitehash/react @whitehash/ui
 
 ## 2. Mount the provider
 
-Import the stylesheet and mount the provider once near the root of your app. It works
-without configuration: mainnet, bundled third-party endpoints, IPFS fallback, and
-browser-persistent caching are selected automatically.
+Import the stylesheet and mount the provider once near the root of your app. It works without
+configuration: Whitehash uses mainnet, public data services, backup IPFS gateways, and browser
+caching by default.
 
 ```tsx
 import { WhitehashProvider } from "@whitehash/ui"
@@ -29,9 +28,9 @@ root.render(
 
 ## 3. Read and render one token
 
-Read the token directly from its chain, contract, and token ID. `Artwork` then owns the
-distinction between a static preview and executable artwork, builds the correctly seeded
-URL, and places the live version in a restricted iframe.
+Tell Whitehash where the token lives, then give the result to `Artwork`. It shows the preview
+first. When someone clicks **Run live**, it opens the actual generative artwork with the right
+seed in a restricted iframe.
 
 ```tsx
 import { useToken } from "@whitehash/react"
@@ -58,22 +57,22 @@ export function TokenArtwork() {
 }
 ```
 
-The preview appears first. Pressing **Run live** replaces it with the executable,
-correctly seeded artwork. Unrevealed tokens and onchfs pieces that need configuration
-get an explicit status instead of failing silently.
+Unrevealed tokens and onchfs pieces that need extra setup show a clear status instead of failing
+silently.
 
 ## Where the token comes from
 
-Whitehash returns the same token shape from every read path:
+You can start with whatever information your app already has:
 
 | You have | Use |
 | --- | --- |
-| A collector address | `useWalletTokens(address)` |
-| A project identity | `useProject({ chain, id })` and select one of its `tokens` |
-| Exact token identity | `useToken({ chain, contract, tokenId })` |
+| A collector address | `useWalletTokens(address)` finds the artwork they own |
+| A project | `useProject({ chain, id })` lists its tokens (editions) |
+| One exact token | `useToken({ chain, contract, tokenId })` reads it directly |
 
-Start with the read path your application already has. Refs are optional serialized
-values for routes and paste fields; normal reads use identity fields directly.
+Start with the row that matches what your application already has. The `chain`, `contract`, and
+`tokenId` values are simply the token’s address: its network, collection, and edition number.
+Refs are optional packed strings for URLs and paste fields.
 
 ## Next
 

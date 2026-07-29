@@ -1,32 +1,32 @@
 # whitehash
 
-An open-source, framework-agnostic toolkit for reading and embedding fxhash generative art
-from **Tezos, Ethereum, and Base**. Whitehash provides low-level TypeScript APIs, headless
-React bindings, and composable React UI while reading ownership, projects, metadata, and
-artwork directly from public blockchain infrastructure and content-addressed storage.
+An open-source toolkit for showing and preserving fxhash generative art from **Tezos, Ethereum,
+and Base**. Give Whitehash a token, project, or collector address and it finds the artwork,
+metadata, ownership, and live generator directly from public blockchain data. Use the ready-made
+React components, or use the plain TypeScript libraries underneath them.
 
-No `@fxhash/*` dependencies. No fxhash-hosted endpoint is used by the toolkit. The docs
-site is fully static; `apps/onchfs-proxy` is the only optional server piece.
+You do not need an API key, backend, wallet connection, or `@fxhash/*` dependency. Whitehash does
+not require an fxhash-hosted endpoint either. The docs site is fully static; the optional
+`apps/onchfs-proxy` app is only needed for some onchfs deployments.
 
 ## Start with one artwork
 
-To preserve one artwork first, paste an identity-bearing fxhash token URL:
+To save one artwork for later, paste its fxhash token URL:
 
 ```bash
 npx @whitehash/archive \
   "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333"
 ```
 
-This creates a verified offline folder containing the artwork bytes and integrity
-hashes. Add `--json` for a lightweight normalized token index intended for a hosted
-website; JSON alone is not an offline copy.
+This creates a verified offline folder with the artwork files and checks that they have not
+changed. Add `--json` if you only want a small JSON record for a website; JSON alone is not an
+offline copy of the artwork.
 
-For a slug-only iteration link, add `--resolver fxhash`. That optional convenience
-contacts fxhash's hosted service only to recover the on-chain identity, then creates
-the same verified offline archive.
+If your link only has a project slug, add `--resolver fxhash`. Whitehash will use fxhash once to
+look up the token identity, then create the same verified offline archive.
 
-The [quickstart](./apps/docs/QUICKSTART.md) shows the core contract: mount the
-zero-config provider, read one token by identity, and hand it to `Artwork`.
+The [quickstart](./apps/docs/QUICKSTART.md) gets one artwork on screen in three steps: install two
+packages, add the provider, and pass a token to `Artwork`.
 
 ```tsx
 import { useToken } from "@whitehash/react"
@@ -57,17 +57,17 @@ root.render(
 )
 ```
 
-The provider defaults to mainnet, bundled public endpoints, IPFS fallback, and
-browser-persistent caching. Configure only what you want to change.
+The provider starts with mainnet and sensible public defaults, including backup IPFS gateways and
+browser caching. Configure only the parts you want to change.
 
 ## Choose an API layer
 
 | Layer | Package | Use it when |
 | --- | --- | --- |
-| Shared contracts | [`@whitehash/core`](./packages/core) | You only need stable types, supported-network metadata, capture contracts, or browser security defaults |
-| Framework-free | [`@whitehash/resolve`](./packages/resolve), [`@whitehash/chain-reader`](./packages/chain-reader), [`@whitehash/runtime`](./packages/runtime), [`@whitehash/onchfs-sw`](./packages/onchfs-sw) | You want plain TypeScript, direct onchfs resolution, a custom renderer, interactive variations, or non-React integration |
-| Headless React | [`@whitehash/react`](./packages/react) | You want hooks for fetching, caching, gateway fallback, and iframe state |
-| Complete UI | [`@whitehash/ui`](./packages/ui) | You want composable artwork, token, gallery, and search components |
+| Shared types | [`@whitehash/core`](./packages/core) | You are building your own integration and only need common types and settings |
+| Plain TypeScript | [`@whitehash/resolve`](./packages/resolve), [`@whitehash/chain-reader`](./packages/chain-reader), [`@whitehash/runtime`](./packages/runtime), [`@whitehash/onchfs-sw`](./packages/onchfs-sw) | You are not using React, or you want to build your own renderer |
+| React hooks | [`@whitehash/react`](./packages/react) | You want ready-made data fetching and state management |
+| React UI | [`@whitehash/ui`](./packages/ui) | You want artwork, gallery, token, and search components ready to drop in |
 
 ## Apps
 

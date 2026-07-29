@@ -11,7 +11,7 @@ export const SITE_ORIGIN = (
 
 export const SITE_NAME = "whitehash"
 export const SITE_DESCRIPTION =
-  "Read, render, explore, and preserve fxhash generative art directly from Tezos, Ethereum, Base, IPFS, and onchfs."
+  "Put fxhash generative art on the web or save it for later, using public data from Tezos, Ethereum, Base, IPFS, and onchfs."
 
 export const API_SLUGS = [
   "whitehash-provider",
@@ -88,27 +88,27 @@ export const UNDERSTAND_SEO: Record<string, PageSeo> = {
   overview: {
     title: "How Whitehash works",
     description:
-      "Learn how Whitehash reads projects and tokens and renders content-addressed generative art.",
+      "Learn the simple model behind Whitehash: projects make editions, and tokens identify those editions.",
   },
   "data-model": {
     title: "Projects and tokens",
     description:
-      "Understand the cross-chain project and token data models that power the Whitehash API.",
+      "Understand the two things Whitehash works with: projects and individual artwork editions.",
   },
   sources: {
     title: "Where the data comes from",
     description:
-      "Trace Whitehash ownership, metadata, projects, and artwork bytes to their public sources.",
+      "See where Whitehash gets ownership, descriptions, images, and artwork files.",
   },
   urls: {
     title: "How artwork URLs are built",
     description:
-      "See how Whitehash combines seeds, parameters, IPFS, and onchfs into deterministic artwork URLs.",
+      "See how Whitehash turns a stored artwork reference into a browser-ready live artwork URL.",
   },
   glossary: {
     title: "Generative art glossary",
     description:
-      "Definitions for the fxhash, blockchain, and generative-art concepts used by Whitehash.",
+      "Plain-English definitions for the blockchain and generative-art words used by Whitehash.",
   },
 }
 
