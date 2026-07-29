@@ -108,7 +108,7 @@ export const UNDERSTAND_SEO: Record<string, PageSeo> = {
   glossary: {
     title: "Generative art glossary",
     description:
-      "Plain-English definitions for the blockchain and generative-art words used by Whitehash.",
+      "Definitions for the blockchain and generative-art words used by Whitehash.",
   },
 }
 

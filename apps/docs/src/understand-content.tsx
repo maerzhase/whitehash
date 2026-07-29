@@ -24,7 +24,7 @@ export const UNDERSTAND_ENTRIES: UnderstandEntry[] = [
   {
     slug: "overview",
     title: "How Whitehash works",
-    description: "A short, plain-English tour before you meet the code.",
+    description: "A short tour of the ideas behind Whitehash before you meet the code.",
   },
   {
     slug: "data-model",
@@ -113,7 +113,7 @@ function Overview() {
           </p>
         </div>
       </DocsSection>
-      <DocsSection title="3. One simple shape across networks">
+      <DocsSection title="3. One consistent shape across networks">
         <div className="docs-prose">
           <p>
             Tezos, Ethereum, and Base store their records differently. Whitehash does the translation
@@ -485,7 +485,7 @@ function Glossary() {
       />
       <DocsSection title="One language">
         <Table
-          head={["Term", "Plain-English meaning"]}
+          head={["Term", "What it means"]}
           rows={[
             [
               <strong>project</strong>,
@@ -530,7 +530,8 @@ function Glossary() {
       </DocsSection>
       <Callout>
         The code still uses the official field names where you need them. The explanations around
-        those names are intentionally ordinary language.
+        those names are written for people who are new to the toolkit as well as people who already
+        know the underlying systems.
       </Callout>
     </DocsPage>
   )

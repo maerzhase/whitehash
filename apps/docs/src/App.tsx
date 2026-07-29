@@ -232,7 +232,7 @@ function HomePage() {
             [
               "01",
               "Read",
-              "Start with a token, collector address, or project. Whitehash gives you the same simple shape every time.",
+              "Start with a token, collector address, or project. Whitehash gives you the same shape every time.",
             ],
             [
               "02",
@@ -368,7 +368,7 @@ result.triggeredBy // event, console, or delay`}
                 ],
                 [
                   "Where the data comes from",
-                  "A plain-English map of where each piece of information comes from.",
+                  "See where each piece of information comes from.",
                   "/understand/sources",
                 ],
                 [
