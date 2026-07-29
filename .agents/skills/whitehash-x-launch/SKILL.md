@@ -55,15 +55,15 @@ The script composes assets owned by the focused skills and copies:
 
 - `thread.md`, an adaptive thread skeleton;
 - `cards.html`, modular deterministic card layouts;
-- the high-resolution Whitehash logo from `apps/docs/public/logo-original.png`.
+- both logo variants and the Geist font files required by the card template.
 
 The scaffold refuses to overwrite a non-empty directory.
 
 ### 4. Draft the thread
 
 Follow `x-thread-plan` and `whitehash-marketing-voice`. Explain internal names such as
-“paste first” with a concrete example or outcome. Keep the offline archive and hostable
-JSON outcomes distinct.
+“paste first” in plain language. Keep the offline archive and hostable JSON outcomes
+distinct.
 
 ### 5. Build visual cards
 

@@ -4,7 +4,13 @@ import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises"
 import { dirname, extname, join, relative, resolve, sep } from "node:path"
 import onchfs from "onchfs"
 import { createWhitehashClient, type ChainId, type WhitehashToken } from "@whitehash/chain-reader"
-import { ARTWORK_IFRAME_SANDBOX, chainSlug, type OnchfsResponse } from "@whitehash/core"
+import {
+  ARTWORK_IFRAME_SANDBOX,
+  chainSlug,
+  isChainId,
+  isEvmChain,
+  type OnchfsResponse,
+} from "@whitehash/core"
 import { ONCHFS_WORKER_NETWORKS } from "@whitehash/onchfs-sw"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"
 import { extractCar, writeExtractedCar } from "./car.js"
@@ -37,6 +43,25 @@ export interface ArchivedToken {
   path: string
   artifact: "ipfs" | "onchfs"
   files: number
+  /**
+   * Provider-observed normalized state captured while the archive was made.
+   * This is comparison evidence, not a signature or a historical chain proof.
+   */
+  provenance?: ArchivedTokenProvenance
+}
+
+export interface ArchivedTokenState {
+  iterationHash: string | null
+  artifactUri: string | null
+  generatorUri: string | null
+  metadataUri: string | null
+  assigned: boolean
+}
+
+export interface ArchivedTokenProvenance {
+  format: 1
+  observedAt: string
+  state: ArchivedTokenState
 }
 
 export interface ArchiveManifest {
@@ -44,6 +69,56 @@ export interface ArchiveManifest {
   createdAt: string
   addresses: string[]
   tokens: ArchivedToken[]
+}
+
+export type OnchainVerificationStatus = "match" | "mismatch" | "unavailable" | "unverifiable"
+
+export interface OnchainFieldCheck {
+  field:
+    | "chain"
+    | "contract"
+    | "tokenId"
+    | "iterationHash"
+    | "artifactUri"
+    | "generatorUri"
+    | "metadataUri"
+    | "assigned"
+  status: "match" | "mismatch"
+  archived: string | boolean | null
+  current: string | boolean | null
+}
+
+export interface OnchainTokenVerification {
+  chain: ChainId
+  contract: string
+  tokenId: string
+  status: OnchainVerificationStatus
+  checks: OnchainFieldCheck[]
+  observedAt: string | null
+  message: string
+}
+
+export interface OnchainArchiveVerification {
+  status: OnchainVerificationStatus
+  offline: { tokens: number; files: number }
+  scope: "current"
+  historical: "unavailable"
+  ownership: "not-checked"
+  trust: string
+  tokens: OnchainTokenVerification[]
+}
+
+export interface OnchainTokenReader {
+  getToken(input: {
+    chain: ChainId
+    contract: string
+    tokenId: string
+  }): Promise<WhitehashToken | null>
+}
+
+export interface VerifyArchiveOnchainOptions {
+  /** Inject a configured Whitehash client or deterministic test reader. */
+  client?: OnchainTokenReader
 }
 
 function safeSegment(value: string): string {
@@ -295,11 +370,225 @@ export async function verifyArchive(root: string): Promise<{ tokens: number; fil
       string
     >
     const actual = await fileHashes(tokenDir)
-    if (JSON.stringify(actual) !== JSON.stringify(expected))
-      throw new Error(`Integrity mismatch: ${token.path}`)
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      const mismatchedFiles = [
+        ...new Set([...Object.keys(expected), ...Object.keys(actual)]),
+      ].filter(path => expected[path] !== actual[path])
+      const listedFiles = mismatchedFiles.slice(0, 12).map(path => `  - ${path}`)
+      if (mismatchedFiles.length > 12)
+        listedFiles.push(`  - …and ${mismatchedFiles.length - 12} more`)
+      throw new Error(
+        `Archive verification failed: local files do not match their recorded integrity hashes.\n\n` +
+          `Token: ${token.path}\n\n` +
+          `Files to inspect:\n${listedFiles.join("\n")}\n\n` +
+          `What to do next:\n` +
+          `  1. Restore those files, or recreate the archive from the token.\n` +
+          `  2. For example: whitehash-archive save <token-url> --out ./new-archive\n` +
+          `  3. Run the verifier again after restoring or recreating the archive.\n\n` +
+          `(Integrity mismatch: ${token.path})`,
+      )
+    }
+    if (token.provenance) {
+      const localProvenance = JSON.parse(
+        await readFile(join(tokenDir, "provenance.json"), "utf8"),
+      ) as ArchivedTokenProvenance
+      if (JSON.stringify(localProvenance) !== JSON.stringify(token.provenance)) {
+        throw new Error(
+          `Archive verification failed: the saved provenance record does not match the manifest.\n\n` +
+            `Token: ${token.path}\n\n` +
+            `What to do next:\n` +
+            `  1. Restore the original provenance.json and manifest.json files.\n` +
+            `  2. Run the verifier again after restoring the files.\n\n` +
+            `(Provenance mismatch: ${token.path})`,
+        )
+      }
+    }
     files += Object.keys(actual).length
   }
   return { tokens: manifest.tokens.length, files }
+}
+
+const ONCHAIN_FIELDS = [
+  "iterationHash",
+  "artifactUri",
+  "generatorUri",
+  "metadataUri",
+  "assigned",
+] as const
+
+function sameIdentity(archived: string, current: string) {
+  return archived === current
+}
+
+function overallOnchainStatus(tokens: OnchainTokenVerification[]): OnchainVerificationStatus {
+  for (const status of ["mismatch", "unavailable", "unverifiable"] as const) {
+    if (tokens.some(token => token.status === status)) return status
+  }
+  return "match"
+}
+
+function hasValidProvenance(value: ArchivedTokenProvenance): boolean {
+  const state = value.state
+  const nullableString = (item: unknown) => item === null || typeof item === "string"
+  return (
+    value.format === 1 &&
+    typeof value.observedAt === "string" &&
+    Boolean(state) &&
+    nullableString(state.iterationHash) &&
+    nullableString(state.artifactUri) &&
+    nullableString(state.generatorUri) &&
+    nullableString(state.metadataUri) &&
+    typeof state.assigned === "boolean"
+  )
+}
+
+/**
+ * Re-run offline verification, then compare recorded token state with a fresh
+ * current read through public chain infrastructure.
+ *
+ * This does not prove ownership, provider consensus, signatures, or historical
+ * state at the archive's wall-clock creation time.
+ */
+export async function verifyArchiveOnchain(
+  root: string,
+  options: VerifyArchiveOnchainOptions = {},
+): Promise<OnchainArchiveVerification> {
+  const offline = await verifyArchive(root)
+  const manifest = JSON.parse(
+    await readFile(join(root, "manifest.json"), "utf8"),
+  ) as ArchiveManifest
+  const client =
+    options.client ??
+    createWhitehashClient({
+      resolver: { ipfsGateways: [...DEFAULT_IPFS_GATEWAYS], onchfs: null },
+    })
+  const tokens: OnchainTokenVerification[] = []
+  for (const archived of manifest.tokens) {
+    if (!isChainId(archived.chain) || !archived.contract || !archived.tokenId) {
+      throw new Error(
+        `Archive token has invalid onchain identity: ${String(archived.chain)}/${archived.contract}/${archived.tokenId}`,
+      )
+    }
+    if (archived.provenance && !hasValidProvenance(archived.provenance)) {
+      throw new Error(
+        `Archive token has invalid provenance: ${archived.chain}/${archived.contract}/${archived.tokenId}`,
+      )
+    }
+    let current: WhitehashToken | null
+    try {
+      current = await client.getToken({
+        chain: archived.chain,
+        contract: archived.contract,
+        tokenId: archived.tokenId,
+      })
+    } catch (cause) {
+      tokens.push({
+        chain: archived.chain,
+        contract: archived.contract,
+        tokenId: archived.tokenId,
+        status: "unavailable",
+        checks: [],
+        observedAt: archived.provenance?.observedAt ?? null,
+        message: `Provider read unavailable: ${cause instanceof Error ? cause.message : String(cause)}`,
+      })
+      continue
+    }
+    if (!current) {
+      tokens.push({
+        chain: archived.chain,
+        contract: archived.contract,
+        tokenId: archived.tokenId,
+        status: "mismatch",
+        checks: [],
+        observedAt: archived.provenance?.observedAt ?? null,
+        message: "The recorded token was not found in the current provider view.",
+      })
+      continue
+    }
+    if (isEvmChain(archived.chain) && current.raw === null) {
+      tokens.push({
+        chain: archived.chain,
+        contract: archived.contract,
+        tokenId: archived.tokenId,
+        status: "unavailable",
+        checks: [],
+        observedAt: archived.provenance?.observedAt ?? null,
+        message:
+          current.metadataUri === null
+            ? "The EVM tokenURI/current metadata read did not establish token state."
+            : `The current metadata reference was observed, but its content was unavailable: ${current.metadataUri}`,
+      })
+      continue
+    }
+    const contractMatches = isEvmChain(archived.chain)
+      ? archived.contract.toLowerCase() === current.contract.toLowerCase()
+      : archived.contract === current.contract
+    const checks: OnchainFieldCheck[] = [
+      {
+        field: "chain",
+        status: sameIdentity(archived.chain, current.chain) ? "match" : "mismatch",
+        archived: archived.chain,
+        current: current.chain,
+      },
+      {
+        field: "contract",
+        status: contractMatches ? "match" : "mismatch",
+        archived: archived.contract,
+        current: current.contract,
+      },
+      {
+        field: "tokenId",
+        status: sameIdentity(archived.tokenId, current.tokenId) ? "match" : "mismatch",
+        archived: archived.tokenId,
+        current: current.tokenId,
+      },
+    ]
+    if (!archived.provenance) {
+      tokens.push({
+        chain: archived.chain,
+        contract: archived.contract,
+        tokenId: archived.tokenId,
+        status: checks.some(check => check.status === "mismatch") ? "mismatch" : "unverifiable",
+        checks,
+        observedAt: null,
+        message:
+          "Current token identity exists, but this legacy archive has no recorded normalized state to compare.",
+      })
+      continue
+    }
+    for (const field of ONCHAIN_FIELDS) {
+      const archivedValue = archived.provenance.state[field]
+      const currentValue = current[field]
+      checks.push({
+        field,
+        status: archivedValue === currentValue ? "match" : "mismatch",
+        archived: archivedValue,
+        current: currentValue,
+      })
+    }
+    const mismatch = checks.some(check => check.status === "mismatch")
+    tokens.push({
+      chain: archived.chain,
+      contract: archived.contract,
+      tokenId: archived.tokenId,
+      status: mismatch ? "mismatch" : "match",
+      checks,
+      observedAt: archived.provenance.observedAt,
+      message: mismatch
+        ? "Current provider-observed state differs from the archived snapshot."
+        : "Current provider-observed identity and recorded state match the archived snapshot.",
+    })
+  }
+  return {
+    status: overallOnchainStatus(tokens),
+    offline,
+    scope: "current",
+    historical: "unavailable",
+    ownership: "not-checked",
+    trust:
+      "Results are current observations from configured RPC/indexer and content providers, not signed proofs or provider consensus.",
+    tokens,
+  }
 }
 
 interface WriteArchiveOptions {
@@ -323,9 +612,21 @@ async function writeArchive(options: WriteArchiveOptions): Promise<ArchiveManife
     const localPath = `${safeSegment(token.chain)}/${safeSegment(token.contract)}/${safeSegment(token.tokenId)}`
     const tokenDir = join(outDir, localPath)
     const artifactDir = join(tokenDir, "artifact")
+    const provenance: ArchivedTokenProvenance = {
+      format: 1,
+      observedAt: new Date().toISOString(),
+      state: {
+        iterationHash: token.iterationHash,
+        artifactUri: token.artifactUri,
+        generatorUri: token.generatorUri,
+        metadataUri: token.metadataUri,
+        assigned: token.assigned,
+      },
+    }
     await mkdir(artifactDir, { recursive: true })
     options.onProgress?.(`[${index + 1}/${options.tokens.length}] ${token.name ?? localPath}`)
     await writeFile(join(tokenDir, "metadata.json"), stringify(token.raw))
+    await writeFile(join(tokenDir, "provenance.json"), stringify(provenance))
     await archiveImage(token, "thumbnail", token.thumbnailUri, tokenDir, options.fetchUri).catch(
       error => options.onProgress?.(`  thumbnail skipped: ${String(error)}`),
     )
@@ -355,6 +656,7 @@ async function writeArchive(options: WriteArchiveOptions): Promise<ArchiveManife
       path: localPath,
       artifact: parts.scheme,
       files,
+      provenance,
     })
   }
   if (archived.length === 0)

@@ -156,10 +156,14 @@ npx @whitehash/archive wallet 0x… --chains ethereum,base --out ./whitehash-arc
 ```
 
 The output contains a top-level `index.html` and `manifest.json`. Each token directory
-contains raw `metadata.json`, available preview images, an `artifact/` tree, an integrity
-manifest, and a wrapper that replays `artifact/index.html` with the token's original
-query string and fragment. Serve the folder from any static server or open the top-level
-index directly. No fxhash-hosted URL is used.
+contains raw `metadata.json`, recorded `provenance.json`, available preview images, an
+`artifact/` tree, an integrity manifest, and a wrapper that replays
+`artifact/index.html` with the token's original
+query string and fragment. New manifests also retain the normalized iteration hash,
+artifact/generator/metadata references, and reveal state observed while archiving so
+that a later opt-in current-chain comparison has explicit evidence to compare. Serve the
+folder from any static server or open the top-level index directly. No fxhash-hosted URL
+is used.
 
 Options:
 
@@ -170,5 +174,60 @@ Options:
 The command never deletes its output directory. It replaces files it owns and preserves
 unrelated files. Publication is not enabled yet.
 
-The existing `project`, `token`, `wallet`, and `verify` commands retain their behavior.
+## Verify an archive
+
+The ordinary verifier is deterministic and fully offline:
+
+```bash
+npx @whitehash/archive verify ./whitehash-archive
+```
+
+On success, the CLI explains what it checked in plain language:
+
+```text
+✓ Archive is intact
+  1 token · 11 files checked
+  Local hashes, files, references, and paths all passed.
+```
+
+If a file no longer matches its recorded hash, verification names the token and the
+files to inspect, then suggests restoring the original archive or recreating it from
+the token before trying again.
+
+It checks local integrity hashes, required files, complete local references, and path
+safety. It does not contact a blockchain, verify ownership, authenticate a signature,
+or prove what chain state existed when the archive was created.
+
+Network-backed comparison is an explicit opt-in mode of the same command:
+
+```bash
+npx @whitehash/archive verify ./whitehash-archive --onchain
+```
+
+`verify --onchain` runs the offline verifier first, then reads every exact recorded
+`chain`, `contract`, and `tokenId` through the existing Whitehash chain reader. It never
+guesses an EVM chain. For new archives it compares the current normalized iteration
+hash, artifact URI, generator URI, metadata URI, and reveal state with the archived
+snapshot.
+
+Results have deliberately narrow meanings:
+
+- `MATCH`: current provider-observed identity and recorded state equal the snapshot.
+- `MISMATCH`: the token is absent or current normalized state differs. Reveal and
+  metadata/reference changes can be legitimate, so this does not itself imply fraud or
+  local corruption.
+- `UNAVAILABLE`: an RPC, indexer, or content provider failed; no conclusion is drawn.
+- `UNVERIFIABLE`: a legacy archive has no normalized snapshot to compare.
+
+The comparison is against current provider-observed state. Archives do not record a
+canonical block/level and block hash, so historical verification at `createdAt` is not
+available. Ownership is mutable and is not captured by the archive token model, so it is
+explicitly not checked. Public RPCs/indexers and content gateways are trust dependencies;
+the result is not a signed proof or provider consensus.
+
+Programmatic callers use `verifyArchiveOnchain(root, { client? })` and receive the same
+structured statuses and per-field checks. Inject a configured Whitehash client to choose
+infrastructure or to run deterministic local tests.
+
+The existing `project`, `token`, `wallet`, and offline `verify` commands retain their behavior.
 The older `index <project>` and implicit-address forms remain accepted for compatibility.

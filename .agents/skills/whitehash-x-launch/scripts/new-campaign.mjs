@@ -27,7 +27,25 @@ await Promise.all([
     resolve(skillsDir, "whitehash-social-cards/assets/cards.html.template"),
     resolve(outputDir, "cards.html"),
   ),
-  cp(resolve(repositoryRoot, "apps/docs/public/logo-original.png"), resolve(outputDir, "logo.png")),
+  cp(resolve(repositoryRoot, "apps/docs/public/logo.png"), resolve(outputDir, "logo.png")),
+  cp(
+    resolve(repositoryRoot, "apps/docs/public/logo-original.png"),
+    resolve(outputDir, "logo-original.png"),
+  ),
+  cp(
+    resolve(
+      repositoryRoot,
+      "apps/docs/node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
+    ),
+    resolve(outputDir, "Geist-Variable.woff2"),
+  ),
+  cp(
+    resolve(
+      repositoryRoot,
+      "apps/docs/node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2",
+    ),
+    resolve(outputDir, "GeistMono-Variable.woff2"),
+  ),
 ])
 
 console.log(`Created Whitehash launch campaign at ${outputDir}`)
