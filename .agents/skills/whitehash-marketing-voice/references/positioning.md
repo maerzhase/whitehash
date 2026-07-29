@@ -61,8 +61,16 @@ resolver only when they help someone configure or extend an integration.
 - Say “without relying on third-party infrastructure” or “infrastructure-neutral,” not
   “permanent,” “guaranteed forever,” or “fully decentralized” without a specific scope.
 - A local archive contains artwork bytes and is designed for preservation.
+- Archive verification checks local file hashes, completeness, local references, and
+  path safety. IPFS CAR blocks are content-hash checked during creation. A later
+  verification is not a fresh blockchain lookup or an externally signed proof.
 - A `whitehash-token-index@1` JSON file is for loading and displaying a token on a
   hosted site. It is not an offline copy of the artwork bytes.
 - Identity-bearing token workflows do not require an fxhash-hosted runtime endpoint.
 - Slug-only fxhash resolution is an explicit convenience that depends on fxhash while
   its service is available.
+- Never imply that an EVM chain is guessed.
+- `/project/...` identifies a project. `/iteration/...` and identity-bearing
+  `/gentk/...` URLs identify one token in the archive workflow.
+- Do not announce a command as available until its package and production documentation
+  are released.

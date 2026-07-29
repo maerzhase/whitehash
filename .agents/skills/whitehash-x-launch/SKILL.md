@@ -23,10 +23,6 @@ orchestrator.
 
 ### 1. Establish product truth
 
-Use `../whitehash-marketing-voice/references/positioning.md` as the positioning
-starting point. Pick the CLI preservation journey or the API/React rendering journey
-before choosing the narrative.
-
 Read the repository `AGENTS.md`, relevant README files, implementation, tests, release
 note, and current Git status. Determine:
 
@@ -66,9 +62,8 @@ The scaffold refuses to overwrite a non-empty directory.
 
 ### 4. Draft the thread
 
-Follow `x-thread-plan` and `whitehash-marketing-voice`. Explain internal names such as
-“paste first” with a concrete example or outcome. Keep the offline archive and hostable
-JSON outcomes distinct.
+Explain internal names such as “paste first” with a concrete example or outcome. Keep
+the offline archive and hostable JSON outcomes distinct.
 
 ### 5. Build visual cards
 
