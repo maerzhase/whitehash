@@ -1,5 +1,5 @@
 ---
-"@whitehash/archive": minor
+"@whitehash/archive": patch
 ---
 
 Add opt-in onchain archive verification that compares recorded token state with current
