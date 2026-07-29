@@ -454,9 +454,8 @@ result.triggeredBy // event, console, or delay`}
         <div className="mx-auto grid max-w-[1200px] items-center gap-6 px-4 py-14 sm:px-6 md:grid-cols-[.9fr_1.1fr] md:gap-12 md:py-16">
           <div>
             <div className="section-kicker">LLM-ready</div>
-            <h2 className="mt-3 flex items-center gap-[0.28em] text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">
-              <img src="/logo-original.png" alt="whitehash" className="size-[0.82em] shrink-0" />
-              <span>for your agents.</span>
+            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">
+              Bring your own agents.
             </h2>
           </div>
           <div>
@@ -522,7 +521,7 @@ function CapabilityShowcase() {
 
   return (
     <div className="gallery-shell py-24 lg:py-32">
-      <header className="gallery-heading mx-auto max-w-[1440px] px-4 sm:px-6">
+      <header className="gallery-heading mx-auto max-w-[1200px] px-4 sm:px-6">
         <div>
           <div className="section-kicker">
             Fresh{" "}
@@ -617,26 +616,32 @@ function CapabilityShowcase() {
             )
           })}
         </div>
-        <button
-          key={`previous-${selectedIndex}`}
-          type="button"
-          className={`carousel-arrow carousel-arrow-previous ${motionDirection === -1 ? "carousel-arrow-reacting" : ""}`}
-          aria-label="Previous artwork"
-          onClick={() => rotate(-1)}
-        >
-          <span aria-hidden>←</span>
-        </button>
-        <button
-          key={`next-${selectedIndex}`}
-          type="button"
-          className={`carousel-arrow carousel-arrow-next ${motionDirection === 1 ? "carousel-arrow-reacting" : ""}`}
-          aria-label="Next artwork"
-          onClick={() => rotate(1)}
-        >
-          <span aria-hidden>→</span>
-        </button>
+        <div className="carousel-controls mx-auto max-w-[1200px]">
+          <Button
+            key={`previous-${selectedIndex}`}
+            type="button"
+            variant="secondary"
+            size="icon"
+            className={`carousel-arrow carousel-arrow-previous ${motionDirection === -1 ? "carousel-arrow-reacting" : ""}`}
+            aria-label="Previous artwork"
+            onClick={() => rotate(-1)}
+          >
+            <span aria-hidden>←</span>
+          </Button>
+          <Button
+            key={`next-${selectedIndex}`}
+            type="button"
+            variant="secondary"
+            size="icon"
+            className={`carousel-arrow carousel-arrow-next ${motionDirection === 1 ? "carousel-arrow-reacting" : ""}`}
+            aria-label="Next artwork"
+            onClick={() => rotate(1)}
+          >
+            <span aria-hidden>→</span>
+          </Button>
+        </div>
       </div>
-      <div className="carousel-hint mx-auto max-w-[1440px] px-4 sm:px-6">
+      <div className="carousel-hint mx-auto max-w-[1200px] px-4 sm:px-6">
         <span className="hidden sm:inline">
           Swipe, use arrow keys, or click the arrows to browse
         </span>

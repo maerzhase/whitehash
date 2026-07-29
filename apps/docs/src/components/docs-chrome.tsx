@@ -24,7 +24,7 @@ export interface DocsNavItem {
 export function SiteHeader({ actions }: { actions?: ReactNode }) {
   return (
     <header className="docs-header">
-      <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-4 sm:px-6">
         <Link href="/" className="group flex items-center gap-2.5" aria-label="Whitehash home">
           <img
             src="/logo.png"
