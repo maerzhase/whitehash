@@ -27,7 +27,7 @@ await Promise.all([
     resolve(skillsDir, "whitehash-social-cards/assets/cards.html.template"),
     resolve(outputDir, "cards.html"),
   ),
-  cp(resolve(repositoryRoot, "apps/docs/public/logo.png"), resolve(outputDir, "logo.png")),
+  cp(resolve(repositoryRoot, "apps/docs/public/logo-original.png"), resolve(outputDir, "logo.png")),
 ])
 
 console.log(`Created Whitehash launch campaign at ${outputDir}`)

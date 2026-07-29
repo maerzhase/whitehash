@@ -14,17 +14,10 @@ Prefer deterministic HTML/CSS cards for:
 Use generated raster imagery only when an illustration or photographic scene adds real
 meaning. Do not use image generation for the Whitehash logo, code, UI, or typography.
 
-## Brand assets
-
-- Use `apps/docs/public/logo.png`.
-- Show the logo as supplied. Do not redraw, stylize, crop, recolor, or reinterpret it.
-- Do not place a circle, halo, badge, or decorative container around the logo unless
-  the user explicitly requests one.
-- Use the wordmark `whitehash` in lowercase.
-
 ## Composition
 
 - Render social cards at 1280×720 unless another format is requested.
+- Start from the canonical CI in `references/brand-ci.md`.
 - Design for a small phone screen.
 - Use one core message per card.
 - Prefer a headline plus one supporting block.
@@ -37,7 +30,7 @@ meaning. Do not use image generation for the Whitehash logo, code, UI, or typogr
 
 Use only the card types the story needs:
 
-- **Hero:** real logo, one memorable line, one functional subline.
+- **Hero:** locked canonical composition, one memorable hook, one functional subline.
 - **CLI:** smallest working command and concise success outcome.
 - **Output comparison:** clearly separate distinct output modes.
 - **Archive contents:** compact file tree plus verification command.
@@ -62,6 +55,7 @@ Do not force every campaign to contain every card.
 5. Capture each `?card=<id>` view at 1280×720.
 6. Inspect every screenshot at original resolution.
 7. Revise and rerender until:
+   - the hero matches the canonical Whitehash composition;
    - the logo is visible and undistorted;
    - text is readable on a phone;
    - no copy wraps awkwardly;

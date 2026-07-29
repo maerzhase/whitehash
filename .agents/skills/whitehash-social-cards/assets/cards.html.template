@@ -8,9 +8,19 @@
       :root {
         color-scheme: dark;
         font-family:
-          Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #050505;
-        color: #f7f3ea;
+          Geist, "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
+        background: #000;
+        color: #f4e7d8;
+        --canvas: #000;
+        --surface: #080808;
+        --surface-2: #1a1a1a;
+        --line: #ffffff24;
+        --line-strong: #ffffff3d;
+        --fg: #f4e7d8;
+        --muted: #a0a0a0;
+        --faint: #777;
+        --blue: #47a8ff;
+        --success: #00ca50;
       }
       * {
         box-sizing: border-box;
@@ -20,111 +30,154 @@
         height: 720px;
         margin: 0;
         overflow: hidden;
-        background:
-          radial-gradient(circle at 84% 16%, rgba(211, 232, 226, 0.1), transparent 30%),
-          radial-gradient(circle at 10% 92%, rgba(225, 203, 161, 0.09), transparent 32%), #050505;
+        background: var(--canvas);
       }
       .card {
+        position: relative;
         display: none;
         width: 100%;
         height: 100%;
-        padding: 48px 66px;
-        position: relative;
+        overflow: hidden;
+        padding: 52px 68px;
+        background: var(--canvas);
+      }
+      .card::before {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgb(255 255 255 / 0.07) 1px, transparent 1px);
+        background-size: 64px 64px;
+        content: "";
+        opacity: 0.7;
+      }
+      .card::after {
+        position: absolute;
+        width: 620px;
+        height: 620px;
+        top: 8px;
+        right: -36px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgb(71 168 255 / 0.18), transparent 68%);
+        content: "";
       }
       .card.active {
         display: block;
+      }
+      .card > * {
+        position: relative;
+        z-index: 1;
       }
       header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        color: #9f9c95;
-        font-size: 15px;
-        letter-spacing: 0.1em;
+        min-height: 42px;
+        color: var(--faint);
+        font: 13px/1.2 GeistMono, "SFMono-Regular", Consolas, monospace;
+        letter-spacing: 0.13em;
         text-transform: uppercase;
       }
       .brand {
         display: flex;
         align-items: center;
-        gap: 11px;
-        color: #f7f3ea;
-        font-size: 17px;
-        font-weight: 680;
-        letter-spacing: -0.025em;
+        gap: 14px;
+        color: var(--fg);
+        font: 600 24px/1 Geist, "Helvetica Neue", Arial, sans-serif;
+        letter-spacing: -0.6px;
         text-transform: lowercase;
       }
       .brand img {
-        width: 34px;
-        height: 34px;
+        width: 42px;
+        height: 42px;
         object-fit: contain;
       }
       h1 {
-        margin: 38px 0 27px;
-        font-size: 51px;
-        line-height: 1.03;
-        letter-spacing: -0.048em;
-        font-weight: 650;
+        max-width: 900px;
+        margin: 52px 0 30px;
+        color: var(--fg);
+        font-size: 56px;
+        font-weight: 600;
+        line-height: 0.99;
+        letter-spacing: -3.6px;
       }
-      h1 span,
-      .accent {
-        color: #a9d7d2;
+      h1 .secondary {
+        display: block;
+        margin-top: 10px;
+        color: var(--faint);
       }
-      .hero {
-        display: grid;
-        grid-template-columns: 0.8fr 1.2fr;
-        align-items: center;
-        gap: 62px;
-        height: calc(100% - 45px);
+      footer {
+        position: absolute !important;
+        right: 68px;
+        bottom: 32px;
+        left: 68px;
+        display: flex;
+        justify-content: space-between;
+        color: var(--faint);
+        font-size: 14px;
       }
-      .hero-logo {
-        display: grid;
-        place-items: center;
-        height: 490px;
-      }
-      .hero-logo img {
-        width: 360px;
-        height: 360px;
-        object-fit: contain;
-        filter: drop-shadow(0 30px 35px rgba(0, 0, 0, 0.5));
+      .hero-copy {
+        position: absolute !important;
+        top: 218px;
+        left: 68px;
+        width: 790px;
       }
       .hero-copy h1 {
-        margin-top: 0;
-        font-size: 66px;
-        max-width: 700px;
+        margin: 0;
+        font-size: 70px;
+        line-height: 0.96;
+        letter-spacing: -4.6px;
+      }
+      .hero-copy h1 span {
+        display: block;
+      }
+      .hero-copy .hero-secondary {
+        margin-top: 13px;
+        color: var(--faint);
       }
       .hero-copy p {
-        max-width: 630px;
-        color: #aaa69e;
-        font-size: 23px;
-        line-height: 1.45;
-        margin: 0;
+        max-width: 680px;
+        margin: 28px 0 0;
+        color: var(--muted);
+        font-size: 21px;
+        line-height: 1.42;
       }
-      .eyebrow {
-        color: #d9c6a4;
-        font: 16px/1.2 "SFMono-Regular", Consolas, monospace;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        margin-bottom: 22px;
+      .hero-mark {
+        position: absolute !important;
+        z-index: 1;
+        right: -10px;
+        bottom: -28px;
+        width: 510px;
+        height: 510px;
+        object-fit: contain;
+        filter: drop-shadow(0 30px 70px rgb(0 0 0 / 0.65));
+      }
+      .hero-card footer span:last-child {
+        display: none;
       }
       .terminal,
       .panel {
-        border: 1px solid #2d2d2d;
-        border-radius: 17px;
         overflow: hidden;
-        background: rgba(11, 11, 11, 0.91);
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+        border: 1px solid var(--line-strong);
+        border-radius: 12px;
+        background: rgb(8 8 8 / 0.94);
+        box-shadow: 0 24px 70px rgb(0 0 0 / 0.32);
       }
       pre {
         margin: 0;
-        padding: 25px 29px;
-        font: 18px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        padding: 27px 30px;
+        color: var(--fg);
+        font: 18px/1.55 GeistMono, "SFMono-Regular", Consolas, monospace;
         white-space: pre-wrap;
       }
       .muted {
-        color: #77746e;
+        color: var(--faint);
       }
       .ok {
-        color: #dcc8a5;
+        color: var(--success);
+      }
+      .focus {
+        color: var(--blue);
       }
       .choice-grid,
       .api-grid {
@@ -134,56 +187,78 @@
       }
       .choice,
       .fact {
-        padding: 24px;
-        border: 1px solid #2d2d2d;
-        border-radius: 15px;
-        background: rgba(11, 11, 11, 0.82);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgb(8 8 8 / 0.92);
       }
       .choice {
         min-height: 310px;
+        padding: 27px;
+      }
+      .choice-label {
+        color: var(--faint);
+        font: 12px/1.2 GeistMono, "SFMono-Regular", Consolas, monospace;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
       }
       .choice h2 {
-        margin: 13px 0 15px;
-        font-size: 29px;
-        letter-spacing: -0.035em;
+        margin: 16px 0;
+        color: var(--fg);
+        font-size: 31px;
+        letter-spacing: -1.4px;
       }
-      .choice p,
-      .fact span {
-        color: #a7a39b;
+      .choice p {
+        min-height: 78px;
+        margin: 0 0 22px;
+        color: var(--muted);
         font-size: 18px;
         line-height: 1.45;
+      }
+      .choice code {
+        display: block;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        color: var(--blue);
+        font: 17px/1.5 GeistMono, "SFMono-Regular", Consolas, monospace;
+      }
+      .api-grid {
+        grid-template-columns: 1.18fr 0.82fr;
       }
       .facts {
         display: grid;
         gap: 12px;
       }
+      .fact {
+        padding: 19px 21px;
+      }
       .fact b {
         display: block;
         margin-bottom: 5px;
+        color: var(--fg);
+        font-size: 17px;
       }
-      footer {
-        position: absolute;
-        left: 66px;
-        right: 66px;
-        bottom: 25px;
-        display: flex;
-        justify-content: space-between;
-        color: #65625d;
-        font-size: 14px;
+      .fact span {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.4;
       }
     </style>
   </head>
   <body>
-    <!-- Keep only the cards needed for this campaign. -->
-    <section class="card" data-card="hero">
-      <div class="hero">
-        <div class="hero-logo"><img src="./logo.png" alt="" /></div>
-        <div class="hero-copy">
-          <div class="eyebrow">{{HERO_EYEBROW}}</div>
-          <h1>{{HERO_HEADLINE}}<br /><span>{{HERO_ACCENT_LINE}}</span></h1>
-          <p>{{HERO_SUBLINE}}</p>
-        </div>
+    <!-- Keep the hero structure. Remove other cards the campaign does not need. -->
+    <section class="card hero-card" data-card="hero">
+      <header>
+        <div class="brand"><img src="./logo.png" alt="" />whitehash</div>
+        <div>{{HERO_LABEL}}</div>
+      </header>
+      <div class="hero-copy">
+        <h1>
+          <span>{{HERO_HEADLINE}}</span>
+          <span class="hero-secondary">{{HERO_ACCENT_LINE}}</span>
+        </h1>
+        <p>{{HERO_SUBLINE}}</p>
       </div>
+      <img class="hero-mark" src="./logo.png" alt="" />
       <footer><span>{{HERO_FOOTER}}</span><span>whitehash.dev</span></footer>
     </section>
 
@@ -192,10 +267,10 @@
         <div class="brand"><img src="./logo.png" alt="" />whitehash</div>
         <div>{{CLI_LABEL}}</div>
       </header>
-      <h1>{{CLI_HEADLINE}}<br /><span>{{CLI_ACCENT_LINE}}</span></h1>
+      <h1>{{CLI_HEADLINE}}<span class="secondary">{{CLI_ACCENT_LINE}}</span></h1>
       <div class="terminal">
         <pre><span class="muted">┌─ {{CLI_TASK}}</span>
-│  ❯ {{CLI_COMMAND_LINE_1}}
+│  ❯ <span class="focus">{{CLI_COMMAND_LINE_1}}</span>
 │    {{CLI_COMMAND_LINE_2}}
 │
 <span class="ok">└─ ✓ {{CLI_RESULT}}</span></pre>
@@ -208,17 +283,19 @@
         <div class="brand"><img src="./logo.png" alt="" />whitehash</div>
         <div>{{OUTPUTS_LABEL}}</div>
       </header>
-      <h1>{{OUTPUTS_HEADLINE}}<br /><span>{{OUTPUTS_ACCENT_LINE}}</span></h1>
+      <h1>{{OUTPUTS_HEADLINE}}<span class="secondary">{{OUTPUTS_ACCENT_LINE}}</span></h1>
       <div class="choice-grid">
         <div class="choice">
+          <div class="choice-label">{{OUTPUT_A_LABEL}}</div>
           <h2>{{OUTPUT_A_TITLE}}</h2>
           <p>{{OUTPUT_A_DESCRIPTION}}</p>
-          <pre>❯ {{OUTPUT_A_COMMAND}}</pre>
+          <code>❯ {{OUTPUT_A_COMMAND}}</code>
         </div>
         <div class="choice">
+          <div class="choice-label">{{OUTPUT_B_LABEL}}</div>
           <h2>{{OUTPUT_B_TITLE}}</h2>
           <p>{{OUTPUT_B_DESCRIPTION}}</p>
-          <pre>❯ {{OUTPUT_B_COMMAND}}</pre>
+          <code>❯ {{OUTPUT_B_COMMAND}}</code>
         </div>
       </div>
       <footer><span>{{OUTPUTS_FOOTER}}</span><span>whitehash.dev</span></footer>
@@ -229,7 +306,7 @@
         <div class="brand"><img src="./logo.png" alt="" />whitehash</div>
         <div>{{API_LABEL}}</div>
       </header>
-      <h1>{{API_HEADLINE}}<br /><span>{{API_ACCENT_LINE}}</span></h1>
+      <h1>{{API_HEADLINE}}<span class="secondary">{{API_ACCENT_LINE}}</span></h1>
       <div class="api-grid">
         <div class="panel"><pre>{{API_CODE}}</pre></div>
         <div class="facts">
