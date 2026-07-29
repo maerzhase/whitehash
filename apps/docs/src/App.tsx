@@ -355,8 +355,8 @@ result.triggeredBy // event, console, or delay`}
           </h2>
           <p className="mt-5 max-w-2xl leading-7 text-muted">
             Whitehash reads public records and artwork files from the networks and storage systems
-            where they live. The services and contract addresses are visible, configurable, and
-            easy to verify.
+            where they live. The services and contract addresses are visible, configurable, and easy
+            to verify.
           </p>
           <div className="mt-10 border-t border-line">
             {(
@@ -455,8 +455,8 @@ function CapabilityShowcase() {
           </h2>
         </div>
         <p className="max-w-sm text-sm leading-6 text-muted sm:text-base sm:leading-7">
-          These are real editions from real projects, including older IPFS pieces and works that
-          use graphics cards, sound, or animation.
+          These are real editions from real projects, including older IPFS pieces and works that use
+          graphics cards, sound, or animation.
         </p>
       </header>
 

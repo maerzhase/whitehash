@@ -55,8 +55,7 @@ export const GUIDE_SEO: Record<string, PageSeo> = {
   },
   configuration: {
     title: "Configuration",
-    description:
-      "Configure the services, gateways, cache, and networks Whitehash uses.",
+    description: "Configure the services, gateways, cache, and networks Whitehash uses.",
   },
   cli: {
     title: "Archive CLI",
@@ -74,13 +73,11 @@ export const GUIDE_SEO: Record<string, PageSeo> = {
   },
   variations: {
     title: "Explore variations",
-    description:
-      "Run an original generator with a different seed or fx(params).",
+    description: "Run an original generator with a different seed or fx(params).",
   },
   capture: {
     title: "Capture engine",
-    description:
-      "Create repeatable PNG or GIF captures from generative artwork.",
+    description: "Create repeatable PNG or GIF captures from generative artwork.",
   },
 }
 
@@ -97,8 +94,7 @@ export const UNDERSTAND_SEO: Record<string, PageSeo> = {
   },
   sources: {
     title: "Where the data comes from",
-    description:
-      "See where Whitehash gets ownership, descriptions, images, and artwork files.",
+    description: "See where Whitehash gets ownership, descriptions, images, and artwork files.",
   },
   urls: {
     title: "How artwork URLs are built",
@@ -107,8 +103,7 @@ export const UNDERSTAND_SEO: Record<string, PageSeo> = {
   },
   glossary: {
     title: "Generative art glossary",
-    description:
-      "Definitions for the blockchain and generative-art words used by Whitehash.",
+    description: "Definitions for the blockchain and generative-art words used by Whitehash.",
   },
 }
 

@@ -40,14 +40,12 @@ export const UNDERSTAND_ENTRIES: UnderstandEntry[] = [
   {
     slug: "urls",
     title: "How URLs are built",
-    description:
-      "How a stored artwork reference becomes a URL your browser can open.",
+    description: "How a stored artwork reference becomes a URL your browser can open.",
   },
   {
     slug: "glossary",
     title: "Glossary",
-    description:
-      "The few blockchain and generative-art words you will see in the docs.",
+    description: "The few blockchain and generative-art words you will see in the docs.",
   },
 ]
 
@@ -116,8 +114,8 @@ function Overview() {
       <DocsSection title="3. One consistent shape across networks">
         <div className="docs-prose">
           <p>
-            Tezos, Ethereum, and Base store their records differently. Whitehash does the translation
-            for you, so your app gets the same <code>WhitehashProject</code> or{" "}
+            Tezos, Ethereum, and Base store their records differently. Whitehash does the
+            translation for you, so your app gets the same <code>WhitehashProject</code> or{" "}
             <code>WhitehashToken</code> whichever network the work comes from. It then finds the
             files on IPFS or onchfs without a Whitehash-hosted backend.
           </p>
@@ -159,7 +157,8 @@ function DataModel() {
           <p>
             A token’s address is three values: its <code>chain</code> (network),{" "}
             <code>contract</code> (collection), and <code>tokenId</code> (edition number). A project
-            uses <code>chain</code> and <code>id</code>. Pass those values directly to the read APIs.
+            uses <code>chain</code> and <code>id</code>. Pass those values directly to the read
+            APIs.
           </p>
         </div>
         <CodeBlock
@@ -196,8 +195,8 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
             [
               <code>artifactUri</code>,
               <>
-                Metadata: the executable generator URL (<code>ipfs://</code>/<code>onchfs://</code>
-                ) with render state
+                Metadata: the executable generator URL (<code>ipfs://</code>/<code>onchfs://</code>)
+                with render state
               </>,
               "metadata omits it",
             ],
@@ -408,8 +407,8 @@ function UrlAnatomy() {
             <strong>
               fragment (<code>#0x…</code>)
             </strong>{" "}
-            extra settings for the generator. Whitehash keeps them because removing them can
-            change the artwork.
+            extra settings for the generator. Whitehash keeps them because removing them can change
+            the artwork.
           </p>
         </div>
       </DocsSection>
@@ -502,21 +501,20 @@ function Glossary() {
             [
               <strong>seed</strong>,
               <>
-                A value that tells the generator which edition to draw. The same seed should
-                produce the same result.
+                A value that tells the generator which edition to draw. The same seed should produce
+                the same result.
               </>,
             ],
             [
               <strong>artifact</strong>,
               <>
-                The live generator files (<code>artifactUri</code>), separate from the preview image.
+                The live generator files (<code>artifactUri</code>), separate from the preview
+                image.
               </>,
             ],
             [
               <strong>display / thumbnail</strong>,
-              <>
-                The still images shown before the live artwork loads.
-              </>,
+              <>The still images shown before the live artwork loads.</>,
             ],
             [
               <strong>ref</strong>,

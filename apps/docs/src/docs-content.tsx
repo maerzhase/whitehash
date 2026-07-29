@@ -107,15 +107,13 @@ export const API_ENTRIES: ApiEntry[] = [
     slug: "use-wallet-tokens",
     name: "useWalletTokens",
     group: "React hooks",
-    description:
-      "Find the tokens owned by a collector address across supported networks.",
+    description: "Find the tokens owned by a collector address across supported networks.",
   },
   {
     slug: "use-projects",
     name: "useProjects",
     group: "React hooks",
-    description:
-      "Browse projects and preview images across supported networks.",
+    description: "Browse projects and preview images across supported networks.",
   },
   {
     slug: "use-project",
@@ -127,8 +125,7 @@ export const API_ENTRIES: ApiEntry[] = [
     slug: "use-gateway-image",
     name: "useGatewayImage",
     group: "React hooks",
-    description:
-      "Load an IPFS image and try another gateway if the first one is unavailable.",
+    description: "Load an IPFS image and try another gateway if the first one is unavailable.",
   },
   {
     slug: "use-artwork-frame",
@@ -140,8 +137,7 @@ export const API_ENTRIES: ApiEntry[] = [
     slug: "artwork",
     name: "Artwork",
     group: "Domain",
-    description:
-      "Show a token’s preview, live artwork, and reveal status.",
+    description: "Show a token’s preview, live artwork, and reveal status.",
   },
   {
     slug: "token-details",
@@ -793,10 +789,10 @@ return <img src={image.src} onError={image.onError} alt="" />`}
           <div className="docs-prose">
             <p>
               From the token alone, <code>Root</code> derives: the preview URL (gateways in your
-              configured order), the live URL (<code>artworkUrl</code>, v1 seed applied,
-              ipfs/onchfs resolved), and the status: <code>ok</code>, <code>unrevealed</code>{" "}
-              (placeholder token), or <code>needs-onchfs</code> (artifact is on-chain but no
-              resolver is enabled). The iframe always ships{" "}
+              configured order), the live URL (<code>artworkUrl</code>, v1 seed applied, ipfs/onchfs
+              resolved), and the status: <code>ok</code>, <code>unrevealed</code> (placeholder
+              token), or <code>needs-onchfs</code> (artifact is on-chain but no resolver is
+              enabled). The iframe always ships{" "}
               <code>sandbox="allow-scripts allow-same-origin allow-modals"</code> plus the
               device-permission allowlist generative pieces expect.
             </p>
@@ -819,16 +815,14 @@ const GUIDES: Record<
   },
   configuration: {
     title: "Configuration",
-    description:
-      "Start with the defaults, then change only the services you need to control.",
+    description: "Start with the defaults, then change only the services you need to control.",
     code: `<WhitehashProvider>
   <App />
 </WhitehashProvider>`,
   },
   cli: {
     title: "Archive CLI",
-    description:
-      "Save a project, token, or collector’s artwork for a website or offline archive.",
+    description: "Save a project, token, or collector’s artwork for a website or offline archive.",
     code: `# Index a project's metadata and every iteration
 npx @whitehash/archive project v2:13944
 
@@ -839,8 +833,7 @@ npx @whitehash/archive token \\
   },
   theming: {
     title: "Theming and tokens",
-    description:
-      "Change colors, spacing, and type without rewriting the components.",
+    description: "Change colors, spacing, and type without rewriting the components.",
     code: `:root {
   --color-canvas: #000;
   --color-surface: #000;
@@ -870,8 +863,7 @@ npx @whitehash/archive token \\
   },
   onchfs: {
     title: "Render onchfs artwork",
-    description:
-      "Run artwork stored on Tezos, Ethereum, or Base directly in the browser.",
+    description: "Run artwork stored on Tezos, Ethereum, or Base directly in the browser.",
     code: `"use client"
 
 import { useEffect } from "react"
@@ -894,8 +886,7 @@ export function OnchfsRegistration() {
   },
   variations: {
     title: "Explore variations",
-    description:
-      "Try the original generator with a different seed or settings in the browser.",
+    description: "Try the original generator with a different seed or settings in the browser.",
     code: `import { BlockchainType, createRuntimeConnector } from "@whitehash/runtime"
 import { ArtworkIframe, useRuntimeController } from "@whitehash/runtime/react"
 
