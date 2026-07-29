@@ -1,5 +1,20 @@
 # @whitehash/archive
 
+## 0.0.2
+
+### Patch Changes
+
+- e64be2a: Make archive verification output easier to understand, with plain-language success
+  summaries and actionable guidance for local integrity mismatches.
+- e64be2a: Add opt-in onchain archive verification that compares recorded token state with current
+  public chain data while preserving the existing deterministic offline verifier.
+- f879b13: Archive one fxhash token from an identity-bearing URL as either a verified offline
+  folder or portable JSON index, with optional hosted resolution for slug-only iteration
+  links.
+- Updated dependencies [f879b13]
+- Updated dependencies [915d5a9]
+  - @whitehash/chain-reader@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes
