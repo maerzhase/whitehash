@@ -1,0 +1,4 @@
+interface:
+  display_name: "X Thread Plan"
+  short_description: "Plan and validate concise X product threads"
+  default_prompt: "Use $x-thread-plan to turn these verified product facts into a concise X thread."

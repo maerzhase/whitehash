@@ -1,0 +1,4 @@
+interface:
+  display_name: "Whitehash Social Cards"
+  short_description: "Create deterministic branded social cards"
+  default_prompt: "Use $whitehash-social-cards to create phone-readable visual cards for this campaign."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Whitehash X Launch"
+  short_description: "Create launch threads and branded visual cards"
+  default_prompt: "Use $whitehash-x-launch to turn this Whitehash feature into a concise X launch thread with phone-readable visual cards."
