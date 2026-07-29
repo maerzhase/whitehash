@@ -1,8 +1,9 @@
 # whitehash
 
-An open-source toolkit for embedding fxhash generative art from **Tezos, Ethereum, and
-Base** into any React site. Whitehash reads ownership, projects, metadata, and artwork
-directly from public blockchain infrastructure and content-addressed storage.
+An open-source, framework-agnostic toolkit for reading and embedding fxhash generative art
+from **Tezos, Ethereum, and Base**. Whitehash provides low-level TypeScript APIs, headless
+React bindings, and composable React UI while reading ownership, projects, metadata, and
+artwork directly from public blockchain infrastructure and content-addressed storage.
 
 No `@fxhash/*` dependencies. No fxhash-hosted endpoint is used by the toolkit. The docs
 site is fully static; `apps/onchfs-proxy` is the only optional server piece.
@@ -19,8 +20,8 @@ npx @whitehash/archive \
 This creates a verified offline folder containing the artwork bytes and integrity
 hashes. Here, “verified” means deterministic local hashes, completeness, references,
 and path safety—not a fresh blockchain lookup or signed proof. Add `--json` for a
-lightweight normalized token index intended for a hosted
-website; JSON alone is not an offline copy.
+lightweight normalized token index intended for a hosted website; JSON alone is not an
+offline copy.
 
 Add `--onchain` to `npx @whitehash/archive verify <folder>` only when you explicitly
 want a network-backed comparison with current provider-observed token state. It does not

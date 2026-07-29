@@ -1,6 +1,6 @@
 ---
-"@whitehash/archive": minor
-"@whitehash/chain-reader": minor
+"@whitehash/archive": patch
+"@whitehash/chain-reader": patch
 ---
 
 Archive one fxhash token from an identity-bearing URL as either a verified offline
