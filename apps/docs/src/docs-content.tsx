@@ -231,8 +231,8 @@ export const ONCHFS_SAMPLE_TOKEN: WhitehashToken = {
   iterationHash: "0x4d47331fb7ef118d98ff2c313fe79d2a6870a62ad078f625623d1122989b545e",
   artifactUri:
     "onchfs://046f4712c2aaa344f82f1ef8ffed2ab8c9714819228e29c6a28cf67b14377f61/?fxhash=0x4d47331fb7ef118d98ff2c313fe79d2a6870a62ad078f625623d1122989b545e&fxiteration=2953&fxminter=0xb29DDe74b1ba90f3b21F12bA7ae7583976562EDD",
-  displayUri: "ipfs://QmSsAErzt6VsCFArRU9dAYQzv9iqkCLCCi6rsMioaVBQak",
-  thumbnailUri: "ipfs://QmSsAErzt6VsCFArRU9dAYQzv9iqkCLCCi6rsMioaVBQak",
+  displayUri: "ipfs://QmZKeTq6iKkfKZnjHRufSc1zr9xfkmDqqaZAFDHPV3rbu1",
+  thumbnailUri: "ipfs://QmPePWvBJVxJFs3V7yVGuY9bSzy19L2kCDFSpG2U3p6BKW",
   generatorUri: "onchfs://046f4712c2aaa344f82f1ef8ffed2ab8c9714819228e29c6a28cf67b14377f61",
   attributes: [
     { name: "Genome A", value: "iNrBswx`o" },
@@ -260,7 +260,7 @@ function OnchfsTokenExample() {
 
   const virtualUrl = client.artworkUrl(ONCHFS_SAMPLE_TOKEN)
   return (
-    <DocsSection title="Live on-chain result">
+    <DocsSection title="Render an onchfs artwork in the browser">
       <div className="grid gap-8 md:grid-cols-[1.35fr_.65fr] md:items-start">
         <Artwork.Root token={ONCHFS_SAMPLE_TOKEN} className="rounded-lg">
           <Artwork.Image source="thumbnail" />
@@ -269,21 +269,22 @@ function OnchfsTokenExample() {
           <Artwork.StatusBadge />
         </Artwork.Root>
         <div className="pt-1">
-          <Badge variant="accent">service worker · ethereum</Badge>
-          <h3 className="mt-4 font-display text-3xl font-semibold tracking-[-0.04em]">
+          <h3 className="font-display text-3xl font-semibold tracking-[-0.04em]">
             Genomes #2953
           </h3>
           <p className="mt-3 text-sm leading-6 text-muted">
-            This is the composed <code>Artwork</code> component: the IPFS preview loads first, then{" "}
-            <strong>Run onchfs live</strong> replaces it with the executable artwork. Its HTML,
-            scripts, and assets are read from Ethereum through the same-origin worker.
+            This example shows the composed <code>Artwork</code> component: an IPFS preview loads
+            first, then <strong>Run onchfs live</strong> replaces it with the executable artwork.
+            Its HTML, scripts, and assets are read from Ethereum through the same-origin worker.
           </p>
           <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-            <dt className="text-muted">Contract</dt>
+            <dt className="text-muted">Network</dt>
+            <dd className="font-mono text-xs">Ethereum</dd>
+            <dt className="text-muted">Collection</dt>
             <dd className="truncate font-mono text-xs">0xBb47…E78E</dd>
-            <dt className="text-muted">Token</dt>
+            <dt className="text-muted">Token ID</dt>
             <dd className="font-mono text-xs">2953</dd>
-            <dt className="text-muted">Content</dt>
+            <dt className="text-muted">Generator root</dt>
             <dd className="truncate font-mono text-xs">046f4712…77f61</dd>
           </dl>
           {workerError ? (
@@ -562,7 +563,7 @@ function ApiDetails({ name }: { name: string }) {
         <Callout>
           Need the exact contracts and fallback path? See{" "}
           <Link className="docs-text-link" href="/understand/sources">
-            Where the data comes from
+            Where data comes from
           </Link>
           .
         </Callout>
@@ -599,7 +600,7 @@ result.hasMore && result.loadMore()`}
         <Callout>
           Project discovery is scoped to verified fxhash issuers. Their addresses are listed in{" "}
           <Link className="docs-text-link" href="/understand/sources">
-            Where the data comes from
+            Where data comes from
           </Link>
           .
         </Callout>
@@ -819,8 +820,8 @@ const GUIDES: Record<
 > = {
   "getting-started": {
     title: "Getting started",
-    description: "Put a real fxhash artwork on a React page.",
-    code: `npm install @whitehash/ui @whitehash/react`,
+    description: "Render one real fxhash token in a React page.",
+    code: `pnpm add @whitehash/ui @whitehash/react`,
     language: "bash",
   },
   configuration: {
@@ -832,13 +833,14 @@ const GUIDES: Record<
   },
   cli: {
     title: "Archive CLI",
-    description: "Save a project, token, or collector’s artwork for a website or offline archive.",
-    code: `# Index a project's metadata and every iteration
+    description:
+      "Choose a portable JSON index for a website, or a self-contained archive for offline preservation.",
+    code: `# Build a website index
 npx @whitehash/archive project v2:13944
 
-# Index one token
-npx @whitehash/archive token \\
-  KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE 16333`,
+# Preserve one token offline
+npx @whitehash/archive \\
+  "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333"`,
     language: "bash",
   },
   theming: {
@@ -872,27 +874,22 @@ npx @whitehash/archive token \\
 }`,
   },
   onchfs: {
-    title: "Render onchfs artwork",
-    description: "Run artwork stored on Tezos, Ethereum, or Base directly in the browser.",
-    code: `"use client"
-
-import { useEffect } from "react"
-import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
-
-export const config = {
+    title: "Onchfs",
+    description:
+      "Choose a client-side service worker or a self-hosted proxy to resolve onchfs:// artwork.",
+    code: `// Client-side browser resolution
+const clientConfig = {
   resolver: {
     onchfs: { mode: "service-worker" },
   },
 }
 
-export function OnchfsRegistration() {
-  useEffect(() => {
-    void registerOnchfsWorker().catch(console.error)
-  }, [])
-  return null
-}
-
-// Mount <OnchfsRegistration /> once beside your provider.`,
+// Your own HTTP endpoint
+const serverConfig = {
+  resolver: {
+    onchfs: { mode: "proxy", baseUrl: "https://onchfs.example.com" },
+  },
+}`,
   },
   variations: {
     title: "Explore variations",
@@ -932,14 +929,23 @@ export function GuidePage({ slug }: { slug: string }) {
       : slug === "configuration"
         ? "The default"
         : slug === "cli"
-          ? "Choose what to index"
+          ? "Start with one command"
           : slug === "onchfs"
-            ? "Enable onchfs"
+            ? "Choose a resolver"
             : "Example"
   return (
     <DocsPage>
       <DocsHeading eyebrow="Guide" title={guide.title} description={guide.description} />
       <DocsSection title={firstSection}>
+        {slug === "onchfs" && (
+          <div className="docs-prose mb-4">
+            <p>
+              Resolve <code>onchfs://</code> URLs in one of two ways: run the worker in the browser,
+              or host an HTTP proxy endpoint for your app and server-side tools. Choose the one
+              that fits your deployment.
+            </p>
+          </div>
+        )}
         <CodeBlock
           code={guide.code}
           language={guide.language ?? (slug === "theming" ? "css" : "tsx")}
@@ -954,17 +960,20 @@ function GuideDetails({ slug }: { slug: string }) {
   if (slug === "getting-started")
     return (
       <>
-        <DocsSection title="What you need">
+        <DocsSection title="Before you start">
           <div className="docs-prose">
             <p>
-              You need <strong>React 18.3+</strong>. You do not need an API key, backend, wallet
-              connection, or fxhash dependency.
+              This guide assumes <strong>React 18.3+</strong>. The first render needs no API key,
+              backend, wallet connection, or <code>fxhash</code> dependency.
             </p>
           </div>
         </DocsSection>
         <DocsSection title="1. Add the provider">
           <div className="docs-prose">
-            <p>Mount it once. No config object is required until you want to override a default.</p>
+            <p>
+              Mount <code>WhitehashProvider</code> once near your app&rsquo;s root. The defaults are
+              ready for the first render; add configuration when you need to control a service.
+            </p>
           </div>
           <CodeBlock
             className="mt-4"
@@ -978,9 +987,9 @@ import "@whitehash/ui/styles.css"
         <DocsSection title="2. Render one artwork">
           <div className="docs-prose">
             <p>
-              Read one token by identity, then hand it to <code>Artwork</code>. The hook normalizes
-              the chain data; the component coordinates the preview, seeded live iframe, play state,
-              and unrevealed state.
+              Give <code>useToken</code> a chain, contract, and token ID, then pass the normalized
+              token to <code>Artwork</code>. The component coordinates the preview, seeded live
+              iframe, play state, and unrevealed state.
             </p>
           </div>
           <CodeBlock
@@ -1021,7 +1030,7 @@ function FirstArtwork() {
           <div className="docs-prose mt-4">
             <p>
               The image appears first. <strong>Run live</strong> swaps in the correctly seeded
-              artifact inside a restricted iframe. If the piece is unrevealed or needs onchfs before
+              artwork inside a restricted iframe. If the token is unrevealed or needs onchfs before
               it can run, the component says so instead of failing silently.
             </p>
           </div>
@@ -1029,8 +1038,8 @@ function FirstArtwork() {
         <DocsSection title="3. Use the identity you already have">
           <div className="docs-prose">
             <p>
-              <code>useToken</code> is the direct path. Discovery APIs return the same token shape
-              when your application starts from a collector or project:
+              <code>useToken</code> is the direct path. If your application starts with a collector
+              or project, discovery APIs return the same token shape:
             </p>
           </div>
           <div className="mt-4">
@@ -1046,12 +1055,14 @@ function FirstArtwork() {
               ]}
             />
           </div>
-          <Callout className="mt-5">
-            Refs are optional serialized values for routes and paste fields. Normal reads use the
-            identity fields already present on projects and tokens.
-          </Callout>
+          <div className="docs-prose mt-4">
+            <p>
+              Refs are optional serialized values for routes and paste fields. Normal reads use the
+              identity fields already present on projects and tokens.
+            </p>
+          </div>
         </DocsSection>
-        <DocsSection title="What Artwork handles">
+        <DocsSection title="What the component handles">
           <CodeBlock
             language="text"
             code={`WhitehashToken
@@ -1063,9 +1074,9 @@ function FirstArtwork() {
           />
           <div className="docs-prose mt-4">
             <p>
-              No read depends on a Whitehash-hosted service. Continue to{" "}
+              The read path does not depend on a hosted service. Continue to{" "}
               <Link className="docs-text-link" href="/understand/overview">
-                How Whitehash works
+                understand how it works
               </Link>
               , or inspect the complete{" "}
               <Link className="docs-text-link" href="/docs/artwork">
@@ -1238,17 +1249,42 @@ const wallet = useWalletTokens(address, { client })`}
   if (slug === "cli")
     return (
       <>
-        <Callout>
-          <strong>One mental model:</strong> paste an identity-bearing token URL for a verified
-          offline archive, add <code>--json</code> for a lightweight website index, use{" "}
-          <code>project</code> for a collection index, and use <code>wallet</code> for a complete
-          offline collection.
-        </Callout>
+        <DocsSection title="Choose your outcome">
+          <div className="docs-prose">
+            <p>
+              Start with the result you need. The index commands describe artwork for a hosted
+              application; the archive commands collect the files needed to keep and replay it
+              offline.
+            </p>
+          </div>
+          <div className="mt-4">
+            <Table
+              head={["If you need to…", "Use", "You get"]}
+              rows={[
+                [
+                  "Load artwork on a website",
+                  <>
+                    <code>--json</code>, <code>project</code>, or <code>token</code>
+                  </>,
+                  "Portable JSON with normalized identities, metadata, and content-addressed URIs; not artwork bytes",
+                ],
+                [
+                  "Keep artwork available offline",
+                  <>
+                    An identity-bearing token URL or <code>wallet</code>
+                  </>,
+                  "A self-contained archive with artwork assets, previews, integrity data, and offline replay support",
+                ],
+              ]}
+            />
+          </div>
+        </DocsSection>
         <DocsSection title="How the JSON formats align">
           <div className="docs-prose">
             <p>
-              Both files use the same normalized <code>project</code> and token shapes. A project
-              index stores tokens in <code>iterations[]</code>; a token index stores one token at{" "}
+              Both index formats are designed for hosted applications, not offline preservation.
+              They use the same normalized <code>project</code> and token shapes. A project index
+              stores tokens in <code>iterations[]</code>; a token index stores one token at{" "}
               <code>token</code>. Missing chain metadata is written as <code>null</code>, never
               silently omitted.
             </p>
@@ -1398,7 +1434,7 @@ return token ? (
 ) : null`}
           />
         </DocsSection>
-        <DocsSection title="Index a token">
+        <DocsSection title="Build a website index for one token">
           <div className="docs-prose">
             <p>
               Paste an identity-bearing token URL with <code>--json</code> to write the smaller{" "}
@@ -1538,7 +1574,7 @@ const current = ref
             relationship across shared FA2 storage.
           </Callout>
         </DocsSection>
-        <DocsSection title="Archive complete artwork">
+        <DocsSection title="Preserve artwork offline">
           <div className="docs-prose">
             <p>
               Paste an identity-bearing fxhash token URL to download IPFS CAR files or read onchfs
@@ -1931,13 +1967,13 @@ const { image, thumbnail: gifThumbnail } =
   if (slug === "onchfs")
     return (
       <>
-        <Callout>
-          <strong>What you get:</strong> the standard <code>Artwork</code> component can resolve and
-          execute <code>onchfs://</code> artwork directly in the browser, without an fxhash endpoint
-          or Whitehash-hosted backend.
-        </Callout>
-        <DocsSection title="1. Copy the browser assets">
+        <DocsSection title="1. Use the client-side worker">
           <div className="docs-prose">
+            <p>
+              The standard <code>Artwork</code> component can resolve and execute{" "}
+              <code>onchfs://</code> artwork directly in the browser, without an fxhash endpoint or
+              hosted backend.
+            </p>
             <p>
               Place the worker and its browser bundle in your public root. They must remain next to
               each other.
@@ -1955,14 +1991,30 @@ cp node_modules/@whitehash/onchfs-sw/dist/onchfs.global.js public/onchfs.global.
             Service workers require HTTPS in production. Localhost works during development.
           </Callout>
         </DocsSection>
-        <DocsSection title="2. Register once and enable onchfs">
+        <DocsSection title="2. Register the worker once">
           <div className="docs-prose">
             <p>
-              Mount the registration component beside your provider using the code at the top of
-              this page. After activation, every <code>Artwork</code> can resolve{" "}
+              Mount the registration component beside your provider. After activation, every{" "}
+              <code>Artwork</code> can resolve{" "}
               <code>onchfs://</code> with no component changes.
             </p>
           </div>
+          <CodeBlock
+            className="mt-4"
+            code={`"use client"
+
+import { useEffect } from "react"
+import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
+
+export function OnchfsRegistration() {
+  useEffect(() => {
+    void registerOnchfsWorker().catch(console.error)
+  }, [])
+  return null
+}
+
+// Mount <OnchfsRegistration /> once beside your provider.`}
+          />
         </DocsSection>
         <DocsSection title="3. Render normally">
           <CodeBlock
@@ -1990,35 +2042,59 @@ if (!loading && token) {
             </p>
           </div>
         </DocsSection>
-        <DocsSection title="Advanced deployment">
-          <details className="rounded-md border border-line px-4 py-3">
-            <summary className="cursor-pointer text-sm font-medium text-fg">
-              Proxy mode, caching, and RPC overrides
-            </summary>
-            <div className="docs-prose mt-4">
-              <p>
-                Use proxy mode when service workers are unavailable or server-side tools need
-                ordinary HTTP responses. Immutable generator bytes receive long-lived cache headers;
-                query parameters still reach the runtime without duplicating those bytes.
-              </p>
-            </div>
-            <CodeBlock
-              className="mt-4"
-              language="bash"
-              code={`PORT=3939 pnpm --filter @whitehash/onchfs-proxy start
+        <DocsSection title="Use a self-hosted proxy instead">
+          <div className="docs-prose">
+            <p>
+              Choose proxy mode when service workers are unavailable or your application needs
+              ordinary HTTP responses. Host the endpoint yourself and point <code>baseUrl</code>{" "}
+              at it. Immutable generator bytes receive long-lived cache headers; query parameters
+              still reach the runtime without duplicating those bytes.
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="bash"
+            code={`# From the onchfs-proxy app directory
+pnpm install
+PORT=3939 pnpm start`}
+          />
+          <div className="docs-prose mt-5">
+            <p>
+              The same Hono app can run inside a Next.js route handler. Mount it under the path
+              you will use as <code>baseUrl</code>:
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            code={`import { Hono } from "hono"
+import { createApp } from "@whitehash/onchfs-proxy"
 
-resolver: {
-  onchfs: { mode: "proxy", baseUrl: "https://onchfs.example.com" }
-}
+const routes = new Hono()
+routes.route("/api/onchfs", createApp())
 
-ONCHFS_ETH_RPCS=https://ethereum-rpc.example
+export const runtime = "nodejs"
+export const GET = (request: Request) => routes.fetch(request)
+export const HEAD = GET`}
+          />
+          <CodeBlock
+            className="mt-4"
+            language="tsx"
+            code={`const config = {
+  resolver: {
+    onchfs: { mode: "proxy", baseUrl: "https://example.com/api/onchfs" },
+  },
+}`}
+          />
+          <CodeBlock
+            className="mt-4"
+            language="bash"
+            code={`ONCHFS_ETH_RPCS=https://ethereum-rpc.example
 ONCHFS_BASE_RPCS=https://base-rpc.example`}
-            />
-            <Callout className="mt-5">
-              The proxy only translates onchfs content into HTTP. It does not discover wallets or
-              fetch IPFS.
-            </Callout>
-          </details>
+          />
+          <Callout className="mt-5">
+            The proxy only translates onchfs content into HTTP. It does not discover wallets or
+            fetch IPFS.
+          </Callout>
         </DocsSection>
       </>
     )
