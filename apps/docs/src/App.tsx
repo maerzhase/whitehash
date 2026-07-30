@@ -357,40 +357,6 @@ return token && (
       <section className="border-t border-line bg-surface">
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:py-32">
           <div>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
-              Onchfs.
-              <br />
-              <span className="text-muted">Brwsrrdy.</span>
-            </h2>
-            <p className="mt-5 max-w-md leading-7 text-muted">
-              Some fxhash generators live entirely on-chain through onchfs. Resolve them with a
-              browser service worker or your own HTTP endpoint, then render them with the same{" "}
-              <code>Artwork</code> component.
-            </p>
-            <p className="mt-4 max-w-md text-sm leading-6 text-faint">
-              Choose the worker for browser-only apps, or the proxy when your app and server-side
-              tools need ordinary HTTP responses.
-            </p>
-            <Link className="docs-text-link mt-6 inline-block" href="/guide/onchfs">
-              Choose an onchfs resolver →
-            </Link>
-          </div>
-          <CodeBlock
-            language="tsx"
-            code={`// Browser
-resolver: { onchfs: { mode: "service-worker" } }
-
-// Your own endpoint
-resolver: {
-  onchfs: { mode: "proxy", baseUrl: "https://example.com/onchfs" }
-}`}
-          />
-        </div>
-      </section>
-
-      <section className="border-t border-line bg-surface">
-        <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:py-32">
-          <div>
             <div className="section-kicker">Capture art</div>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
               Artwork URL in.
@@ -427,6 +393,34 @@ result.image       // PNG or GIF
 result.features    // declared token traits
 result.triggeredBy // event, console, or delay`}
           />
+        </div>
+      </section>
+
+      <section className="border-t border-line bg-surface">
+        <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-32">
+          <CodeBlock
+            language="tsx"
+            code={"// Browser\nresolver: { onchfs: { mode: \"service-worker\" } }\n\n// Your own endpoint\nresolver: {\n  onchfs: { mode: \"proxy\", baseUrl: \"https://example.com/onchfs\" }\n}"}
+          />
+          <div>
+            <h2 className="text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
+              Onchfs.
+              <br />
+              <span className="text-muted">Brwsrrdy.</span>
+            </h2>
+            <p className="mt-5 max-w-md leading-7 text-muted">
+              Some fxhash generators live entirely on-chain through onchfs. Resolve them with a
+              browser service worker or your own HTTP endpoint, then render them with the same{" "}
+              <code>Artwork</code> component.
+            </p>
+            <p className="mt-4 max-w-md text-sm leading-6 text-faint">
+              Choose the worker for browser-only apps, or the proxy when your app and server-side
+              tools need ordinary HTTP responses.
+            </p>
+            <Link className="docs-text-link mt-6 inline-block" href="/guide/onchfs">
+              Choose an onchfs resolver →
+            </Link>
+          </div>
         </div>
       </section>
 
