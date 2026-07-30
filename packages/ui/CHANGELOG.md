@@ -1,5 +1,11 @@
 # @whitehash/ui
 
+## 0.1.0
+
+### Minor Changes
+
+- 94fe0b6: Add a Base UI-backed Tooltip compound with shared delays, accessible triggers, collision-aware positioning, and styled content.
+
 ## 0.0.2
 
 ### Patch Changes

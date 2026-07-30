@@ -1,5 +1,12 @@
 # @whitehash/docs
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [94fe0b6]
+  - @whitehash/ui@0.1.0
+
 ## 0.0.2
 
 ### Patch Changes
