@@ -259,9 +259,9 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
       </DocsSection>
       <div className="docs-prose mt-4">
         <p>
-          <strong>Refs are optional.</strong> Use <code>projectRef()</code>, <code>tokenRef()</code>,
-          and <code>formatRef()</code> only when a route or paste field needs one serialized value.
-          Ordinary reads use the identity fields above.
+          <strong>Refs are optional.</strong> Use <code>projectRef()</code>, <code>tokenRef()</code>
+          , and <code>formatRef()</code> only when a route or paste field needs one serialized
+          value. Ordinary reads use the identity fields above.
         </p>
       </div>
     </DocsPage>
@@ -413,7 +413,11 @@ function UrlAnatomy() {
                 </>,
                 "Identifies where the generator files live",
               ],
-              ["Generator path", <code>Qm…generator…/</code>, "Locates the generator within storage"],
+              [
+                "Generator path",
+                <code>Qm…generator…/</code>,
+                "Locates the generator within storage",
+              ],
               [
                 "Seed",
                 <code>fxhash=oo…</code>,
@@ -425,7 +429,8 @@ function UrlAnatomy() {
               [
                 "Token context",
                 <>
-                  <code>fxiteration=136</code>, <code>fxminter=tz1…</code>, <code>fxchain=tezos</code>
+                  <code>fxiteration=136</code>, <code>fxminter=tz1…</code>,{" "}
+                  <code>fxchain=tezos</code>
                 </>,
                 "Carries the iteration, minter, and chain values",
               ],
@@ -562,7 +567,9 @@ function Glossary() {
         />
       </DocsSection>
       <div className="docs-prose mt-4">
-        <p>Need the exact field names? The API reference shows each field in context with examples.</p>
+        <p>
+          Need the exact field names? The API reference shows each field in context with examples.
+        </p>
       </div>
     </DocsPage>
   )

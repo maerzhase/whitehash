@@ -400,7 +400,9 @@ result.triggeredBy // event, console, or delay`}
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-32">
           <CodeBlock
             language="tsx"
-            code={"// Browser\nresolver: { onchfs: { mode: \"service-worker\" } }\n\n// Your own endpoint\nresolver: {\n  onchfs: { mode: \"proxy\", baseUrl: \"https://example.com/onchfs\" }\n}"}
+            code={
+              '// Browser\nresolver: { onchfs: { mode: "service-worker" } }\n\n// Your own endpoint\nresolver: {\n  onchfs: { mode: "proxy", baseUrl: "https://example.com/onchfs" }\n}'
+            }
           />
           <div>
             <div className="section-kicker">Onchain Art</div>

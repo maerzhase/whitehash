@@ -2,12 +2,7 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import type { Metadata } from "next"
 import Link from "next/link"
-import {
-  CodeBlock,
-  DocsHeading,
-  DocsPage,
-  DocsSection,
-} from "../../../src/components/docs-chrome"
+import { CodeBlock, DocsHeading, DocsPage, DocsSection } from "../../../src/components/docs-chrome"
 import { pageMetadata } from "../../../src/seo"
 
 export const metadata: Metadata = pageMetadata("/llms", {
@@ -29,8 +24,8 @@ export default async function LlmsPage() {
       <DocsSection title="About this file">
         <div className="docs-prose">
           <p>
-            Use this guide to understand Whitehash&rsquo;s purpose, package boundaries, domain rules,
-            supported networks, and documentation routes before writing or changing code. The
+            Use this guide to understand Whitehash&rsquo;s purpose, package boundaries, domain
+            rules, supported networks, and documentation routes before writing or changing code. The
             machine-readable source is available at{" "}
             <Link className="docs-text-link" href="/llms.txt">
               /llms.txt

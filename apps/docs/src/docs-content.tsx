@@ -269,9 +269,7 @@ function OnchfsTokenExample() {
           <Artwork.StatusBadge />
         </Artwork.Root>
         <div className="pt-1">
-          <h3 className="font-display text-3xl font-semibold tracking-[-0.04em]">
-            Genomes #2953
-          </h3>
+          <h3 className="font-display text-3xl font-semibold tracking-[-0.04em]">Genomes #2953</h3>
           <p className="mt-3 text-sm leading-6 text-muted">
             This example shows the composed <code>Artwork</code> component: an IPFS preview loads
             first, then <strong>Run onchfs live</strong> replaces it with the executable artwork.
@@ -941,8 +939,8 @@ export function GuidePage({ slug }: { slug: string }) {
           <div className="docs-prose mb-4">
             <p>
               Resolve <code>onchfs://</code> URLs in one of two ways: run the worker in the browser,
-              or host an HTTP proxy endpoint for your app and server-side tools. Choose the one
-              that fits your deployment.
+              or host an HTTP proxy endpoint for your app and server-side tools. Choose the one that
+              fits your deployment.
             </p>
           </div>
         )}
@@ -1995,8 +1993,7 @@ cp node_modules/@whitehash/onchfs-sw/dist/onchfs.global.js public/onchfs.global.
           <div className="docs-prose">
             <p>
               Mount the registration component beside your provider. After activation, every{" "}
-              <code>Artwork</code> can resolve{" "}
-              <code>onchfs://</code> with no component changes.
+              <code>Artwork</code> can resolve <code>onchfs://</code> with no component changes.
             </p>
           </div>
           <CodeBlock
@@ -2046,9 +2043,9 @@ if (!loading && token) {
           <div className="docs-prose">
             <p>
               Choose proxy mode when service workers are unavailable or your application needs
-              ordinary HTTP responses. Host the endpoint yourself and point <code>baseUrl</code>{" "}
-              at it. Immutable generator bytes receive long-lived cache headers; query parameters
-              still reach the runtime without duplicating those bytes.
+              ordinary HTTP responses. Host the endpoint yourself and point <code>baseUrl</code> at
+              it. Immutable generator bytes receive long-lived cache headers; query parameters still
+              reach the runtime without duplicating those bytes.
             </p>
           </div>
           <CodeBlock
@@ -2060,8 +2057,8 @@ PORT=3939 pnpm start`}
           />
           <div className="docs-prose mt-5">
             <p>
-              The same Hono app can run inside a Next.js route handler. Mount it under the path
-              you will use as <code>baseUrl</code>:
+              The same Hono app can run inside a Next.js route handler. Mount it under the path you
+              will use as <code>baseUrl</code>:
             </p>
           </div>
           <CodeBlock

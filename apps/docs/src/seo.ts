@@ -99,8 +99,7 @@ export const UNDERSTAND_SEO: Record<string, PageSeo> = {
   },
   urls: {
     title: "How artwork URLs are built",
-    description:
-      "See how a stored artwork reference becomes a browser-ready live artwork URL.",
+    description: "See how a stored artwork reference becomes a browser-ready live artwork URL.",
   },
   glossary: {
     title: "Generative art glossary",
