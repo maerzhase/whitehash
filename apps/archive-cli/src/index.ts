@@ -5,6 +5,7 @@ import { writeProjectIndex } from "./project-index.js"
 import { writeTokenIndex } from "./token-index.js"
 import { parseFxhashTokenUrl, parseRef, type ChainId } from "@whitehash/chain-reader"
 import { chainLabel, resolveChainId } from "@whitehash/core"
+import { realpathSync } from "node:fs"
 import { pathToFileURL } from "node:url"
 
 const HELP = `whitehash archive
@@ -772,7 +773,9 @@ export async function main(args: string[]): Promise<void> {
   console.log(`Archived ${manifest.tokens.length} tokens to ${command.outDir}`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+const invokedPath = process.argv[1] ? realpathSync(process.argv[1]) : undefined
+
+if (invokedPath && import.meta.url === pathToFileURL(invokedPath).href) {
   void main(process.argv.slice(2)).catch(error => {
     const message = error instanceof Error ? error.message : String(error)
     if (error instanceof UsageError) {
