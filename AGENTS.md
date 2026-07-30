@@ -94,4 +94,8 @@ suite as passing coverage.
 - Do not commit, push, create branches, or open pull requests unless explicitly asked.
 - When asked to commit, stage only the files in scope and use a concise conventional
   commit message.
+- Before committing, run the standard CI checks sequentially from the repository root:
+  `pnpm lint`, `pnpm format`, `pnpm build`, `pnpm check-types`, and `pnpm test`. If
+  `pnpm format` fails, run `pnpm format:fix`, inspect the resulting diff, and rerun the
+  formatter before committing. Do not commit while any standard CI check is failing.
 - Never discard or overwrite unrelated user changes.
