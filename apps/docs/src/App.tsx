@@ -403,10 +403,11 @@ result.triggeredBy // event, console, or delay`}
             code={"// Browser\nresolver: { onchfs: { mode: \"service-worker\" } }\n\n// Your own endpoint\nresolver: {\n  onchfs: { mode: \"proxy\", baseUrl: \"https://example.com/onchfs\" }\n}"}
           />
           <div>
-            <h2 className="text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
+            <div className="section-kicker">Onchain Art</div>
+            <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
               Onchfs.
               <br />
-              <span className="text-muted">On-chain. On screen.</span>
+              <span className="text-muted">Onscrn.</span>
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
               Some fxhash generators live entirely on-chain through onchfs. Resolve them with a
