@@ -411,8 +411,8 @@ result.triggeredBy // event, console, or delay`}
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
               Some fxhash generators live entirely on-chain through onchfs. Resolve them with a
-              browser service worker or your own HTTP endpoint, then render them with the same{" "}
-              <code>Artwork</code> component.
+              browser service worker or your own HTTP endpoint, then render them on screen with the
+              same <code>Artwork</code> component.
             </p>
             <p className="mt-4 max-w-md text-sm leading-6 text-faint">
               Choose the worker for browser-only apps, or the proxy when your app and server-side
