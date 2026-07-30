@@ -52,7 +52,7 @@ export interface PageSeo {
 export const GUIDE_SEO: Record<string, PageSeo> = {
   "getting-started": {
     title: "Getting started",
-    description: "Put a real fxhash artwork on a React page with a preview and live view.",
+    description: "Render one real fxhash token in a React page with a preview and live view.",
   },
   configuration: {
     title: "Configuration",
@@ -64,7 +64,7 @@ export const GUIDE_SEO: Record<string, PageSeo> = {
       "Preserve fxhash artwork locally as an offline archive, or index projects and tokens into portable JSON.",
   },
   onchfs: {
-    title: "Render onchfs artwork",
+    title: "Onchfs",
     description:
       "Resolve onchfs content from Tezos, Ethereum, or Base and run it without a hosted platform backend.",
   },
@@ -84,27 +84,27 @@ export const GUIDE_SEO: Record<string, PageSeo> = {
 
 export const UNDERSTAND_SEO: Record<string, PageSeo> = {
   overview: {
-    title: "How Whitehash works",
+    title: "How the toolkit works",
     description:
-      "Learn the simple model behind Whitehash: projects make editions, and tokens identify those editions.",
+      "Learn the simple model behind the toolkit: projects group artwork, and tokens identify iterations.",
   },
   "data-model": {
     title: "Projects and tokens",
     description:
-      "Understand the two things Whitehash works with: projects and individual artwork editions.",
+      "Understand the two core objects: projects group artwork, and tokens identify individual iterations.",
   },
   sources: {
-    title: "Where the data comes from",
-    description: "See where Whitehash gets ownership, descriptions, images, and artwork files.",
+    title: "Where data comes from",
+    description: "Trace ownership, metadata, previews, and artwork back to their public sources.",
   },
   urls: {
     title: "How artwork URLs are built",
     description:
-      "See how Whitehash turns a stored artwork reference into a browser-ready live artwork URL.",
+      "See how a stored artwork reference becomes a browser-ready live artwork URL.",
   },
   glossary: {
     title: "Generative art glossary",
-    description: "Definitions for the blockchain and generative-art words used by Whitehash.",
+    description: "Definitions for the blockchain and generative-art terms used in the toolkit.",
   },
 }
 

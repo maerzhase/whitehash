@@ -3,16 +3,18 @@ import { UNDERSTAND_ENTRIES } from "./understand-content"
 import type { DocsNavItem } from "./components/docs-chrome"
 
 export const DOC_NAV: DocsNavItem[] = [
-  { label: "Getting started", href: "/guide/getting-started", group: "Start" },
-  ...UNDERSTAND_ENTRIES.filter(entry => ["overview", "data-model"].includes(entry.slug)).map(
-    entry => ({ label: entry.title, href: `/understand/${entry.slug}`, group: "Understand" }),
-  ),
+  { label: "Getting started", href: "/guide/getting-started", group: "Guides" },
   { label: "Configuration", href: "/guide/configuration", group: "Guides" },
   { label: "Archive CLI", href: "/guide/cli", group: "Guides" },
-  { label: "Onchfs artwork", href: "/guide/onchfs", group: "Guides" },
+  { label: "Onchfs", href: "/guide/onchfs", group: "Guides" },
   { label: "Explore variations", href: "/guide/variations", group: "Guides" },
   { label: "Capture engine", href: "/guide/capture", group: "Guides" },
   { label: "Theming", href: "/guide/theming", group: "Guides" },
+  ...UNDERSTAND_ENTRIES.map(entry => ({
+    label: entry.title,
+    href: `/understand/${entry.slug}`,
+    group: "Deep dives",
+  })),
   ...[
     "artwork",
     "use-token",
@@ -28,8 +30,5 @@ export const DOC_NAV: DocsNavItem[] = [
     const entry = API_ENTRIES.find(candidate => candidate.slug === slug)
     return entry ? [{ label: entry.name, href: `/docs/${entry.slug}`, group: "Reference" }] : []
   }),
-  ...UNDERSTAND_ENTRIES.filter(entry => ["sources", "urls", "glossary"].includes(entry.slug)).map(
-    entry => ({ label: entry.title, href: `/understand/${entry.slug}`, group: "Deep dives" }),
-  ),
   { label: "LLM guide", href: "/llms", group: "Resources" },
 ]

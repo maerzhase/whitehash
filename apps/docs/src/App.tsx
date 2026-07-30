@@ -416,7 +416,7 @@ result.triggeredBy // event, console, or delay`}
                   "/understand/data-model",
                 ],
                 [
-                  "Where the data comes from",
+                  "Where data comes from",
                   "See where each piece of information comes from.",
                   "/understand/sources",
                 ],

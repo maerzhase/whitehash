@@ -7,7 +7,7 @@ import { Badge, Input } from "@whitehash/ui"
 import { Callout, CodeBlock, DocsHeading, DocsPage, DocsSection } from "./components/docs-chrome"
 
 /**
- * The "Understand" section, the transparency layer. Every fact whitehash
+ * The "Deep dives" section, the transparency layer. Every fact the toolkit
  * surfaces is traced here to its on-chain or content-addressed source, in one
  * consistent vocabulary. These pages answer, one click from the docs home:
  * where the image URL comes from, where the contract addresses come from, and
@@ -23,29 +23,28 @@ export interface UnderstandEntry {
 export const UNDERSTAND_ENTRIES: UnderstandEntry[] = [
   {
     slug: "overview",
-    title: "How Whitehash works",
-    description: "A short tour of the ideas behind Whitehash before you meet the code.",
+    title: "How the toolkit works",
+    description: "A short tour of projects, tokens, public records, and live artwork.",
   },
   {
     slug: "data-model",
     title: "Projects and tokens",
-    description: "A project is a generative artwork release; a token is one edition from it.",
+    description: "A project groups related artwork; a token identifies one iteration.",
   },
   {
     slug: "sources",
-    title: "Where the data comes from",
-    description:
-      "Where ownership, descriptions, images, and contract addresses come from, and how to check them.",
+    title: "Where data comes from",
+    description: "Trace ownership, metadata, previews, and artwork back to their public sources.",
   },
   {
     slug: "urls",
-    title: "How URLs are built",
-    description: "How a stored artwork reference becomes a URL your browser can open.",
+    title: "How artwork URLs are built",
+    description: "See how a stored artwork reference becomes a browser-ready URL.",
   },
   {
     slug: "glossary",
-    title: "Glossary",
-    description: "The few blockchain and generative-art words you will see in the docs.",
+    title: "Generative art glossary",
+    description: "Definitions for the blockchain and generative-art terms used in the toolkit.",
   },
 ]
 
@@ -64,9 +63,9 @@ function Table({ head, rows }: { head: string[]; rows: React.ReactNode[][] }) {
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="align-top">
+            <tr key={i} className="align-top border-b border-line last:border-b-0">
               {row.map((cell, j) => (
-                <td key={j} className="border-b border-line px-3 py-3 text-muted [&_code]:text-fg">
+                <td key={j} className="px-3 py-3 text-muted [&_code]:text-fg">
                   {cell}
                 </td>
               ))}
@@ -83,9 +82,9 @@ function Overview() {
   return (
     <DocsPage>
       <DocsHeading
-        eyebrow="Understand"
-        title="How Whitehash works"
-        description="Three ideas are enough to get started: projects contain tokens, a preview is not the live artwork, and Whitehash reads public records."
+        eyebrow="Deep dive"
+        title="How the toolkit works"
+        description="Three ideas are enough to get started: projects contain tokens, previews are not live artwork, and the toolkit reads public records."
       />
       <DocsSection title="1. A project contains tokens">
         <div className="docs-prose">
@@ -114,10 +113,10 @@ function Overview() {
       <DocsSection title="3. One consistent shape across networks">
         <div className="docs-prose">
           <p>
-            Tezos, Ethereum, and Base store their records differently. Whitehash does the
-            translation for you, so your app gets the same <code>WhitehashProject</code> or{" "}
-            <code>WhitehashToken</code> whichever network the work comes from. It then finds the
-            files on IPFS or onchfs without a Whitehash-hosted backend.
+            Tezos, Ethereum, and Base store their records differently. The chain reader translates
+            them into the same <code>WhitehashProject</code> or <code>WhitehashToken</code> shape,
+            whichever network the work comes from. It then finds the files on IPFS or onchfs without
+            a hosted backend.
           </p>
         </div>
         <CodeBlock
@@ -148,7 +147,7 @@ function DataModel() {
   return (
     <DocsPage>
       <DocsHeading
-        eyebrow="Understand"
+        eyebrow="Deep dive"
         title="Projects and tokens"
         description="Two objects cover most use cases: a project groups related artwork; a token is one edition."
       />
@@ -258,11 +257,13 @@ const result = useProject({ chain: selected.chain, id: selected.id })`}
           ]}
         />
       </DocsSection>
-      <Callout>
-        <strong>Refs are optional.</strong> Use <code>projectRef()</code>, <code>tokenRef()</code>,
-        and <code>formatRef()</code> only when a route or paste field needs one serialized value.
-        Ordinary reads use the identity fields above.
-      </Callout>
+      <div className="docs-prose mt-4">
+        <p>
+          <strong>Refs are optional.</strong> Use <code>projectRef()</code>, <code>tokenRef()</code>,
+          and <code>formatRef()</code> only when a route or paste field needs one serialized value.
+          Ordinary reads use the identity fields above.
+        </p>
+      </div>
     </DocsPage>
   )
 }
@@ -288,84 +289,93 @@ function Sources() {
   return (
     <DocsPage>
       <DocsHeading
-        eyebrow="Understand"
-        title="Where the data comes from"
-        description="Whitehash does not invent the records it shows. Here is where the ownership, text, images, and artwork files come from."
+        eyebrow="Deep dive"
+        title="Where data comes from"
+        description="The public sources behind ownership, metadata, previews, and artwork."
       />
-      <DocsSection title="What we look up, and where">
-        <Table
-          head={["Fact", "Read from"]}
-          rows={[
-            [<>Ownership (Tezos)</>, <>TzKT token balances on the gentk contracts</>],
-            [
-              <>Ownership (Ethereum / Base)</>,
-              <>
-                Blockscout holdings matched against the fxhash collections Whitehash knows about
-                (with a direct blockchain fallback)
-              </>,
-            ],
-            [
-              <>Token metadata</>,
-              <>
-                Tezos <code>token_metadata</code> / EVM <code>tokenURI</code>, then the JSON file
-                through your IPFS gateways
-              </>,
-            ],
-            [
-              <>Projects</>,
-              <>
-                Tezos issuer ledger big maps / EVM <code>ProjectCreated</code> factory events
-              </>,
-            ],
-            [<>Artwork bytes</>, <>IPFS gateways, or onchfs read directly from chain</>],
-          ]}
-        />
+      <DocsSection title="What each source provides">
+        <div className="docs-prose">
+          <p>
+            A token is assembled from several public systems. This table shows where the client
+            reads ownership, metadata, project records, previews, and artwork bytes.
+          </p>
+        </div>
+        <div className="mt-4">
+          <Table
+            head={["Fact", "Read from"]}
+            rows={[
+              [<>Ownership (Tezos)</>, <>TzKT token balances on the gentk contracts</>],
+              [
+                <>Ownership (Ethereum / Base)</>,
+                <>
+                  Blockscout holdings matched against the fxhash collections Whitehash knows about
+                  (with a direct blockchain fallback)
+                </>,
+              ],
+              [
+                <>Token metadata</>,
+                <>
+                  Tezos <code>token_metadata</code> / EVM <code>tokenURI</code>, then the JSON file
+                  through your IPFS gateways
+                </>,
+              ],
+              [
+                <>Projects</>,
+                <>
+                  Tezos issuer ledger big maps / EVM <code>ProjectCreated</code> factory events
+                </>,
+              ],
+              [<>Artwork bytes</>, <>IPFS gateways, or onchfs read directly from chain</>],
+            ]}
+          />
+        </div>
       </DocsSection>
       <DocsSection title="Tezos contracts">
         <div className="docs-prose">
           <p>
-            These are the fxhash contracts Whitehash knows how to read. You can check any of them on{" "}
+            These are the fxhash contracts supported by the chain reader. You can check any of them
+            on{" "}
             <a className="docs-text-link" href="https://tzkt.io" target="_blank" rel="noreferrer">
               tzkt.io
             </a>
             .
           </p>
         </div>
-        <Table
-          head={["Contract", "Mainnet", "Ghostnet"]}
-          rows={TEZOS_ADDRESSES.map(([label, main, ghost]) => [
-            label,
-            <code className="text-xs">{main}</code>,
-            <code className="text-xs">{ghost}</code>,
-          ])}
-        />
+        <div className="mt-4">
+          <Table
+            head={["Contract", "Mainnet", "Ghostnet"]}
+            rows={TEZOS_ADDRESSES.map(([label, main, ghost]) => [
+              label,
+              <code className="text-xs">{main}</code>,
+              <code className="text-xs">{ghost}</code>,
+            ])}
+          />
+        </div>
       </DocsSection>
       <DocsSection title="EVM issuer factories">
         <div className="docs-prose">
           <p>
             Each network has one <code>FxIssuerFactory</code>, which records when new projects are
-            created. Whitehash reads those records from the start of the factory’s history. Verify
-            any address on the relevant explorer.
+            created. The chain reader scans those records from the start of the factory’s history.
+            Verify any address on the relevant explorer.
           </p>
         </div>
-        <Table
-          head={["Network", "FxIssuerFactory", "Deploy block"]}
-          rows={EVM_FACTORIES.map(([label, addr, block]) => [
-            label,
-            <code className="text-xs">{addr}</code>,
-            <code>{block}</code>,
-          ])}
-        />
+        <div className="mt-4">
+          <Table
+            head={["Network", "FxIssuerFactory", "Deploy block"]}
+            rows={EVM_FACTORIES.map(([label, addr, block]) => [
+              label,
+              <code className="text-xs">{addr}</code>,
+              <code>{block}</code>,
+            ])}
+          />
+        </div>
       </DocsSection>
-      <Callout>
-        Contract addresses live in <code>@whitehash/chain-reader</code> (<code>networks.ts</code>).
-        This table is the same data. If the two ever diverge, the code is the source of truth.
-      </Callout>
     </DocsPage>
   )
 }
 
-/* 4. How URLs are built (interactive) */
+/* 4. How artwork URLs are built (interactive) */
 function UrlAnatomy() {
   const { client } = useWhitehash()
   const [value, setValue] = useState(
@@ -381,75 +391,104 @@ function UrlAnatomy() {
   return (
     <DocsPage>
       <DocsHeading
-        eyebrow="Understand"
-        title="How URLs are built"
-        description="The live artwork URL carries the information needed to show the right edition. Here is how Whitehash builds it."
+        eyebrow="Deep dive"
+        title="How artwork URLs are built"
+        description="A stored artwork reference becomes a browser-ready URL through a few predictable steps."
       />
-      <DocsSection title="What is in a live artwork link?">
+      <DocsSection title="What a live artwork link contains">
         <CodeBlock
           language="text"
           code={`ipfs://Qm…generator…/?fxhash=oo…&fxiteration=136&fxminter=tz1…&fxchain=tezos#0x…params…
-└─ scheme  └─ generator CID   └─ seed        └─ iteration   └─ minter      └─ chain      └─ fx(params) bytes`}
+└────────────────────┘└─────────┘└─────────────────────────────────────────┘└─────────┘
+       storage           seed                   token context               fx(params)`}
         />
-        <div className="docs-prose mt-4">
-          <p>
-            <strong>storage</strong>: <code>ipfs://</code> or <code>onchfs://</code> tells Whitehash
-            where to find the generator files.
-          </p>
-          <p>
-            <strong>
-              seed (<code>fxhash</code>)
-            </strong>{" "}
-            tells the generator which edition to draw. Older Tezos work stores it separately;
-            Whitehash adds it when needed.
-          </p>
-          <p>
-            <strong>
-              fragment (<code>#0x…</code>)
-            </strong>{" "}
-            extra settings for the generator. Whitehash keeps them because removing them can change
-            the artwork.
-          </p>
+        <div className="mt-4">
+          <Table
+            head={["Part", "Example", "Purpose"]}
+            rows={[
+              [
+                "Storage",
+                <>
+                  <code>ipfs://</code> or <code>onchfs://</code>
+                </>,
+                "Identifies where the generator files live",
+              ],
+              ["Generator path", <code>Qm…generator…/</code>, "Locates the generator within storage"],
+              [
+                "Seed",
+                <code>fxhash=oo…</code>,
+                <>
+                  Selects the token&rsquo;s output. Older Tezos metadata stores it separately; the{" "}
+                  <code>artworkUrl</code> helper adds it when needed.
+                </>,
+              ],
+              [
+                "Token context",
+                <>
+                  <code>fxiteration=136</code>, <code>fxminter=tz1…</code>, <code>fxchain=tezos</code>
+                </>,
+                "Carries the iteration, minter, and chain values",
+              ],
+              [
+                "Render state",
+                <code>#0x…params…</code>,
+                "Carries fx(params) bytes. Keep the fragment intact because removing it can change the artwork",
+              ],
+            ]}
+          />
         </div>
       </DocsSection>
-      <DocsSection title="From stored reference to browser URL">
-        <Table
-          head={["Input", "resolveUri result"]}
-          rows={[
-            [
-              <code>ipfs://CID/path?q#f</code>,
-              <>
-                &lt;first gateway&gt;<code>/ipfs/CID/path?q#f</code> (query &amp; fragment
-                preserved; <code>useGatewayImage</code> advances on error)
-              </>,
-            ],
-            [
-              <code>onchfs://CID</code>,
-              <>
-                same-origin worker path <code>/.whitehash/onchfs/&lt;chain&gt;/CID</code>, or your
-                configured proxy
-              </>,
-            ],
-            [
-              <>
-                <code>https:</code> / <code>data:</code>
-              </>,
-              "passed through unchanged",
-            ],
-            [
-              <>
-                bare <code>CID</code>
-              </>,
-              "treated as ipfs",
-            ],
-          ]}
-        />
+      <DocsSection title="How a stored reference becomes a fetchable URL">
+        <div className="docs-prose">
+          <p>
+            The values above identify content, but they are not always URLs a browser can fetch
+            directly. <code>resolveUri</code> turns each reference into a fetchable URL using your
+            configured IPFS gateway or onchfs worker or proxy.
+          </p>
+        </div>
+        <div className="mt-4">
+          <Table
+            head={["Stored reference", "Result"]}
+            rows={[
+              [
+                <code>ipfs://CID/path?q#f</code>,
+                <>
+                  &lt;first gateway&gt;<code>/ipfs/CID/path?q#f</code> (query &amp; fragment
+                  preserved; <code>useGatewayImage</code> advances on error)
+                </>,
+              ],
+              [
+                <code>onchfs://CID</code>,
+                <>
+                  same-origin worker path <code>/.whitehash/onchfs/&lt;chain&gt;/CID</code>, or your
+                  configured proxy
+                </>,
+              ],
+              [
+                <>
+                  <code>https:</code> / <code>data:</code>
+                </>,
+                "passed through unchanged",
+              ],
+              [
+                <>
+                  bare <code>CID</code>
+                </>,
+                "treated as ipfs",
+              ],
+            ]}
+          />
+        </div>
       </DocsSection>
       <DocsSection title="Try it">
         <div className="docs-prose">
           <p>
             Paste an <code>ipfs://</code>, <code>onchfs://</code>, or bare-CID value. This shows the
-            browser URL Whitehash would use to load it.
+            browser URL the configured resolver would use to load it.
+          </p>
+          <p>
+            For a token, <code>artworkUrl(token)</code> applies a missing v1 seed and resolves the
+            storage scheme in one step.
           </p>
         </div>
         <Input className="mt-4" value={value} onChange={e => setValue(e.target.value)} />
@@ -465,10 +504,6 @@ function UrlAnatomy() {
           )}
         </div>
       </DocsSection>
-      <Callout>
-        The same <code>artworkUrl(token)</code> helper applies the v1 seed and resolves the scheme
-        in one step, so components never construct URLs by hand.
-      </Callout>
     </DocsPage>
   )
 }
@@ -478,9 +513,9 @@ function Glossary() {
   return (
     <DocsPage>
       <DocsHeading
-        eyebrow="Understand"
-        title="Glossary"
-        description="Here are the few terms that may be unfamiliar when you first use Whitehash."
+        eyebrow="Deep dive"
+        title="Generative art glossary"
+        description="The terms used to describe projects, tokens, generators, and stored references."
       />
       <DocsSection title="One language">
         <Table
@@ -526,9 +561,9 @@ function Glossary() {
           ]}
         />
       </DocsSection>
-      <Callout>
-        Need the exact field names? The API reference shows each field in context with examples.
-      </Callout>
+      <div className="docs-prose mt-4">
+        <p>Need the exact field names? The API reference shows each field in context with examples.</p>
+      </div>
     </DocsPage>
   )
 }

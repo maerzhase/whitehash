@@ -3,7 +3,6 @@ import { join } from "node:path"
 import type { Metadata } from "next"
 import Link from "next/link"
 import {
-  Callout,
   CodeBlock,
   DocsHeading,
   DocsPage,
@@ -25,23 +24,20 @@ export default async function LlmsPage() {
       <DocsHeading
         eyebrow="Resources"
         title="LLM guide"
-        description="The complete machine-readable overview of Whitehash, shown exactly as language models receive it."
+        description="A focused map of the Whitehash toolkit for code-generating models."
       />
       <DocsSection title="About this file">
         <div className="docs-prose">
           <p>
-            This page mirrors the canonical{" "}
+            Use this guide to understand Whitehash&rsquo;s purpose, package boundaries, domain rules,
+            supported networks, and documentation routes before writing or changing code. The
+            machine-readable source is available at{" "}
             <Link className="docs-text-link" href="/llms.txt">
               /llms.txt
             </Link>{" "}
-            file. It explains the toolkit&rsquo;s purpose, layers, data flow, supported networks,
-            domain rules, and constraints for code-generating models.
+            for direct use in coding tools.
           </p>
         </div>
-        <Callout className="mt-5">
-          The raw text endpoint is the source of truth. This page reads it during the static build,
-          so the two versions cannot drift.
-        </Callout>
       </DocsSection>
       <DocsSection title="Full llms.txt">
         <CodeBlock code={content} language="markdown" />

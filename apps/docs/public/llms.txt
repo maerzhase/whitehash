@@ -86,14 +86,14 @@ The high-level client is created with `createWhitehashClient(config)`. Its princ
 
 - [LLM guide](/llms/): human-viewable documentation page containing this complete machine-readable guide.
 - [Getting started](/guide/getting-started/): render one real token with the provider, token hook, and Artwork compound.
-- [How Whitehash works](/understand/overview/): the complete architecture and responsibility boundaries.
+- [How the toolkit works](/understand/overview/): the complete architecture and responsibility boundaries.
 - [Data model](/understand/data-model/): normalized project and token concepts.
 - [Where data comes from](/understand/sources/): public indexers, RPCs, gateways, and chain-specific sources.
-- [How URLs are built](/understand/urls/): artifact state, IPFS resolution, onchfs resolution, query strings, and fragments.
-- [Glossary](/understand/glossary/): mappings between Whitehash terms, fxhash concepts, and on-chain records.
+- [How artwork URLs are built](/understand/urls/): artifact state, IPFS resolution, onchfs resolution, query strings, and fragments.
+- [Generative art glossary](/understand/glossary/): mappings between toolkit terms, fxhash concepts, and on-chain records.
 - [Configuration](/guide/configuration/): networks, RPCs, indexers, gateways, caching, and provider options.
 - [Archive CLI](/guide/cli/): complete project/token JSON formats, their shared metadata model, loading indexed data, direct EVM discovery, and offline wallet archives.
-- [Onchfs artwork](/guide/onchfs/): resolve and render onchfs content with a service worker or self-hosted proxy.
+- [Onchfs](/guide/onchfs/): resolve and render onchfs content with a service worker or self-hosted proxy.
 - [Explore variations](/guide/variations/): reusable generators, alternate seeds, and fx(params).
 - [Capture engine](/guide/capture/): viewport, canvas, and GIF captures; artwork readiness; browser providers; caching; framework adapters; and security.
 - [Theming](/guide/theming/): precompiled CSS, Tailwind v4, and semantic design tokens.
