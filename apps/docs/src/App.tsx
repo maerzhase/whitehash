@@ -31,7 +31,6 @@ import {
   ApiDocPage,
   CONTRAPUNTOS_TOKEN,
   GuidePage,
-  ONCHFS_SAMPLE_TOKEN,
   SAMPLE_TOKEN,
 } from "./docs-content"
 import { DOC_NAV } from "./docs-navigation"
@@ -288,7 +287,7 @@ function HomePage() {
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.85fr_1.15fr] lg:py-32">
           <div>
             <div className="section-kicker">Preserve art</div>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+            <h2 className="text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
               Token in.
               <br />
               Archive out.
@@ -358,11 +357,10 @@ return token && (
       <section className="border-t border-line bg-surface">
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:py-32">
           <div>
-            <div className="section-kicker">Onchfs</div>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
-              On-chain code.
+              Onchfs.
               <br />
-              Browser-ready.
+              <span className="text-muted">Brwsrrdy.</span>
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
               Some fxhash generators live entirely on-chain through onchfs. Resolve them with a
@@ -377,24 +375,16 @@ return token && (
               Choose an onchfs resolver →
             </Link>
           </div>
-          <div className="grid gap-4">
-            <Artwork.Root token={ONCHFS_SAMPLE_TOKEN} className="rounded-lg">
-              <Artwork.Image source="thumbnail" />
-              <Artwork.Live />
-              <Artwork.PlayButton playLabel="▶ Run onchfs live" />
-              <Artwork.StatusBadge />
-            </Artwork.Root>
-            <CodeBlock
-              language="tsx"
-              code={`// Browser
+          <CodeBlock
+            language="tsx"
+            code={`// Browser
 resolver: { onchfs: { mode: "service-worker" } }
 
 // Your own endpoint
 resolver: {
   onchfs: { mode: "proxy", baseUrl: "https://example.com/onchfs" }
 }`}
-            />
-          </div>
+          />
         </div>
       </section>
 
