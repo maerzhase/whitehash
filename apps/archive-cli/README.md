@@ -1,7 +1,7 @@
 # @whitehash/archive
 
-Paste an identity-bearing fxhash token URL to create a verified, self-contained offline
-archive:
+Preserve an fxhash artwork without relying on a hosted platform. Paste an identity-bearing
+token URL to create a verified, self-contained offline archive:
 
 ```bash
 npx @whitehash/archive \

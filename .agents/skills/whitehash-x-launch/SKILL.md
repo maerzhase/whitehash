@@ -28,6 +28,7 @@ note, and current Git status. Determine:
 
 - the user problem and new capability;
 - the shortest successful user journey;
+- whether the story is local preservation or online rendering/integration;
 - default behavior and opt-in behavior;
 - exact commands and public APIs;
 - meaningful limitations and external dependencies;
@@ -61,9 +62,8 @@ The scaffold refuses to overwrite a non-empty directory.
 
 ### 4. Draft the thread
 
-Follow `x-thread-plan` and `whitehash-marketing-voice`. Explain internal names such as
-“paste first” in plain language. Keep the offline archive and hostable JSON outcomes
-distinct.
+Explain internal names such as “paste first” with a concrete example or outcome. Keep
+the offline archive and hostable JSON outcomes distinct.
 
 ### 5. Build visual cards
 

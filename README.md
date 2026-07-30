@@ -1,14 +1,20 @@
 # whitehash
 
-An open-source, framework-agnostic toolkit for reading and embedding fxhash generative art
-from **Tezos, Ethereum, and Base**. Whitehash provides low-level TypeScript APIs, headless
-React bindings, and composable React UI while reading ownership, projects, metadata, and
-artwork directly from public blockchain infrastructure and content-addressed storage.
+An open-source, framework-agnostic toolkit for keeping fxhash generative art available without
+relying on third-party infrastructure. Preserve a token locally as a verified offline archive with
+the CLI, or load and render it in your own website, gallery, database, or collection with the API
+and React layers.
+
+Whitehash reads artwork, metadata, ownership, and live generator information from **Tezos,
+Ethereum, and Base** through public chain and configurable content infrastructure. Use the
+ready-made React components, or use the plain TypeScript libraries underneath them.
 
 No `@fxhash/*` dependencies. No fxhash-hosted endpoint is used by the toolkit. The docs
 site is fully static; `apps/onchfs-proxy` is the only optional server piece.
 
-## Start with one artwork
+## Choose your path
+
+### Preserve locally
 
 To preserve one artwork first, paste an identity-bearing fxhash token URL:
 
@@ -19,9 +25,9 @@ npx @whitehash/archive \
 
 This creates a verified offline folder containing the artwork bytes and integrity
 hashes. Here, “verified” means deterministic local hashes, completeness, references,
-and path safety—not a fresh blockchain lookup or signed proof. Add `--json` for a
-lightweight normalized token index intended for a hosted website; JSON alone is not an
-offline copy.
+and path safety. It does not mean a fresh blockchain lookup or signed proof. Add
+`--json` for a lightweight normalized token index intended for a hosted website; JSON
+alone is not an offline copy.
 
 Add `--onchain` to `npx @whitehash/archive verify <folder>` only when you explicitly
 want a network-backed comparison with current provider-observed token state. It does not
@@ -31,8 +37,10 @@ For a slug-only iteration link, add `--resolver fxhash`. That optional convenien
 contacts fxhash's hosted service only to recover the on-chain identity, then creates
 the same verified offline archive.
 
-The [quickstart](./apps/docs/QUICKSTART.md) shows the core contract: mount the
-zero-config provider, read one token by identity, and hand it to `Artwork`.
+### Render and integrate online
+
+The [quickstart](./apps/docs/QUICKSTART.md) gets one artwork on screen in three steps: install two
+packages, add the provider, and pass a token to `Artwork`.
 
 ```tsx
 import { useToken } from "@whitehash/react"

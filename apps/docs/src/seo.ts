@@ -11,7 +11,7 @@ export const SITE_ORIGIN = (
 
 export const SITE_NAME = "whitehash"
 export const SITE_DESCRIPTION =
-  "Put fxhash generative art on the web or save it for later, using public data from Tezos, Ethereum, Base, IPFS, and onchfs."
+  "Keep fxhash generative art available without relying on third-party infrastructure: preserve it locally with the CLI or render it in your own app with the API and React layers."
 
 export const API_SLUGS = [
   "whitehash-provider",
@@ -30,6 +30,7 @@ export const API_SLUGS = [
   "input",
   "textarea",
   "dialog",
+  "tooltip",
   "spinner",
   "skeleton",
   "separator",
@@ -60,7 +61,7 @@ export const GUIDE_SEO: Record<string, PageSeo> = {
   cli: {
     title: "Archive CLI",
     description:
-      "Index fxhash projects and tokens into portable JSON or preserve a wallet as an offline archive.",
+      "Preserve fxhash artwork locally as an offline archive, or index projects and tokens into portable JSON.",
   },
   onchfs: {
     title: "Render onchfs artwork",
@@ -125,6 +126,7 @@ const API_DESCRIPTIONS: Record<string, string> = {
   "address-search": "Accept and validate a Tezos or EVM wallet address.",
   "wallet-search": "Add a wallet-search dialog to a Whitehash interface.",
   "sort-toggle": "Switch the display order of projects or tokens.",
+  tooltip: "Show accessible contextual information on hover, focus, or touch.",
 }
 
 export function apiSeo(slug: string): PageSeo {

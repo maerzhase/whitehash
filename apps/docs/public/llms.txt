@@ -1,6 +1,6 @@
 # whitehash
 
-> Whitehash is an open-source TypeScript toolkit for reading, rendering, exploring, and preserving fxhash generative art without depending on fxhash-hosted APIs or `@fxhash/*` packages. It works across Tezos, Ethereum, and Base, and its documentation app is a static showcase built with the toolkit itself.
+> Whitehash is an open-source TypeScript toolkit for keeping fxhash generative art available without relying on third-party infrastructure. Use the CLI to preserve a token as a verified offline archive, or use the API and React layers to render it in your own website, gallery, database, or collection. It works across Tezos, Ethereum, and Base.
 
 Whitehash is a library, not a replacement marketplace or hosted data service. It offers progressively higher-level building blocks: framework-free protocol packages, headless React hooks, and a complete composable UI system. Applications remain in control of their RPCs, indexers, IPFS gateways, caches, rendering UI, and optional onchfs services.
 
@@ -27,7 +27,7 @@ The toolkit does not use an fxhash-hosted endpoint as a default or fallback. Pub
 - `@whitehash/capture`: framework-neutral fxhash-compatible PNG/GIF capture orchestration over headless Chromium, with injectable browser providers, feature extraction, web-standard handlers, stores, and request locks.
 - `@whitehash/onchfs-sw`: browser service worker that resolves and caches fully on-chain artwork at same-origin virtual URLs.
 - `@whitehash/react`: headless provider, persistent cache, data hooks, gateway-image fallback, and artwork-frame state. It renders no visual UI and imports no CSS.
-- `@whitehash/ui`: the complete Whitehash design system, including primitives, artwork compounds, token details, wallet galleries, project browsing, and search. It can be consumed with precompiled CSS or as Tailwind v4 source and tokens.
+- `@whitehash/ui`: the complete Whitehash design system, including Base UI-backed buttons, dialogs, tooltips, and form controls plus artwork compounds, token details, wallet galleries, project browsing, and search. It can be consumed with precompiled CSS or as Tailwind v4 source and tokens.
 
 Use the framework-free packages for a non-React integration or custom renderer. Use `@whitehash/react` when an application already owns presentation. Use `@whitehash/ui` for the branded, composable end-to-end React experience.
 
@@ -104,5 +104,6 @@ The high-level client is created with `createWhitehashClient(config)`. Its princ
 - [useProjects API](/docs/use-projects/): paginated project discovery.
 - [useProject API](/docs/use-project/): project metadata and iteration browsing.
 - [TokenDetails API](/docs/token-details/): complete artwork, provenance, and feature presentation.
+- [Tooltip API](/docs/tooltip/): accessible hover, focus, touch, and collision-aware contextual labels.
 
 Whitehash is MIT-licensed and is not affiliated with or endorsed by fxhash.

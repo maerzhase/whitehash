@@ -31,7 +31,7 @@ Retheme either path by overriding semantic variables such as `--color-primary`,
 | `WhitehashProvider` | provider | High-level package entry; configures every domain component |
 | `Button` | behavioral primitive | CVA variants and Base UI `render` slot |
 | `Card.*`, `Badge` | presentational primitives | Card compound and status pills |
-| `ToggleGroup.*`, `Dialog.*` | behavioral primitives | Keyboard/focus/overlay behavior from Base UI |
+| `ToggleGroup.*`, `Dialog.*`, `Tooltip.*` | behavioral primitives | Keyboard/focus/overlay behavior from Base UI |
 | `Field.*`, `Input`, `Textarea` | form primitives | Form-library-independent labelled controls |
 | `Spinner`, `Skeleton`, `Separator` | feedback/layout | Loading and structural feedback |
 | `Artwork.*` | compound domain | Resilient still, sandboxed live iframe, play control, status |
@@ -50,6 +50,18 @@ Token cards are deliberately a recipe, not another component family:
   <Card.Media><Artwork.Root token={token}><Artwork.Image /></Artwork.Root></Card.Media>
   <Card.Body><Card.Title>{token.name}</Card.Title></Card.Body>
 </Card.Root>
+```
+
+Tooltips use Base UI for hover, focus, touch, Escape, collision handling, and ARIA
+wiring:
+
+```tsx
+<Tooltip.Provider delay={250}>
+  <Tooltip.Root>
+    <Tooltip.Trigger>3 chains</Tooltip.Trigger>
+    <Tooltip.Content>Tezos · Ethereum · Base</Tooltip.Content>
+  </Tooltip.Root>
+</Tooltip.Provider>
 ```
 
 ## Exports
