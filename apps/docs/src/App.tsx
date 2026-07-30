@@ -406,7 +406,7 @@ result.triggeredBy // event, console, or delay`}
             <h2 className="text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
               Onchfs.
               <br />
-              <span className="text-muted">Brwsrrdy.</span>
+              <span className="text-muted">Render it anywhere.</span>
             </h2>
             <p className="mt-5 max-w-md leading-7 text-muted">
               Some fxhash generators live entirely on-chain through onchfs. Resolve them with a
