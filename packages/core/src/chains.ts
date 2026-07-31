@@ -37,8 +37,8 @@ export const CHAIN_DEFINITIONS = [
     aliases: ["tezos"],
     onchfsNetwork: "tezos:NetXdQprcVkpaWU",
     defaultRpcs: [
-      "https://mainnet.tezos.ecadinfra.com",
-      "https://mainnet.tezos.marigold.dev",
+      "https://tezos-mainnet.octez.io",
+      "https://rpc.tzkt.io/mainnet",
       "https://rpc.tzbeta.net",
     ],
   },
@@ -50,7 +50,7 @@ export const CHAIN_DEFINITIONS = [
     mode: "testnet",
     aliases: ["ghostnet"],
     onchfsNetwork: "tezos:NetXnHfVqm9iesp",
-    defaultRpcs: ["https://ghostnet.tezos.ecadinfra.com", "https://ghostnet.tezos.marigold.dev"],
+    defaultRpcs: ["https://ghostnet.tezos.octez.io", "https://rpc.tzkt.io/ghostnet"],
   },
   {
     id: "eip155:1",
