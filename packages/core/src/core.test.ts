@@ -16,4 +16,12 @@ describe("shared chain catalog", () => {
       for (const alias of chain.aliases) expect(resolveChainId(alias)).toBe(chain.id)
     }
   })
+  it("uses current public Tezos RPC defaults", () => {
+    const tezos = CHAIN_DEFINITIONS.find(chain => chain.id === "tezos:mainnet")!
+    expect(tezos.defaultRpcs).toEqual([
+      "https://tezos-mainnet.octez.io",
+      "https://rpc.tzkt.io/mainnet",
+      "https://rpc.tzbeta.net",
+    ])
+  })
 })
