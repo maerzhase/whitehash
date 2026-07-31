@@ -1,5 +1,11 @@
 # @whitehash/archive
 
+## 0.0.3
+
+### Patch Changes
+
+- 2ad3920: Make the archive CLI launch correctly when invoked through package-manager binaries such as `npx`.
+
 ## 0.0.2
 
 ### Patch Changes
