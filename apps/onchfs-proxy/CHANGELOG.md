@@ -1,5 +1,12 @@
 # @whitehash/onchfs-proxy
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [0b94615]
+  - @whitehash/core@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes

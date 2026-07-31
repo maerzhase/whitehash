@@ -1,5 +1,17 @@
 # @whitehash/docs
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [0b94615]
+  - @whitehash/onchfs-sw@0.0.2
+  - @whitehash/chain-reader@0.0.3
+  - @whitehash/react@0.0.3
+  - @whitehash/resolve@0.0.2
+  - @whitehash/runtime@0.0.2
+  - @whitehash/ui@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes

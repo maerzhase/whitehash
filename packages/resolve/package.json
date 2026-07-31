@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/resolve",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "URI to HTTP URL resolution for IPFS, onchfs, and data URIs — the single source of truth for how whitehash turns content-addressed URIs into fetchable URLs.",
   "license": "MIT",
   "repository": {

@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/onchfs-proxy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Self-hostable HTTP proxy that serves onchfs:// artworks by resolving them from Tezos, Ethereum, and Base. Runs on Node, Vercel, or Cloudflare Workers.",
   "license": "MIT",
