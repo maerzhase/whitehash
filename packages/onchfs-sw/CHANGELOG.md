@@ -1,5 +1,13 @@
 # @whitehash/onchfs-sw
 
+## 0.0.2
+
+### Patch Changes
+
+- 0b94615: Use current public Tezos RPC endpoints so onchfs artwork archives continue to resolve after the retired ECAD endpoints shut down.
+- Updated dependencies [0b94615]
+  - @whitehash/core@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes

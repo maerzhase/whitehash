@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Shared framework-free contracts, network metadata, and browser policies for whitehash packages.",
   "license": "MIT",
   "repository": {

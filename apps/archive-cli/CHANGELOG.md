@@ -1,5 +1,17 @@
 # @whitehash/archive
 
+## 0.0.4
+
+### Patch Changes
+
+- 0b94615: Make the archive CLI launch correctly when invoked through package-manager binaries such as `npx`.
+- 0b94615: Use current public Tezos RPC endpoints so onchfs artwork archives continue to resolve after the retired ECAD endpoints shut down.
+- Updated dependencies [0b94615]
+  - @whitehash/core@0.0.2
+  - @whitehash/onchfs-sw@0.0.2
+  - @whitehash/chain-reader@0.0.3
+  - @whitehash/resolve@0.0.2
+
 ## 0.0.3
 
 ### Patch Changes

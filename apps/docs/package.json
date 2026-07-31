@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/docs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "description": "Next.js documentation and live component showcases for the whitehash toolkit.",
   "license": "MIT",
