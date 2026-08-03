@@ -1,5 +1,15 @@
 # @whitehash/docs
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [46a1c76]
+  - @whitehash/market@0.1.0
+  - @whitehash/chain-reader@0.1.0
+  - @whitehash/react@0.1.0
+  - @whitehash/ui@0.1.0
+
 ## 0.0.4
 
 ### Patch Changes

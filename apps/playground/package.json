@@ -1,8 +1,8 @@
 {
   "name": "@whitehash/playground",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
-  "description": "Development playground for the whitehash toolkit \u2014 loads and visualizes market index artifacts produced by the archive CLI.",
+  "description": "Development playground for the whitehash toolkit — loads and visualizes market index artifacts produced by the archive CLI.",
   "license": "MIT",
   "type": "module",
   "scripts": {

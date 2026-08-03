@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/ui",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Complete whitehash React design system: primitives, generative-art compounds, and gallery blocks.",
   "license": "MIT",
   "repository": {

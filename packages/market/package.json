@@ -1,7 +1,7 @@
 {
   "name": "@whitehash/market",
-  "version": "0.0.0",
-  "description": "On-demand fxhash market history indexing from public chain infrastructure \u2014 per-project listings, offers, and sales backfill with portable JSON and SQLite artifacts.",
+  "version": "0.1.0",
+  "description": "On-demand fxhash market history indexing from public chain infrastructure — per-project listings, offers, and sales backfill with portable JSON and SQLite artifacts.",
   "license": "MIT",
   "repository": {
     "type": "git",
