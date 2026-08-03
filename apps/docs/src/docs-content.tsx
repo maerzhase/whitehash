@@ -972,7 +972,7 @@ npx @whitehash/archive \\
     language: "bash",
   },
   market: {
-    title: "Market history",
+    title: "Market history CLI",
     description:
       "Backfill one project's listings, offers, sales and mints from public infrastructure, then render them.",
     code: `# Write market-index-v2-13944.json and its .sqlite sibling

@@ -66,7 +66,7 @@ export const GUIDE_SEO: Record<string, PageSeo> = {
       "Preserve fxhash artwork locally as an offline archive, or index projects and tokens into portable JSON.",
   },
   market: {
-    title: "Market history",
+    title: "Market history CLI",
     description:
       "Backfill a project's listings, offers, sales, and mints from public infrastructure, then render floor, volume, and history.",
   },
