@@ -1,7 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import {
-  buildProjectIndex,
   createWhitehashClient,
   indexedProjectMetadata,
   parseRef,
@@ -97,21 +96,12 @@ export async function writeMarketIndex(
 
   let index: MarketIndex
   if (isTezosChain(ref.chain)) {
-    const projectIndex = await buildProjectIndex(client, ref, {
-      onProgress: progress => {
-        const total = progress.total === null ? "" : ` / ${progress.total}`
-        onProgress(`tokens: ${progress.iterations}${total}`)
-      },
-    })
+    const project = await client.getProject(ref)
+    if (!project) throw new Error(`Project not found: ${ref.chain}/${ref.id}`)
     const result = await backfillTezosMarketEvents(
-      {
-        chain: ref.chain,
-        projectId: ref.id,
-        tokens: projectIndex.iterations.map(iteration => ({
-          contract: iteration.token.contract,
-          tokenId: iteration.token.tokenId,
-        })),
-      },
+      // Tokens are discovered from the project's own gentk mints, so no
+      // iteration metadata has to be read to know what to scan.
+      { chain: ref.chain, projectId: ref.id },
       {
         config: client.config,
         sinceLevel: existing?.cursors[ref.chain]?.height,
@@ -125,11 +115,11 @@ export async function writeMarketIndex(
       ? updateMarketIndex(existing, {
           events: result.events,
           cursors: { [ref.chain]: result.cursor },
-          project: projectIndex.project,
+          project: indexedProjectMetadata(project),
           generatedAt,
         })
       : buildMarketIndex({
-          project: projectIndex.project,
+          project: indexedProjectMetadata(project),
           events: result.events,
           cursors: { [ref.chain]: result.cursor },
           generatedAt,

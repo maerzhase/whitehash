@@ -49,6 +49,7 @@ export {
 } from "./market-index.js"
 export {
   backfillTezosMarketEvents,
+  discoverTezosProjectTokens,
   type TezosBackfillOptions,
   type TezosBackfillResult,
   type TezosBackfillTarget,

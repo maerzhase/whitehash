@@ -49,8 +49,11 @@ export interface TezosBackfillTarget {
   chain: TezosChainId
   /** whitehash project id, e.g. `"v2:13944"` (issuer version + on-chain id). */
   projectId: string
-  /** The project's minted iterations (canonical token identities). */
-  tokens: { contract: string; tokenId: string }[]
+  /**
+   * The project's minted iterations. Discovered from the project's own gentk
+   * mints when omitted, which is exact; pass a set only to narrow the scan.
+   */
+  tokens?: { contract: string; tokenId: string }[]
 }
 
 export interface TezosBackfillOptions {
@@ -95,8 +98,8 @@ async function fetchOperations(
   base: string,
   query: string,
   fetchImpl: typeof fetch,
+  select = "id,level,timestamp,sender,amount,parameter,diffs,hash",
 ): Promise<TzktOperation[]> {
-  const select = "id,level,timestamp,sender,amount,parameter,diffs,hash"
   const operations: TzktOperation[] = []
   let offsetId: number | undefined
   for (;;) {
@@ -110,6 +113,52 @@ async function fetchOperations(
     offsetId = page[page.length - 1]?.id
     await sleep(120) // politeness between pages
   }
+}
+
+/**
+ * Every token a project minted, read from the gentk mint operations the project
+ * caused.
+ *
+ * Each gentk generation records `issuer_id` and `token_id` in its mint
+ * parameters, so this is the authoritative set: exactly the tokens this project
+ * minted, whichever gentk contract they landed on. It replaces matching
+ * iteration names against a prefix, which misses any token whose metadata reads
+ * differently.
+ */
+export async function discoverTezosProjectTokens(
+  chain: TezosChainId,
+  projectId: string,
+  options: {
+    config?: ChainReaderConfig
+    fetchImpl?: typeof fetch
+    /** Ignore mints above this level, to match a backfill's window. */
+    maxLevel?: number
+    onProgress?: (message: string) => void
+  } = {},
+): Promise<{ contract: string; tokenId: string }[]> {
+  const config = options.config ?? defaultChainReaderConfig()
+  const fetchImpl = options.fetchImpl ?? fetch
+  const base = tzktBaseUrl(chain, config)
+  const issuerId = projectId.includes(":") ? projectId.split(":")[1] : projectId
+  if (!issuerId || !/^\d+$/.test(issuerId)) {
+    throw new Error(`Unsupported Tezos project id (expected "v<N>:<id>"): ${projectId}`)
+  }
+  const range = options.maxLevel === undefined ? "" : `&level.le=${options.maxLevel}`
+  const tokens: { contract: string; tokenId: string }[] = []
+  for (const contract of TEZOS_NETWORKS[chain].gentkContracts) {
+    const ops = await fetchOperations(
+      base,
+      `target=${contract}&entrypoint=mint&parameter.issuer_id=${issuerId}${range}`,
+      fetchImpl,
+      "id,parameter",
+    )
+    for (const op of ops) {
+      const tokenId = str(record(op.parameter?.value)?.token_id)
+      if (tokenId !== null) tokens.push({ contract, tokenId })
+    }
+    options.onProgress?.(`tokens: ${tokens.length} minted iteration(s)`)
+  }
+  return tokens
 }
 
 interface DecodeContext {
@@ -391,17 +440,24 @@ export async function backfillTezosMarketEvents(
     throw new Error(`Unknown issuer version ${issuerVersion} on ${chain}`)
   }
 
-  const tokenSet = new Set(target.tokens.map(token => `${token.contract}/${token.tokenId}`))
+  const tokens =
+    target.tokens ??
+    (await discoverTezosProjectTokens(chain, target.projectId, {
+      config,
+      fetchImpl,
+      maxLevel,
+      onProgress,
+    }))
+  const tokenSet = new Set(tokens.map(token => `${token.contract}/${token.tokenId}`))
   const tokensByVersion = new Map<string, string[]>()
-  for (const token of target.tokens) {
+  for (const token of tokens) {
     const version = gentkVersionForContract(chain, token.contract)
     if (version === null) continue
     const ids = tokensByVersion.get(version) ?? []
     ids.push(token.tokenId)
     tokensByVersion.set(version, ids)
   }
-  const defaultContract =
-    target.tokens[0]?.contract ?? TEZOS_NETWORKS[chain].gentkContracts[0] ?? ""
+  const defaultContract = tokens[0]?.contract ?? TEZOS_NETWORKS[chain].gentkContracts[0] ?? ""
   const ctx: DecodeContext = { chain, defaultContract }
 
   const events: MarketEvent[] = []

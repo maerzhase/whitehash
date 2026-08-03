@@ -93,8 +93,8 @@ console.log(index.stats.floor, index.stats.volume.total.all)
 
 ## Limitations
 
-- Tezos token discovery reuses the project index's name-prefix strategy; iterations TzKT
-  has not indexed metadata for are not covered.
+- Tezos token discovery reads the project's gentk mint operations, so it is exact: the
+  set is every token the project minted, on whichever gentk contract it landed.
 - EVM floor/median/listed are `null`/`0` with `stats.listingsAvailable: false`.
 - An EVM mint with no `Purchase` log is skipped rather than priced from the transaction
   value: owner mints, airdrops, ticket redemptions and ranked-auction settlements all
@@ -106,6 +106,10 @@ console.log(index.stats.floor, index.stats.volume.total.all)
   purchase), slightly undercounting primary volume for ticketed projects.
 - Tezos marketplace v3 traded only fxhash articles and is intentionally not indexed.
 - All prices are native base units (mutez/wei) as decimal strings; no fiat conversion.
+- Stats are derived from chain state at the artifact's cursor, so they can disagree with a
+  marketplace's cached figures. On one project fxhash reported a floor of 888 tez against
+  our 995: the five cheaper listings were `active: false` in the marketplace big map, two
+  of them closed only days earlier. Diff against the big map, not against a hosted stat.
 - Seaport bundle orders attribute the full payment to the first collection token in the
   order; sibling tokens in the same bundle produce no event.
 - Only Seaport fills are decoded. Sales settled on non-Seaport venues are absent, and

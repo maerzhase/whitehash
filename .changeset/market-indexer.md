@@ -18,8 +18,14 @@ fxhash-compatible statistics and reads/writes portable
 a separate `@whitehash/market/sqlite` entry point, so a bundle that only reads
 stats never pulls in its WebAssembly SQLite build.
 
+Tezos token discovery is exact: it reads the project's gentk mint operations,
+which record `issuer_id` and `token_id`, so the token set is every token the
+project minted on whichever gentk contract it landed, rather than iterations
+whose names match a prefix.
+
 `@whitehash/ui` gains the `MarketStats` compound (tiles, floor and volume charts,
-event history) and `@whitehash/react` gains `useMarketIndex`, which loads an
+event history; its event table labels the two parties Seller and Buyer, since
+most rows are order lifecycle rather than a transfer) and `@whitehash/react` gains `useMarketIndex`, which loads an
 artifact from a URL, from a keyed loader for any other transport, or from an
 index already in memory. The archive CLI gains a `market` command with incremental
 `--update` runs, live single-line progress, and `--resolver fxhash` for project

@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest"
 import {
   backfillTezosMarketEvents,
+  discoverTezosProjectTokens,
   decodeMarketplaceV1Operation,
   decodeMarketplaceV2Operation,
   decodeMintOperation,
@@ -427,5 +428,52 @@ describe("backfillTezosMarketEvents", () => {
       { fetchImpl, sinceLevel: 998 },
     )
     expect(result).toEqual({ events: [], cursor: { height: 998 } })
+  })
+})
+
+describe("discoverTezosProjectTokens", () => {
+  it("reads every minted token id from the project's gentk mints", async () => {
+    const requested: string[] = []
+    const fetchImpl = (async (input: RequestInfo | URL) => {
+      const url = String(input)
+      requested.push(url)
+      // Only the first gentk generation minted for this project.
+      if (url.includes(GENTK_V1)) {
+        return new Response(
+          JSON.stringify([
+            {
+              id: 1,
+              parameter: { entrypoint: "mint", value: { token_id: "41", issuer_id: "86" } },
+            },
+            {
+              id: 2,
+              parameter: { entrypoint: "mint", value: { token_id: "42", issuer_id: "86" } },
+            },
+          ]),
+        )
+      }
+      return new Response(JSON.stringify([]))
+    }) as typeof fetch
+
+    const tokens = await discoverTezosProjectTokens("tezos:mainnet", "v2:86", {
+      fetchImpl,
+      maxLevel: 5000,
+    })
+    expect(tokens).toEqual([
+      { contract: GENTK_V1, tokenId: "41" },
+      { contract: GENTK_V1, tokenId: "42" },
+    ])
+    // Filtered by the project on chain, not by iteration name, and bounded by
+    // the caller's window.
+    expect(requested.some(url => url.includes("parameter.issuer_id=86"))).toBe(true)
+    expect(requested.some(url => url.includes("level.le=5000"))).toBe(true)
+    // Every gentk generation is asked, since a project can span them.
+    expect(requested.filter(url => url.includes("entrypoint=mint")).length).toBe(3)
+  })
+
+  it("rejects a project id without a numeric on-chain id", async () => {
+    await expect(
+      discoverTezosProjectTokens("tezos:mainnet", "not-an-id", { fetchImpl: fetch }),
+    ).rejects.toThrow(/expected/)
   })
 })
