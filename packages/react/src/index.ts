@@ -26,6 +26,12 @@ export {
   type UseProjectsOptions,
 } from "./use-projects.js"
 export {
+  loadMarketIndex,
+  useMarketIndex,
+  type UseMarketIndexOptions,
+  type UseMarketIndexResult,
+} from "./use-market-index.js"
+export {
   useToken,
   type UseTokenOptions,
   type UseTokenResult,
