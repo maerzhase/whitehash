@@ -6,6 +6,7 @@ export const DOC_NAV: DocsNavItem[] = [
   { label: "Getting started", href: "/guide/getting-started", group: "Guides" },
   { label: "Configuration", href: "/guide/configuration", group: "Guides" },
   { label: "Archive CLI", href: "/guide/cli", group: "Guides" },
+  { label: "Market history", href: "/guide/market", group: "Guides" },
   { label: "Onchfs", href: "/guide/onchfs", group: "Guides" },
   { label: "Explore variations", href: "/guide/variations", group: "Guides" },
   { label: "Capture engine", href: "/guide/capture", group: "Guides" },

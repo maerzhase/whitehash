@@ -9,10 +9,10 @@ import { MarketStats, Skeleton } from "@whitehash/ui"
  * offline-friendly and shows the shape an application actually hosts, rather
  * than backfilling a project in the browser on every page view.
  */
-const DEMO_ARTIFACT = "/market-index-demo.json"
+export const DEMO_MARKET_ARTIFACT = "/market-index-demo.json"
 
 export function MarketDemo() {
-  const { index, loading, error } = useMarketIndex(DEMO_ARTIFACT)
+  const { index, loading, error } = useMarketIndex(DEMO_MARKET_ARTIFACT)
 
   if (loading) {
     return (

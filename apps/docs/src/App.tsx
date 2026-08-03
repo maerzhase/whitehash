@@ -447,7 +447,7 @@ result.triggeredBy // event, console, or delay`}
                 The artifact below is a static file this site hosts, indexed from TzKT. On Ethereum
                 and Base only sales are recoverable, because listings there are signed off-chain.
               </p>
-              <Link className="docs-text-link mt-6 inline-block" href="/guide/cli">
+              <Link className="docs-text-link mt-6 inline-block" href="/guide/market">
                 Index a project&rsquo;s market history &rarr;
               </Link>
               <CodeBlock

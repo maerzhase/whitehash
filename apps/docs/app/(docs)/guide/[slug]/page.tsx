@@ -6,6 +6,7 @@ const SLUGS = [
   "getting-started",
   "configuration",
   "cli",
+  "market",
   "onchfs",
   "theming",
   "variations",
