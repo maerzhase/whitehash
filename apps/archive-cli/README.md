@@ -156,12 +156,11 @@ npx @whitehash/archive market v2:13944 --update market-index-v2-13944.json
 ```
 
 On Tezos the full order book plus mints are recovered from TzKT (marketplace v1 and
-v2). On Ethereum and Base only secondary sales are recoverable in this version —
-fxhash listings there are off-chain signed Seaport orders, and mints are not yet
-indexed — discovered through the collection's transfers (Blockscout by default,
-trustless RPC scan as fallback) and decoded from Seaport `OrderFulfilled` events
-regardless of Seaport version, so other Seaport-based marketplaces such as OpenSea
-are covered too:
+v2). On Ethereum and Base sales and mints are recovered but active listings are not,
+because fxhash listings there are signed off-chain. Both are discovered through the
+collection's transfers (Blockscout by default, trustless RPC scan as fallback) and
+decoded by event signature, so any Seaport version and other Seaport-based
+marketplaces such as OpenSea are covered too:
 
 ```bash
 npx @whitehash/archive market base:0x50c04A6B066d659Fe2F66F6388Cf8dD394036632
@@ -175,9 +174,11 @@ needs an archive-capable RPC — several public endpoints reject deep
 `--source blockscout` to fail instead of falling back.
 
 Only Seaport fills are decoded, so sales settled on non-Seaport venues are absent,
-while Seaport sales on other marketplaces (OpenSea and friends) are included. On a
-spot check of one Ethereum collection, every sale shared with fxhash's own index
-matched to the wei.
+while Seaport sales on other marketplaces (OpenSea and friends) are included. A mint
+with no purchase log in its transaction is skipped rather than priced from the
+transaction value, which leaves out owner mints, airdrops and ticket redemptions.
+On one Ethereum collection, every sale and every one of its 512 mints matched
+fxhash's own index to the wei.
 
 ## Index a token
 

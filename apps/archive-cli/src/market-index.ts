@@ -51,9 +51,9 @@ function sqlitePath(outFile: string): string {
 /**
  * Backfill a project's market history from public chain infrastructure and
  * write portable JSON (and SQLite) artifacts. Tezos projects get the full
- * order book and sales; EVM collections get Seaport sales only, because
- * fxhash EVM listings are off-chain signed orders that public infrastructure
- * cannot reconstruct.
+ * order book, sales and mints; EVM collections get sales and mints but no
+ * active listings, because fxhash EVM listings are off-chain signed orders that
+ * public infrastructure cannot reconstruct.
  */
 export async function writeMarketIndex(
   options: WriteMarketIndexOptions,
@@ -140,7 +140,7 @@ export async function writeMarketIndex(
     if (!/^0x[0-9a-fA-F]{40}$/.test(ref.id)) {
       throw new Error(`EVM project id must be the collection contract address, got ${ref.id}`)
     }
-    onProgress("EVM collections have sales only: fxhash listings are off-chain Seaport orders")
+    onProgress("EVM: sales and mints only, since fxhash listings there are signed off-chain")
     const result = await backfillEvmMarketEvents(
       { chain: ref.chain, contract: ref.id as `0x${string}` },
       {
