@@ -1,9 +1,9 @@
 ---
-"@whitehash/market": minor
-"@whitehash/chain-reader": minor
-"@whitehash/react": minor
-"@whitehash/ui": minor
-"@whitehash/archive": minor
+"@whitehash/market": patch
+"@whitehash/chain-reader": patch
+"@whitehash/react": patch
+"@whitehash/ui": patch
+"@whitehash/archive": patch
 ---
 
 Add on-demand per-project market history indexing, and the parts to display it.
