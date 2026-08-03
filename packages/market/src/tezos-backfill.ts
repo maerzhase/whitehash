@@ -73,6 +73,16 @@ export interface TezosBackfillResult {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
+/**
+ * TzKT's `.in` filter rejects a single-item list ("JSON array must contain at
+ * least two items"), so a batch of one has to use the scalar form of the same
+ * field.
+ */
+function valueFilter(field: string, values: string[]): string {
+  if (values.length === 1) return `${field}=${values[0]}`
+  return `${field}.in=${values.join(",")}`
+}
+
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = []
   for (let index = 0; index < items.length; index += size) {
@@ -420,7 +430,7 @@ export async function backfillTezosMarketEvents(
     const ops = await fetchOperations(
       base,
       `target=${marketplaces.v2}&entrypoint.in=listing,offer,auction&${range}` +
-        `&parameter.gentk.version=${version}&parameter.gentk.id.in=${batch.join(",")}`,
+        `&parameter.gentk.version=${version}&${valueFilter("parameter.gentk.id", batch)}`,
       fetchImpl,
     )
     collectV2(ops)
@@ -442,23 +452,23 @@ export async function backfillTezosMarketEvents(
   const followUps: { entrypoints: string; parameter: string; ids: Set<string> }[] = [
     {
       entrypoints: "listing_cancel,listing_accept",
-      parameter: "parameter.in",
+      parameter: "parameter",
       ids: orderIds.v2Listings,
     },
-    { entrypoints: "offer_cancel,offer_accept", parameter: "parameter.in", ids: orderIds.v2Offers },
+    { entrypoints: "offer_cancel,offer_accept", parameter: "parameter", ids: orderIds.v2Offers },
     {
       entrypoints: "collection_offer_cancel",
-      parameter: "parameter.in",
+      parameter: "parameter",
       ids: orderIds.v2CollectionOffers,
     },
     {
       entrypoints: "collection_offer_accept",
-      parameter: "parameter.offer_id.in",
+      parameter: "parameter.offer_id",
       ids: orderIds.v2CollectionOffers,
     },
     {
       entrypoints: "auction_bid,auction_cancel,auction_fulfill",
-      parameter: "parameter.in",
+      parameter: "parameter",
       ids: orderIds.v2Auctions,
     },
   ]
@@ -470,7 +480,7 @@ export async function backfillTezosMarketEvents(
     const ops = await fetchOperations(
       base,
       `target=${marketplaces.v2}&entrypoint.in=${followUp.entrypoints}&${range}` +
-        `&${followUp.parameter}=${batch.join(",")}`,
+        `&${valueFilter(followUp.parameter, batch)}`,
       fetchImpl,
     )
     collectV2(ops)
@@ -494,7 +504,7 @@ export async function backfillTezosMarketEvents(
       collectV1(
         await fetchOperations(
           base,
-          `target=${marketplaces.v1}&entrypoint=offer&${range}&parameter.objkt_id.in=${batch.join(",")}`,
+          `target=${marketplaces.v1}&entrypoint=offer&${range}&${valueFilter("parameter.objkt_id", batch)}`,
           fetchImpl,
         ),
       )
@@ -505,7 +515,7 @@ export async function backfillTezosMarketEvents(
         await fetchOperations(
           base,
           `target=${marketplaces.v1}&entrypoint.in=collect,cancel_offer&${range}` +
-            `&parameter.in=${batch.join(",")}`,
+            `&${valueFilter("parameter", batch)}`,
           fetchImpl,
         ),
       )

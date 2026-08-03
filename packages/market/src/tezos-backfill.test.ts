@@ -300,7 +300,10 @@ describe("backfillTezosMarketEvents", () => {
         ]
       }
       if (url.includes("entrypoint.in=listing_cancel,listing_accept")) {
-        expect(url).toContain("parameter.in=7")
+        // A single order id must use the scalar filter: TzKT rejects a
+        // one-item `.in` list with a 400.
+        expect(url).toContain("parameter=7")
+        expect(url).not.toContain("parameter.in=")
         return [
           {
             id: 11,
@@ -367,6 +370,44 @@ describe("backfillTezosMarketEvents", () => {
           url.includes("parameter.issuer_id=99"),
       ),
     ).toBe(true)
+  })
+
+  it("batches ids with .in but falls back to the scalar filter for a single id", async () => {
+    const requested: string[] = []
+    const fetchImpl = (async (input: RequestInfo | URL) => {
+      const url = String(input)
+      requested.push(url)
+      if (url.includes("/v1/head")) return new Response(JSON.stringify({ level: 1000 }))
+      return new Response(JSON.stringify([]))
+    }) as typeof fetch
+
+    await backfillTezosMarketEvents(
+      {
+        chain: "tezos:mainnet",
+        projectId: "v2:99",
+        tokens: [{ contract: GENTK_V1, tokenId: "42" }],
+      },
+      { fetchImpl },
+    )
+    const creations = requested.find(url => url.includes("entrypoint.in=listing,offer,auction"))
+    expect(creations).toContain("parameter.gentk.id=42")
+    expect(creations).not.toContain("parameter.gentk.id.in=")
+
+    await backfillTezosMarketEvents(
+      {
+        chain: "tezos:mainnet",
+        projectId: "v2:99",
+        tokens: [
+          { contract: GENTK_V1, tokenId: "42" },
+          { contract: GENTK_V1, tokenId: "43" },
+        ],
+      },
+      { fetchImpl },
+    )
+    const multi = requested
+      .filter(url => url.includes("entrypoint.in=listing,offer,auction"))
+      .at(-1)
+    expect(multi).toContain("parameter.gentk.id.in=42,43")
   })
 
   it("short-circuits when the cursor is already at the safe head", async () => {
