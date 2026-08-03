@@ -13,9 +13,10 @@ apps/docs/out/
 apps/docs/public/onchfs-sw.js
 apps/docs/public/onchfs.global.js
 whitehash-archive/
-# CLI output written into the repo when run without --out
-market-index-*.json
-market-index-*.sqlite
+# CLI output written into the working directory when run without --out.
+# Root-anchored: artifacts an app deliberately ships (apps/docs/public) are tracked.
+/market-index-*.json
+/market-index-*.sqlite
 
 # Local planning notes and agent session artifacts
 /.private/
