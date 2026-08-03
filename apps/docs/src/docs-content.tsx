@@ -1354,6 +1354,23 @@ const wallet = useWalletTokens(address, { client })`}
             code={`npx @whitehash/archive project v2:13944 \\
   --out ./public/monogrid.json`}
           />
+          <div className="docs-prose mt-4">
+            <p>
+              The related <code>market</code> command backfills the same project&rsquo;s market
+              history — listings, offers, sales, and mints with derived floor, median, and volume
+              statistics — into a versioned <code>whitehash-market-index@1</code> JSON file plus a
+              queryable SQLite sibling. Artifacts embed resume cursors, so{" "}
+              <code>--update &lt;existing.json&gt;</code> re-runs are incremental. On EVM chains
+              only secondary sales are recoverable; fxhash listings there are off-chain signed
+              Seaport orders. Load the JSON with <code>parseMarketIndex()</code> from{" "}
+              <code>@whitehash/market</code>.
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="bash"
+            code={`npx @whitehash/archive market v2:13944`}
+          />
           <CodeBlock
             className="mt-4"
             language="json"

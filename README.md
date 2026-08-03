@@ -79,7 +79,7 @@ browser-persistent caching. Configure only what you want to change.
 | Layer | Package | Use it when |
 | --- | --- | --- |
 | Shared contracts | [`@whitehash/core`](./packages/core) | You only need stable types, supported-network metadata, capture contracts, or browser security defaults |
-| Framework-free | [`@whitehash/resolve`](./packages/resolve), [`@whitehash/chain-reader`](./packages/chain-reader), [`@whitehash/runtime`](./packages/runtime), [`@whitehash/onchfs-sw`](./packages/onchfs-sw) | You want plain TypeScript, direct onchfs resolution, a custom renderer, interactive variations, or non-React integration |
+| Framework-free | [`@whitehash/resolve`](./packages/resolve), [`@whitehash/chain-reader`](./packages/chain-reader), [`@whitehash/market`](./packages/market), [`@whitehash/runtime`](./packages/runtime), [`@whitehash/onchfs-sw`](./packages/onchfs-sw) | You want plain TypeScript, direct onchfs resolution, market history indexing, a custom renderer, interactive variations, or non-React integration |
 | Headless React | [`@whitehash/react`](./packages/react) | You want hooks for fetching, caching, gateway fallback, and iframe state |
 | Complete UI | [`@whitehash/ui`](./packages/ui) | You want composable artwork, token, gallery, and search components |
 
@@ -88,8 +88,9 @@ browser-persistent caching. Configure only what you want to change.
 | App | Purpose |
 | --- | --- |
 | [`apps/docs`](./apps/docs) | Statically exported Next.js API docs plus live wallet/project/artwork showcases |
-| [`apps/archive-cli`](./apps/archive-cli) | Paste-first single-token archives and JSON indexes, plus project indexing and wallet preservation with CAR verification |
+| [`apps/archive-cli`](./apps/archive-cli) | Paste-first single-token archives and JSON indexes, plus project indexing, market history backfill, and wallet preservation with CAR verification |
 | [`apps/onchfs-proxy`](./apps/onchfs-proxy) | Optional self-hostable HTTP bridge for `onchfs://` artwork |
+| [`apps/playground`](./apps/playground) | Private Vite development playground; loads and visualizes market index artifacts |
 
 Supported networks are Tezos mainnet/ghostnet, Ethereum/Sepolia, and Base/Base Sepolia.
 All configuration is network-keyed, so testnets use the same public API shapes.
