@@ -1,6 +1,6 @@
 {
   "name": "@whitehash/chain-reader",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Read fxhash wallets and projects from public Tezos, Ethereum, and Base infrastructure.",
   "license": "MIT",
   "repository": {
