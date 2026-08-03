@@ -27,16 +27,16 @@ That writes `market-index-v2-13944.json` and `market-index-v2-13944.sqlite`, and
   listing events. Mints are searched across every issuer generation, because fxhash
   consolidated older projects into the v2 ledger while their mint operations stayed on
   the contract they originally ran on.
-- **Ethereum / Base** — secondary sales only. fxhash EVM listings are off-chain signed
-  Seaport orders, so the active order book cannot be reconstructed from public data;
-  fills can. The backfill walks the collection's own ERC-721 transfers (Blockscout by
-  default, trustless JSON-RPC log scan as fallback or via `source: "rpc"`), decodes
-  Seaport `OrderFulfilled` events in the same transactions by event signature (covering
-  Seaport 1.5, 1.6, and other Seaport-based marketplaces such as OpenSea — but not
-  non-Seaport venues), and reconstructs the price from the order's payment items.
-  EVM mints (primary volume) are not indexed in this version. Blockscout requests
-  back off on rate limits; if it stays unavailable the RPC scan takes over, and
-  that path needs an archive-capable endpoint (`config.evm.rpcs`).
+- **Ethereum / Base** — sales and mints, but no active listings: fxhash EVM listings are
+  off-chain signed Seaport orders, so the order book cannot be reconstructed from public
+  data. Fills can. The backfill walks the collection's own ERC-721 transfers (Blockscout
+  by default, trustless JSON-RPC log scan as fallback or via `source: "rpc"`) and decodes
+  the logs in those transactions by event signature: Seaport `OrderFulfilled` for
+  secondary sales (covering Seaport 1.5, 1.6, and other Seaport-based marketplaces such
+  as OpenSea, but not non-Seaport venues), and the minters' `Purchase` for primary sales.
+  Both carry the collection in an indexed topic, so no marketplace or minter address is
+  hardcoded. Blockscout requests back off on rate limits; if it stays unavailable the RPC
+  scan takes over, and that path needs an archive-capable endpoint (`config.evm.rpcs`).
 
 ## Statistics
 
@@ -95,8 +95,11 @@ console.log(index.stats.floor, index.stats.volume.total.all)
 
 - Tezos token discovery reuses the project index's name-prefix strategy; iterations TzKT
   has not indexed metadata for are not covered.
-- EVM floor/median/listed are `null`/`0` with `stats.listingsAvailable: false`, and EVM
-  artifacts contain no mints, so their primary volume is always zero.
+- EVM floor/median/listed are `null`/`0` with `stats.listingsAvailable: false`.
+- An EVM mint with no `Purchase` log is skipped rather than priced from the transaction
+  value: owner mints, airdrops, ticket redemptions and ranked-auction settlements all
+  arrive that way and carry no price on chain at that point. Ticket-based projects price
+  the ticket, not the collection, so their mints are absent too.
 - EVM discovery starts at the fxhash factory deploy block; collections older than the
   factory would lose earlier history.
 - Tezos v3 ticket-based mints record a price of 0 (the payment happened at ticket

@@ -50,7 +50,8 @@ export function buildMarketIndex(options: BuildMarketIndexOptions): MarketIndex 
     stats: computeMarketStats(events, {
       asOf: generatedAt,
       // fxhash EVM listings are off-chain signed Seaport orders, so only
-      // Tezos event sets can reconstruct the active order book.
+      // Tezos event sets can reconstruct the active order book. Sales and mints
+      // come back on every chain.
       listingsAvailable: isTezosChain(options.project.chain),
     }),
   }

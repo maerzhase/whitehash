@@ -9,10 +9,13 @@
  * ERC-20 payment items. Fills are matched by event signature rather than a
  * marketplace address, so every Seaport version (1.5, 1.6, …) is covered.
  *
+ * Mints are primary sales, priced from the `Purchase` log the fxhash minters
+ * emit in the same transaction, which carries the collection in an indexed
+ * topic just like a Seaport fill does.
+ *
  * Discovery defaults to the Blockscout REST API (a handful of paged calls)
  * and falls back to a trustless JSON-RPC `Transfer`-log scan. Scans start at
- * the fxhash factory deploy block, so the scope is fxhash collections;
- * mints (primary sales) are not indexed in this version.
+ * the fxhash factory deploy block, so the scope is fxhash collections.
  */
 import {
   EVM_NETWORKS,
@@ -43,12 +46,87 @@ const ORDER_FULFILLED_ABI = [
 export const ORDER_FULFILLED_TOPIC =
   "0x9d9af8e38d66c62e2c12f0225249fd9d721c54b83f48d9352c97c6cacdcb6f31"
 
+/**
+ * Primary sales. fxhash's minters emit `Purchase` with the collection in
+ * topic1, so a mint is attributable by event signature the same way a Seaport
+ * fill is, without hardcoding minter addresses that change with each
+ * deployment.
+ *
+ * The fixed-price and Farcaster-frame minters share one signature; the Dutch
+ * auction minter orders `_to` before `_amount`, so it needs its own decoder,
+ * and the two disagree about what `_price` measures (see decodeMintPurchase).
+ */
+const PURCHASE_ABI = [
+  parseAbiItem(
+    "event Purchase(address indexed _token, uint256 indexed _reserveId, address indexed _buyer, uint256 _amount, address _to, uint256 _price)",
+  ),
+] as const
+
+const DUTCH_PURCHASE_ABI = [
+  parseAbiItem(
+    "event Purchase(address indexed _token, uint256 indexed _reserveId, address indexed _buyer, address _to, uint256 _amount, uint256 _price)",
+  ),
+] as const
+
+/** keccak256 of Purchase(address,uint256,address,uint256,address,uint256). */
+export const PURCHASE_TOPIC = "0x1ed291f7d8423022df7d587aba59cfed69a7c95aeb081171cc756b396b31557f"
+
+/** keccak256 of Purchase(address,uint256,address,address,uint256,uint256). */
+export const DUTCH_PURCHASE_TOPIC =
+  "0xac14cac126dec46eb2cef1007f2e33dcf4704d2be6c45b0855acf8b81b89e084"
+
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 const DEFAULT_LOG_CHUNK = 9_000n
 const DEFAULT_CONCURRENCY = 8
 /** Public Blockscout instances rate-limit well below the RPC concurrency. */
 const BLOCKSCOUT_CONCURRENCY = 3
 const MAX_BLOCKSCOUT_PAGES = 2_000
+
+/** What one `Purchase` log says about the tokens it paid for. */
+export interface DecodedMintPurchase {
+  /** Tokens the call minted. */
+  amount: bigint
+  /** Total paid for those tokens, in base units. */
+  total: bigint
+}
+
+/**
+ * Read a `Purchase` log for `collection`, or null when the log is a purchase of
+ * something else. The collection sits in topic1, so a purchase for another
+ * collection — or for a ticket contract, which is how fxhash prices params
+ * projects — is rejected here.
+ *
+ * The two minters disagree about `_price`, which is why this returns a total
+ * rather than a unit price: the fixed-price minter reports the whole call, the
+ * Dutch auction minter reports one token. Both readings were checked against
+ * the transaction value on mainnet: a 2-token allowlist buy paying 0.2 ETH
+ * reports `_price` 0.2, while a 20-token auction buy paying 4.6 ETH reports
+ * 0.23.
+ */
+export function decodeMintPurchase(
+  log: Pick<Log, "data" | "topics">,
+  collection: string,
+): DecodedMintPurchase | null {
+  const topic0 = log.topics[0]?.toLowerCase()
+  const perToken = topic0 === DUTCH_PURCHASE_TOPIC
+  const abi = topic0 === PURCHASE_TOPIC ? PURCHASE_ABI : perToken ? DUTCH_PURCHASE_ABI : null
+  if (!abi) return null
+  try {
+    const event = decodeEventLog({
+      abi,
+      data: log.data,
+      topics: log.topics as [`0x${string}`, ...`0x${string}`[]],
+    })
+    const args = event.args as unknown as { _token: string; _amount: bigint; _price: bigint }
+    if (args._token.toLowerCase() !== collection.toLowerCase()) return null
+    return {
+      amount: args._amount,
+      total: perToken ? args._price * args._amount : args._price,
+    }
+  } catch {
+    return null
+  }
+}
 
 interface SeaportItem {
   itemType: number
@@ -160,7 +238,7 @@ export interface EvmBackfillResult {
   cursor: MarketIndexCursor
 }
 
-/** A collection transfer that may correspond to a Seaport fill. */
+/** A collection transfer that may correspond to a sale or a mint. */
 interface SaleCandidate {
   txHash: `0x${string}`
   block: number
@@ -168,6 +246,8 @@ interface SaleCandidate {
   tokenId: string
   from: string
   to: string
+  /** True when `from` is the zero address, i.e. the token was minted here. */
+  mint: boolean
 }
 
 interface SeaportLikeLog {
@@ -224,6 +304,66 @@ export function toSaleEvents(
   return events
 }
 
+/**
+ * Primary sales from mint transfers, priced by the `Purchase` logs in the same
+ * transaction. A transaction's purchases are summed and divided by the tokens
+ * they cover, so a batch mint prices each token correctly whichever minter ran
+ * it, and a transaction mixing prices reports their average.
+ *
+ * A mint transfer with no purchase log is deliberately dropped rather than
+ * priced from the transaction value: owner mints, airdrops, ticket redemptions
+ * and ranked-auction settlements all reach the collection this way, and none of
+ * them has a price at that point in the chain.
+ */
+export function toMintEvents(
+  candidates: SaleCandidate[],
+  logsByTx: Map<`0x${string}`, SeaportLikeLog[]>,
+  target: EvmBackfillTarget,
+): MarketEvent[] {
+  const events: MarketEvent[] = []
+  const priced = new Map<`0x${string}`, { price: bigint; index: number } | null>()
+  for (const candidate of candidates) {
+    if (!candidate.mint) continue
+    if (!priced.has(candidate.txHash)) {
+      let total = 0n
+      let amount = 0n
+      let index: number | null = null
+      for (const log of logsByTx.get(candidate.txHash) ?? []) {
+        const purchase = decodeMintPurchase(log, target.contract)
+        if (!purchase || purchase.amount === 0n) continue
+        total += purchase.total
+        amount += purchase.amount
+        index ??= log.index
+      }
+      priced.set(
+        candidate.txHash,
+        amount === 0n || index === null ? null : { price: total / amount, index },
+      )
+    }
+    const purchase = priced.get(candidate.txHash)
+    if (!purchase) continue
+    events.push({
+      kind: "mint",
+      chain: target.chain,
+      marketplace: null,
+      contract: target.contract,
+      tokenId: candidate.tokenId,
+      orderId: null,
+      price: purchase.price.toString(),
+      seller: null,
+      buyer: candidate.to,
+      saleKind: "primary",
+      timestamp: candidate.timestamp,
+      level: candidate.block,
+      opHash: candidate.txHash,
+      // The purchase log is shared by a batch, so the token keeps the identity
+      // apart rather than the log index alone.
+      sourceId: `${candidate.block}-${purchase.index}-${candidate.tokenId}`,
+    })
+  }
+  return events
+}
+
 interface BlockscoutTransfer {
   block_number?: number
   log_index?: number
@@ -265,7 +405,7 @@ async function collectViaBlockscout(
         reachedCursor = true
         continue
       }
-      if (block > toBlock || from.toLowerCase() === ZERO_ADDRESS) continue
+      if (block > toBlock) continue
       candidates.push({
         txHash,
         block,
@@ -273,6 +413,7 @@ async function collectViaBlockscout(
         tokenId,
         from,
         to: item.to?.hash ?? ZERO_ADDRESS,
+        mint: from.toLowerCase() === ZERO_ADDRESS,
       })
     }
     if (reachedCursor || !body.next_page_params) break
@@ -290,7 +431,7 @@ async function collectViaBlockscout(
     )}`
     onProgress?.(`transfers: page ${page + 1} · ${candidates.length} candidate(s)`)
   }
-  onProgress?.(`transfers: ${candidates.length} non-mint transfer(s) via Blockscout`)
+  onProgress?.(`transfers: ${candidates.length} transfer(s) via Blockscout`)
 
   const txHashes = [...new Set(candidates.map(candidate => candidate.txHash))]
   let fetched = 0
@@ -320,7 +461,10 @@ async function collectViaBlockscout(
       ),
     )
   })
-  return toSaleEvents(candidates, logsByTx, target)
+  return [
+    ...toSaleEvents(candidates, logsByTx, target),
+    ...toMintEvents(candidates, logsByTx, target),
+  ]
 }
 
 async function collectViaRpc(
@@ -361,8 +505,7 @@ async function collectViaRpc(
     transfer =>
       transfer.transactionHash &&
       transfer.blockNumber !== null &&
-      transfer.args.tokenId !== undefined &&
-      (transfer.args.from ?? ZERO_ADDRESS).toLowerCase() !== ZERO_ADDRESS,
+      transfer.args.tokenId !== undefined,
   )
   const timestampByBlock = new Map<bigint, string>()
   await mapConcurrent(
@@ -380,6 +523,7 @@ async function collectViaRpc(
     tokenId: (transfer.args.tokenId as bigint).toString(),
     from: transfer.args.from ?? ZERO_ADDRESS,
     to: transfer.args.to ?? ZERO_ADDRESS,
+    mint: (transfer.args.from ?? ZERO_ADDRESS).toLowerCase() === ZERO_ADDRESS,
   }))
 
   const logsByTx = new Map<`0x${string}`, SeaportLikeLog[]>()
@@ -404,7 +548,10 @@ async function collectViaRpc(
       )
     },
   )
-  return toSaleEvents(candidates, logsByTx, target)
+  return [
+    ...toSaleEvents(candidates, logsByTx, target),
+    ...toMintEvents(candidates, logsByTx, target),
+  ]
 }
 
 /** Public RPCs commonly refuse deep historical `eth_getLogs` queries. */
@@ -455,7 +602,7 @@ export async function backfillEvmMarketEvents(
       events = await scanViaRpc()
     }
   }
-  onProgress?.(`decoded ${events.length} Seaport sale(s)`)
+  onProgress?.(`decoded ${events.length} sale(s) and mint(s)`)
 
   return { events: mergeMarketEvents(events), cursor: { height: toBlock } }
 }
