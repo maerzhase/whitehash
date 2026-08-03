@@ -27,7 +27,7 @@ The toolkit does not use an fxhash-hosted endpoint as a default or fallback. Pub
 - `@whitehash/runtime`: framework-free control of content-addressed generators, seeds, and fx(params), plus an optional React iframe binding.
 - `@whitehash/capture`: framework-neutral fxhash-compatible PNG/GIF capture orchestration over headless Chromium, with injectable browser providers, feature extraction, web-standard handlers, stores, and request locks.
 - `@whitehash/onchfs-sw`: browser service worker that resolves and caches fully on-chain artwork at same-origin virtual URLs.
-- `@whitehash/react`: headless provider, persistent cache, data hooks, gateway-image fallback, and artwork-frame state. `useMarketIndex` loads a market index artifact from a URL and validates it. It renders no visual UI and imports no CSS.
+- `@whitehash/react`: headless provider, persistent cache, data hooks, gateway-image fallback, and artwork-frame state. `useMarketIndex` loads a market index artifact from a URL, a custom loader (an API in front of a database, for example), or an index already in memory, validating anything it fetches. It renders no visual UI and imports no CSS.
 - `@whitehash/ui`: the complete Whitehash design system, including Base UI-backed buttons, dialogs, tooltips, and form controls plus artwork compounds, token details, market-stat tiles and charts, wallet galleries, project browsing, and search. It can be consumed with precompiled CSS or as Tailwind v4 source and tokens.
 
 Use the framework-free packages for a non-React integration or custom renderer. Use `@whitehash/react` when an application already owns presentation. Use `@whitehash/ui` for the branded, composable end-to-end React experience.

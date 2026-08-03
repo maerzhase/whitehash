@@ -19,8 +19,9 @@ a separate `@whitehash/market/sqlite` entry point, so a bundle that only reads
 stats never pulls in its WebAssembly SQLite build.
 
 `@whitehash/ui` gains the `MarketStats` compound (tiles, floor and volume charts,
-event history) and `@whitehash/react` gains `useMarketIndex` for loading an
-artifact from a URL. The archive CLI gains a `market` command with incremental
+event history) and `@whitehash/react` gains `useMarketIndex`, which loads an
+artifact from a URL, from a keyed loader for any other transport, or from an
+index already in memory. The archive CLI gains a `market` command with incremental
 `--update` runs, live single-line progress, and `--resolver fxhash` for project
 slugs. An unknown subcommand now reports itself instead of being parsed as a
 wallet address.

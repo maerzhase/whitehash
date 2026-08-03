@@ -543,18 +543,37 @@ function ApiDetails({ name }: { name: string }) {
 }`}
           />
         </DocsSection>
-        <DocsSection title="An artifact, not a chain read">
+        <DocsSection title="Where the index comes from">
           <div className="docs-prose">
             <p>
-              A market index is a static file your application hosts, produced by{" "}
-              <code>whitehash-archive market &lt;project&gt;</code>. This is the one hook that
-              fetches a plain URL rather than reading through the client, because there is no chain
-              read to bind it to. Pass <code>null</code> to skip loading.
+              A market index is an artifact your application owns rather than a chain read, so the
+              hook takes a source instead of a project reference. One application serves a file from
+              a CDN, another serves many indexes from a database, a third already holds one in
+              memory. Pass <code>null</code> to skip loading.
             </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="tsx"
+            code={`// A file you host
+useMarketIndex("/market-index.json")
+
+// Your own API, one artifact per project. The key identifies the index, so an
+// inline load closure does not restart the request on every render.
+useMarketIndex({
+  key: \`\${chain}/\${id}\`,
+  load: () => fetch(\`/api/market/\${chain}/\${id}\`).then(response => response.json()),
+})
+
+// An index you already have
+useMarketIndex(index)`}
+          />
+          <div className="docs-prose mt-4">
             <p>
-              The response goes through <code>parseMarketIndex</code>, so a truncated or foreign
-              file surfaces as <code>error</code> instead of a broken render. Use{" "}
-              <code>loadMarketIndex</code> for the same fetch outside React.
+              Anything fetched or loaded goes through <code>parseMarketIndex</code>, so a truncated
+              or foreign payload surfaces as <code>error</code> instead of a broken render. An index
+              passed in directly is trusted; validate it yourself if it came from untrusted JSON.
+              Use <code>loadMarketIndex</code> for the same fetch outside React.
             </p>
           </div>
         </DocsSection>

@@ -1,5 +1,26 @@
-import { parseMarketIndex, type MarketIndex } from "@whitehash/market"
+import { MARKET_INDEX_FORMAT, parseMarketIndex, type MarketIndex } from "@whitehash/market"
 import { useCallback, useEffect, useRef, useState } from "react"
+
+/**
+ * A loader for an index that does not live at a plain URL: an API in front of a
+ * database, a bundler import, an offline store. `key` identifies the index so
+ * the hook knows when to reload; an inline `load` closure would otherwise
+ * change identity on every render and refetch forever.
+ */
+export interface MarketIndexLoader {
+  key: string
+  load: () => Promise<unknown>
+}
+
+/**
+ * Where an index comes from:
+ *
+ * - a URL string, fetched and validated
+ * - a `MarketIndex` already in memory, used as-is
+ * - a {@link MarketIndexLoader}, for any other transport
+ * - `null` to load nothing
+ */
+export type MarketIndexSource = string | MarketIndex | MarketIndexLoader | null
 
 export interface UseMarketIndexOptions {
   /** Replaces the global fetch, for tests or a custom transport. */
@@ -26,22 +47,42 @@ export interface UseMarketIndexResult {
   refresh: () => void
 }
 
+function isLoader(source: MarketIndexSource): source is MarketIndexLoader {
+  return typeof source === "object" && source !== null && "load" in source
+}
+
+function inMemoryIndex(source: MarketIndexSource): MarketIndex | null {
+  if (typeof source !== "object" || source === null) return null
+  return "format" in source && source.format === MARKET_INDEX_FORMAT ? source : null
+}
+
 /**
- * Load a market index artifact from a URL.
+ * Load a market index from a URL, a loader, or an index you already hold.
  *
- * This is the one hook that fetches a plain URL rather than reading through the
- * Whitehash client: a market index is a static artifact an application hosts
- * itself (or serves from a CDN), so there is no chain read to bind it to. Pass
- * `null` to skip loading. Untrusted JSON goes through `parseMarketIndex`, so a
- * malformed artifact surfaces as `error` instead of a broken render.
+ * A market index is a static artifact an application owns rather than a chain
+ * read, which is why this hook takes a source instead of a project reference:
+ * one application serves a file from a CDN, another serves many indexes from a
+ * database, a third has one in memory already. Anything fetched is validated
+ * with `parseMarketIndex`, so a malformed artifact surfaces as `error` rather
+ * than a broken render. An index passed in directly is trusted; validate it
+ * yourself if it came from untrusted JSON.
  */
 export function useMarketIndex(
-  url: string | null,
+  source: MarketIndexSource,
   options: UseMarketIndexOptions = {},
 ): UseMarketIndexResult {
   const fetchImpl = options.fetchImpl
+  const direct = inMemoryIndex(source)
+  const url = typeof source === "string" ? source : null
+  const loaderKey = isLoader(source) ? source.key : null
+
+  // The loader closure is read at call time so a new closure with the same key
+  // does not restart the load.
+  const loaderRef = useRef<MarketIndexLoader["load"] | null>(null)
+  loaderRef.current = isLoader(source) ? source.load : null
+
   const [index, setIndex] = useState<MarketIndex | null>(null)
-  const [loading, setLoading] = useState(url !== null)
+  const [loading, setLoading] = useState(url !== null || loaderKey !== null)
   const [error, setError] = useState<string | null>(null)
   const [refreshId, setRefreshId] = useState(0)
   const runId = useRef(0)
@@ -49,7 +90,7 @@ export function useMarketIndex(
   useEffect(() => {
     runId.current += 1
     const id = runId.current
-    if (url === null) {
+    if (url === null && loaderKey === null) {
       setIndex(null)
       setLoading(false)
       setError(null)
@@ -57,7 +98,13 @@ export function useMarketIndex(
     }
     setLoading(true)
     setError(null)
-    void loadMarketIndex(url, fetchImpl)
+    const work =
+      url !== null
+        ? loadMarketIndex(url, fetchImpl)
+        : Promise.resolve()
+            .then(() => loaderRef.current?.())
+            .then(value => parseMarketIndex(value))
+    void work
       .then(value => {
         if (runId.current === id) setIndex(value)
       })
@@ -70,8 +117,9 @@ export function useMarketIndex(
       .finally(() => {
         if (runId.current === id) setLoading(false)
       })
-  }, [url, fetchImpl, refreshId])
+  }, [url, loaderKey, fetchImpl, refreshId])
 
   const refresh = useCallback(() => setRefreshId(value => value + 1), [])
+  if (direct) return { index: direct, loading: false, error: null, refresh }
   return { index, loading, error, refresh }
 }

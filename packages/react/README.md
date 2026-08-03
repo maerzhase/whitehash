@@ -28,7 +28,7 @@ root.render(<WhitehashProvider><Token /></WhitehashProvider>)
 | `useWalletTokens(address, options?)` | Cache-first multi-chain wallet tokens, progress, loading state, and refresh |
 | `useProjects({ chain, version?, order?, limit? })` | Paginated discovery with progressive preview hydration on every chain |
 | `useProject(project, options?)` | Project metadata, iterations, pagination, and sort from `{ chain, id }` |
-| `useMarketIndex(url, options?)` | A validated market index artifact fetched from a URL, loading/error state, and refresh |
+| `useMarketIndex(source, options?)` | A validated market index artifact from a URL, a loader, or one you already hold, with loading/error state and refresh |
 | `useGatewayImage(uri, chain)` | Ordered gateway URL with an `onError` fallback handler |
 | `useArtworkFrame(token)` | Live-view status, play/stop state, and sandboxed iframe props |
 | `createIndexedDbCache()` | Browser-persistent `WhitehashCache` implementation |

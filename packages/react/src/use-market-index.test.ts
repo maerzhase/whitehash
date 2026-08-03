@@ -47,3 +47,23 @@ describe("loadMarketIndex", () => {
     )
   })
 })
+
+describe("MarketIndexSource shapes", () => {
+  it("keeps an in-memory index distinguishable from a loader", async () => {
+    // The hook branches on shape, so the shapes must not be confusable: an
+    // index carries the format marker, a loader carries `load`.
+    const loader = { key: "v2:2464", load: async () => index }
+    expect("load" in loader).toBe(true)
+    expect("format" in index && index.format).toBe("whitehash-market-index@1")
+    expect("load" in index).toBe(false)
+    await expect(loader.load()).resolves.toEqual(index)
+  })
+
+  it("validates whatever a loader returns", async () => {
+    // A loader returning a row from someone's database is untrusted JSON like
+    // any other, so it goes through the same validation as a fetched file.
+    const { parseMarketIndex } = await import("@whitehash/market")
+    expect(() => parseMarketIndex({ format: "something-else" })).toThrow(/format/)
+    expect(parseMarketIndex(JSON.parse(JSON.stringify(index)))).toEqual(index)
+  })
+})

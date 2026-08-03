@@ -28,6 +28,8 @@ export {
 export {
   loadMarketIndex,
   useMarketIndex,
+  type MarketIndexLoader,
+  type MarketIndexSource,
   type UseMarketIndexOptions,
   type UseMarketIndexResult,
 } from "./use-market-index.js"
