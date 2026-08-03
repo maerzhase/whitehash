@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 import { defaultResolverConfig } from "@whitehash/resolve"
 import {
+  bsFetch,
   discoverEvmCollectionsViaBlockscout,
   getEvmWalletTokensViaBlockscout,
 } from "./blockscout.js"
@@ -82,5 +83,51 @@ describe("getEvmWalletTokensViaBlockscout", () => {
       String(c[0]),
     )
     expect(urls.every(u => u.includes("blockscout"))).toBe(true)
+  })
+})
+
+describe("bsFetch", () => {
+  function response(status: number, body: unknown = {}, headers: Record<string, string> = {}) {
+    return new Response(JSON.stringify(body), { status, headers })
+  }
+
+  it("retries rate limits and returns the eventual success", async () => {
+    vi.useFakeTimers()
+    try {
+      const fetchImpl = vi
+        .fn()
+        .mockResolvedValueOnce(response(429))
+        .mockResolvedValueOnce(response(429))
+        .mockResolvedValueOnce(response(200, { ok: true })) as unknown as typeof fetch
+      const pending = bsFetch<{ ok: boolean }>("https://example.test/api", fetchImpl)
+      await vi.runAllTimersAsync()
+      expect(await pending).toEqual({ ok: true })
+      expect(fetchImpl).toHaveBeenCalledTimes(3)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("waits for the server's Retry-After hint", async () => {
+    vi.useFakeTimers()
+    try {
+      const fetchImpl = vi
+        .fn()
+        .mockResolvedValueOnce(response(429, {}, { "retry-after": "5" }))
+        .mockResolvedValueOnce(response(200, { ok: true })) as unknown as typeof fetch
+      const pending = bsFetch<{ ok: boolean }>("https://example.test/api", fetchImpl)
+      await vi.advanceTimersByTimeAsync(4_000)
+      expect(fetchImpl).toHaveBeenCalledTimes(1) // still waiting out the hint
+      await vi.advanceTimersByTimeAsync(1_500)
+      expect(await pending).toEqual({ ok: true })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("fails immediately on a client error that will not resolve itself", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(response(404)) as unknown as typeof fetch
+    await expect(bsFetch("https://example.test/missing", fetchImpl)).rejects.toThrow(/404/)
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
 })

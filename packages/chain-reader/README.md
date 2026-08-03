@@ -40,6 +40,9 @@ that is `false` for unrevealed "waiting to be signed" placeholders.
 | `imageSourceUri()`, `imageUrl()` | Select/resolve display or thumbnail media |
 | `liveViewStatus()` | Distinguish runnable, unrevealed, onchfs-proxy, and unavailable states |
 | `detectAddressChains()` | Select the mainnet/testnet chain set for an address |
+| `tzktFetch()`, `tzktBaseUrl()`, `bsFetch()`, `blockscoutBaseUrl()` | Retrying TzKT/Blockscout request primitives with the configured base URLs |
+| `getLogsAdaptive()`, `makeEvmPublicClient()` | Adaptive `eth_getLogs` chunking over a config-bound viem client |
+| `indexedProjectMetadata()`, `isIndexedProjectMetadata()` | Produce/validate the shared portable-index project summary |
 | `WhitehashToken`, `WhitehashProject`, `ChainReaderConfig` | Normalized public contracts |
 
 ## EVM ownership sources

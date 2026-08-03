@@ -129,6 +129,57 @@ Full chain IDs such as `tezos:mainnet` and `eip155:8453` are accepted alongside 
 aliases. Existing serialized refs such as `project/tezos:mainnet/v2:13944` also remain
 valid, but they are primarily intended for routes and persisted identifiers.
 
+## Backfill market history
+
+Build a project's complete market history — listings, offers, sales, and mints — from
+public infrastructure, with derived statistics:
+
+```bash
+npx @whitehash/archive market v2:13944
+```
+
+This writes a versioned `whitehash-market-index@1` JSON file plus a queryable SQLite
+sibling (skip it with `--json-only`). The stats follow the fxhash definitions: floor,
+median, and listed count come from currently active listings; volumes are cumulative
+primary/secondary buckets with period-over-period changes; a daily floor/volume series
+is included for charting. Load the JSON with `parseMarketIndex()` from
+`@whitehash/market`, or open the SQLite file with any SQLite tooling.
+
+A backfill can take minutes on a large project. Progress is reported live on a
+single line in a terminal, and as one line per step when the output is piped or
+redirected, so CI logs stay complete.
+
+Artifacts embed per-chain resume cursors, so re-runs are incremental:
+
+```bash
+npx @whitehash/archive market v2:13944 --update market-index-v2-13944.json
+```
+
+On Tezos the full order book plus mints are recovered from TzKT (marketplace v1 and
+v2). On Ethereum and Base sales and mints are recovered but active listings are not,
+because fxhash listings there are signed off-chain. Both are discovered through the
+collection's transfers (Blockscout by default, trustless RPC scan as fallback) and
+decoded by event signature, so any Seaport version and other Seaport-based
+marketplaces such as OpenSea are covered too:
+
+```bash
+npx @whitehash/archive market base:0x50c04A6B066d659Fe2F66F6388Cf8dD394036632
+```
+
+EVM discovery uses Blockscout by default because it needs no archive access.
+Public Blockscout instances rate-limit sustained use; requests back off and
+retry, and a persistent failure falls back to a JSON-RPC log scan. That scan
+needs an archive-capable RPC — several public endpoints reject deep
+`eth_getLogs` queries — so configure one for large collections, or pass
+`--source blockscout` to fail instead of falling back.
+
+Only Seaport fills are decoded, so sales settled on non-Seaport venues are absent,
+while Seaport sales on other marketplaces (OpenSea and friends) are included. A mint
+with no purchase log in its transaction is skipped rather than priced from the
+transaction value, which leaves out owner mints, airdrops and ticket redemptions.
+On one Ethereum collection, every sale and every one of its 512 mints matched
+fxhash's own index to the wei.
+
 ## Index a token
 
 Build a portable `whitehash-token-index@1` JSON file from a contract and token ID:

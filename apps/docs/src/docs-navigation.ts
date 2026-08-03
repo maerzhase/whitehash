@@ -6,6 +6,7 @@ export const DOC_NAV: DocsNavItem[] = [
   { label: "Getting started", href: "/guide/getting-started", group: "Guides" },
   { label: "Configuration", href: "/guide/configuration", group: "Guides" },
   { label: "Archive CLI", href: "/guide/cli", group: "Guides" },
+  { label: "Market history CLI", href: "/guide/market", group: "Guides" },
   { label: "Onchfs", href: "/guide/onchfs", group: "Guides" },
   { label: "Explore variations", href: "/guide/variations", group: "Guides" },
   { label: "Capture engine", href: "/guide/capture", group: "Guides" },
@@ -21,10 +22,12 @@ export const DOC_NAV: DocsNavItem[] = [
     "use-wallet-tokens",
     "use-projects",
     "use-project",
+    "use-market-index",
     "use-gateway-image",
     "use-artwork-frame",
     "whitehash-provider",
     "use-whitehash",
+    "market-stats",
     "token-details",
   ].flatMap(slug => {
     const entry = API_ENTRIES.find(candidate => candidate.slug === slug)

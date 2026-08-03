@@ -11,9 +11,9 @@
  * re-read tokenURI from chain and fetch the real JSON.
  */
 import { getAddress } from "viem"
+import { fetchEvmMetadata, readTokenUris } from "./evm.js"
 import { normalizeMetadata } from "./metadata.js"
 import { EVM_NETWORKS } from "./networks.js"
-import { fetchEvmMetadata, readTokenUris } from "./evm.js"
 import type {
   ChainId,
   ChainReaderConfig,
@@ -41,23 +41,38 @@ export function blockscoutBaseUrl(chain: EvmChain, config: ChainReaderConfig): s
   return (override ?? BLOCKSCOUT_DEFAULTS[chain]).replace(/\/+$/, "")
 }
 
-async function bsFetch<T>(url: string, fetchImpl: typeof fetch): Promise<T> {
+/**
+ * Public Blockscout instances rate-limit aggressively under sustained use, so
+ * 429 responses get a long, `Retry-After`-aware backoff: a rate limit means
+ * "wait", not "give up". Other client errors fail immediately.
+ */
+export async function bsFetch<T>(
+  url: string,
+  fetchImpl: typeof fetch = fetch,
+  attempts = 6,
+): Promise<T> {
   let lastError: unknown
-  for (let attempt = 0; attempt < 4; attempt++) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    let res: Response | null = null
+    let retryAfterMs: number | null = null
     try {
-      const res = await fetchImpl(url)
-      if (res.status === 429 || res.status >= 500) {
-        lastError = new Error(`Blockscout HTTP ${res.status}`)
-      } else if (!res.ok) {
-        throw new Error(`Blockscout HTTP ${res.status} for ${url}`)
-      } else {
-        return (await res.json()) as T
-      }
+      res = await fetchImpl(url)
+      if (res.ok) return (await res.json()) as T
+      lastError = new Error(`Blockscout HTTP ${res.status}`)
+      const retryAfter = Number(res.headers.get("retry-after"))
+      if (Number.isFinite(retryAfter) && retryAfter > 0) retryAfterMs = retryAfter * 1000
     } catch (err) {
       lastError = err
     }
+    // Only rate limits and server errors are worth retrying; other statuses
+    // are caller mistakes (e.g. a typo'd address) and should fail fast.
+    if (res && !res.ok && res.status !== 429 && res.status < 500) {
+      throw new Error(`Blockscout HTTP ${res.status} for ${url}`)
+    }
+    const rateLimited = res?.status === 429
+    const backoff = rateLimited ? 2_000 * 2 ** attempt : 400 * 2 ** attempt
     await new Promise(r => {
-      setTimeout(r, 400 * 2 ** attempt)
+      setTimeout(r, Math.min(retryAfterMs ?? backoff, 30_000))
     })
   }
   throw new Error(`Blockscout request failed after retries: ${url} (${String(lastError)})`)

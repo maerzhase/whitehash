@@ -5,6 +5,7 @@ import { registerOnchfsWorker } from "@whitehash/onchfs-sw"
 import {
   useArtworkFrame,
   useGatewayImage,
+  useMarketIndex,
   useProject,
   useProjects,
   useToken,
@@ -34,6 +35,7 @@ import {
 } from "@whitehash/ui"
 import Link from "next/link"
 import { type ReactNode, useEffect, useState } from "react"
+import { DEMO_MARKET_ARTIFACT, MarketDemo } from "./market-demo"
 import {
   Callout,
   CodeBlock,
@@ -117,6 +119,12 @@ export const API_ENTRIES: ApiEntry[] = [
     description: "Browse projects and preview images across supported networks.",
   },
   {
+    slug: "use-market-index",
+    name: "useMarketIndex",
+    group: "React hooks",
+    description: "Load a market index artifact your app hosts, validated before it renders.",
+  },
+  {
     slug: "use-project",
     name: "useProject",
     group: "React hooks",
@@ -139,6 +147,12 @@ export const API_ENTRIES: ApiEntry[] = [
     name: "Artwork",
     group: "Domain",
     description: "Show a token’s preview, live artwork, and reveal status.",
+  },
+  {
+    slug: "market-stats",
+    name: "MarketStats",
+    group: "Domain",
+    description: "Floor, volume, charts, and event history from one market index.",
   },
   {
     slug: "token-details",
@@ -300,6 +314,17 @@ function OnchfsTokenExample() {
 }
 
 const USAGE: Record<string, string> = {
+  MarketStats: `import { useMarketIndex } from "@whitehash/react"
+
+const { index } = useMarketIndex("/market-index.json")
+if (!index) return null
+
+<MarketStats.Root index={index}>
+  <MarketStats.Tiles />
+  <MarketStats.FloorChart />
+  <MarketStats.VolumeChart />
+  <MarketStats.Events limit={25} />
+</MarketStats.Root>`,
   WhitehashProvider: `<WhitehashProvider>\n  <App />\n</WhitehashProvider>`,
   Card: `<Card.Root>\n  <Card.Media />\n  <Card.Body><Card.Title>Title</Card.Title></Card.Body>\n</Card.Root>`,
   Field: `<Field.Root>\n  <Field.Label>Wallet</Field.Label>\n  <Field.Control render={<Input />} />\n</Field.Root>`,
@@ -324,6 +349,7 @@ const codeFor = (name: string) => {
       useGatewayImage: `uri, "tezos:mainnet"`,
       useArtworkFrame: `token`,
       useWhitehash: ``,
+      useMarketIndex: `"/market-index.json"`,
     }
     return `import { ${name} } from "@whitehash/react"\n\nconst result = ${name}(${args[name] ?? ""})`
   }
@@ -331,6 +357,7 @@ const codeFor = (name: string) => {
 }
 
 function HookDemo({ name }: { name: string }) {
+  if (name === "useMarketIndex") return <MarketIndexHookDemo />
   if (name === "useWalletTokens") return <WalletHookDemo />
   if (name === "useToken") return <TokenHookDemo />
   if (name === "useProjects") return <ProjectsHookDemo />
@@ -338,6 +365,19 @@ function HookDemo({ name }: { name: string }) {
   if (name === "useGatewayImage") return <GatewayHookDemo />
   if (name === "useArtworkFrame") return <ArtworkHookDemo />
   return <ContextHookDemo />
+}
+
+function MarketIndexHookDemo() {
+  const { index, loading, error } = useMarketIndex(DEMO_MARKET_ARTIFACT)
+  if (loading) return <HookValue>loading…</HookValue>
+  if (error || !index) return <HookValue>{error ?? "no artifact"}</HookValue>
+  return (
+    <HookValue>
+      {`${index.project.name ?? index.project.id} · ${index.events.length} events · floor ${
+        index.stats.floor ?? "n/a"
+      } · indexed to height ${Object.values(index.cursors)[0]?.height ?? "?"}`}
+    </HookValue>
+  )
 }
 
 function HookValue({ children }: { children: string }) {
@@ -395,6 +435,7 @@ function ComponentDemo({ name }: { name: string }) {
   if (name === "Button")
     return <Button onClick={() => setOpen(value => !value)}>{open ? "Pressed" : "Press me"}</Button>
   if (name === "Badge") return <Badge variant="success">on-chain</Badge>
+  if (name === "MarketStats") return <MarketDemo />
   if (name === "Card")
     return (
       <Card.Root className="max-w-xs">
@@ -488,6 +529,95 @@ export function ApiDocPage({ entry }: { entry: ApiEntry }) {
 }
 
 function ApiDetails({ name }: { name: string }) {
+  if (name === "useMarketIndex")
+    return (
+      <>
+        <DocsSection title="Return value">
+          <CodeBlock
+            language="ts"
+            code={`{
+  index: MarketIndex | null
+  loading: boolean
+  error: string | null
+  refresh(): void
+}`}
+          />
+        </DocsSection>
+        <DocsSection title="Where the index comes from">
+          <div className="docs-prose">
+            <p>
+              A market index is an artifact your application owns rather than a chain read, so the
+              hook takes a source instead of a project reference. One application serves a file from
+              a CDN, another serves many indexes from a database, a third already holds one in
+              memory. Pass <code>null</code> to skip loading.
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="tsx"
+            code={`// A file you host
+useMarketIndex("/market-index.json")
+
+// Your own API, one artifact per project. The key identifies the index, so an
+// inline load closure does not restart the request on every render.
+useMarketIndex({
+  key: \`\${chain}/\${id}\`,
+  load: () => fetch(\`/api/market/\${chain}/\${id}\`).then(response => response.json()),
+})
+
+// An index you already have
+useMarketIndex(index)`}
+          />
+          <div className="docs-prose mt-4">
+            <p>
+              Anything fetched or loaded goes through <code>parseMarketIndex</code>, so a truncated
+              or foreign payload surfaces as <code>error</code> instead of a broken render. An index
+              passed in directly is trusted; validate it yourself if it came from untrusted JSON.
+              Use <code>loadMarketIndex</code> for the same fetch outside React.
+            </p>
+          </div>
+        </DocsSection>
+      </>
+    )
+  if (name === "MarketStats")
+    return (
+      <>
+        <DocsSection title="Parts">
+          <CodeBlock
+            language="tsx"
+            code={`MarketStats.Root          // provides the index and its chain currency
+MarketStats.Tiles         // the default stat set, in a responsive grid
+MarketStats.Floor         // individual tiles
+MarketStats.Listed
+MarketStats.Median
+MarketStats.Volume        // span="24h" | "7d" | "30d" | "all" | …
+MarketStats.Sales
+MarketStats.HighestSale
+MarketStats.LowestSale
+MarketStats.FloorChart    // daily floor, with a crosshair
+MarketStats.VolumeChart   // daily traded volume
+MarketStats.Events        // newest-first history; limit={25}
+MarketStats.Tile          // label/value cell for your own arrangements
+MarketStats.Delta         // signed percentage, colored by direction`}
+          />
+        </DocsSection>
+        <DocsSection title="Currency is handled for you">
+          <div className="docs-prose">
+            <p>
+              Every money field in an index is a base-unit string, mutez on Tezos and wei on EVM.
+              The parts format them with the chain the index came from, so your code never converts.
+              The same helpers are exported from <code>@whitehash/market</code> if you render your
+              own layout.
+            </p>
+            <p>
+              <code>FloorChart</code> renders nothing when active listings are unavailable, which is
+              the case on Ethereum and Base: fxhash listings there are signed off-chain, so only
+              sales can be recovered. <code>Floor</code> and <code>Listed</code> say so on the tile.
+            </p>
+          </div>
+        </DocsSection>
+      </>
+    )
   if (name === "useToken")
     return (
       <>
@@ -841,6 +971,20 @@ npx @whitehash/archive \\
   "https://www.fxhash.xyz/gentk/KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE-16333"`,
     language: "bash",
   },
+  market: {
+    title: "Market history CLI",
+    description:
+      "Backfill one project's listings, offers, sales and mints from public infrastructure, then render them.",
+    code: `# Write market-index-v2-13944.json and its .sqlite sibling
+npx @whitehash/archive market v2:13944
+
+# Resolve an fxhash project slug first
+npx @whitehash/archive market blokkendoos --resolver fxhash
+
+# Extend an existing artifact from its saved cursors
+npx @whitehash/archive market v2:13944 --update market-index-v2-13944.json`,
+    language: "bash",
+  },
   theming: {
     title: "Theming and tokens",
     description: "Change colors, spacing, and type without rewriting the components.",
@@ -926,11 +1070,13 @@ export function GuidePage({ slug }: { slug: string }) {
       ? "Install"
       : slug === "configuration"
         ? "The default"
-        : slug === "cli"
-          ? "Start with one command"
-          : slug === "onchfs"
-            ? "Choose a resolver"
-            : "Example"
+        : slug === "market"
+          ? "Index a project"
+          : slug === "cli"
+            ? "Start with one command"
+            : slug === "onchfs"
+              ? "Choose a resolver"
+              : "Example"
   return (
     <DocsPage>
       <DocsHeading eyebrow="Guide" title={guide.title} description={guide.description} />
@@ -955,6 +1101,84 @@ export function GuidePage({ slug }: { slug: string }) {
 }
 
 function GuideDetails({ slug }: { slug: string }) {
+  if (slug === "market")
+    return (
+      <>
+        <DocsSection title="What it reads">
+          <div className="docs-prose">
+            <p>
+              On Tezos the command reads the fxhash marketplace contracts through TzKT and recovers
+              the full order book: listings, offers, collection offers, their cancels and accepts,
+              plus every mint. Mints are searched across all issuer generations, because older
+              projects kept minting on the contract they launched with.
+            </p>
+            <p>
+              On Ethereum and Base it walks the collection&rsquo;s own transfers and decodes the
+              Seaport fills and mint purchases in those transactions. Sales and mints both come
+              back; active listings do not, because fxhash listings there are signed off-chain and
+              never touch the chain. Stats mark that with <code>listingsAvailable: false</code>, and
+              floor, median, and listed count read as unavailable rather than zero.
+            </p>
+          </div>
+        </DocsSection>
+        <DocsSection title="Artifacts and incremental runs">
+          <div className="docs-prose">
+            <p>
+              Each run writes a versioned <code>whitehash-market-index@1</code> JSON file and a
+              queryable SQLite sibling. Both carry a resume height per chain, so{" "}
+              <code>--update</code> fetches only what happened since. Add <code>--json-only</code>{" "}
+              to skip SQLite, and <code>--source rpc</code> to force a trustless log scan instead of
+              Blockscout, which needs an archive-capable endpoint.
+            </p>
+          </div>
+        </DocsSection>
+        <DocsSection title="Display it">
+          <div className="docs-prose">
+            <p>
+              <code>useMarketIndex</code> loads and validates an artifact your app hosts, and the{" "}
+              <code>MarketStats</code> parts render it. Prices arrive as base units, mutez or wei,
+              and every part formats them with the chain the index came from.
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="tsx"
+            code={`import { useMarketIndex } from "@whitehash/react"
+import { MarketStats } from "@whitehash/ui"
+
+function Market() {
+  const { index, loading, error } = useMarketIndex("/market-index.json")
+  if (loading) return <p>Loading…</p>
+  if (error || !index) return <p>{error ?? "Not found"}</p>
+
+  return (
+    <MarketStats.Root index={index}>
+      <MarketStats.Tiles />
+      <MarketStats.FloorChart />
+      <MarketStats.VolumeChart />
+      <MarketStats.Events limit={25} />
+    </MarketStats.Root>
+  )
+}`}
+          />
+        </DocsSection>
+        <DocsSection title="How the numbers are defined">
+          <div className="docs-prose">
+            <p>
+              The statistics follow fxhash&rsquo;s own definitions, so a floor here means the same
+              thing it does on fxhash: the lowest price among listings active at the moment the
+              index was built. Volume buckets are cumulative per span, and a period&rsquo;s change
+              compares it with the span immediately before it.
+            </p>
+            <p>
+              Two deliberate differences: the highest and lowest sale compare native base units
+              rather than converted USD, because this toolkit keeps no historical exchange rates,
+              and Tezos mint prices record the tez actually paid.
+            </p>
+          </div>
+        </DocsSection>
+      </>
+    )
   if (slug === "getting-started")
     return (
       <>
@@ -1354,6 +1578,16 @@ const wallet = useWalletTokens(address, { client })`}
             code={`npx @whitehash/archive project v2:13944 \\
   --out ./public/monogrid.json`}
           />
+          <div className="docs-prose mt-4">
+            <p>
+              For a project&rsquo;s market history, the <code>market</code> command writes listings,
+              offers, sales, mints, and derived statistics into their own artifact. See the{" "}
+              <a className="docs-text-link" href="/guide/market">
+                market history guide
+              </a>
+              .
+            </p>
+          </div>
           <CodeBlock
             className="mt-4"
             language="json"

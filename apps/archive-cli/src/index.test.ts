@@ -167,6 +167,43 @@ describe("archive CLI arguments", () => {
     })
   })
 
+  it("parses market backfill commands with defaults and full options", () => {
+    expect(parseArgs(["market", "v2:13944"])).toEqual({
+      kind: "index-market",
+      project: "v2:13944",
+      chain: "tezos:mainnet",
+      outFile: "market-index-v2-13944.json",
+      update: undefined,
+      jsonOnly: undefined,
+      source: undefined,
+    })
+    expect(
+      parseArgs([
+        "market",
+        "base:0x50c04A6B066d659Fe2F66F6388Cf8dD394036632",
+        "--out",
+        "fixtures/market.json",
+        "--update",
+        "fixtures/previous.json",
+        "--json-only",
+        "--source",
+        "rpc",
+      ]),
+    ).toEqual({
+      kind: "index-market",
+      project: "0x50c04A6B066d659Fe2F66F6388Cf8dD394036632",
+      chain: "eip155:8453",
+      outFile: "fixtures/market.json",
+      update: "fixtures/previous.json",
+      jsonOnly: true,
+      source: "rpc",
+    })
+    expect(parseArgs(["market", "--help"])).toEqual({ kind: "help", topic: "market" })
+    expect(parseArgs(["help", "market"])).toEqual({ kind: "help", topic: "market" })
+    expect(() => parseArgs(["market"])).toThrow(/Missing project ID/)
+    expect(() => parseArgs(["market", "v2:13944", "--frobnicate"])).toThrow(/Unknown market option/)
+  })
+
   it("parses Tezos and EVM token index commands", () => {
     expect(parseArgs(["token", "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE", "16333"])).toEqual({
       kind: "index-token",

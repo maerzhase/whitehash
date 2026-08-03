@@ -37,6 +37,7 @@
   "dependencies": {
     "@whitehash/chain-reader": "workspace:*",
     "@whitehash/core": "workspace:*",
+    "@whitehash/market": "workspace:*",
     "idb-keyval": "6.2.2"
   },
   "devDependencies": {

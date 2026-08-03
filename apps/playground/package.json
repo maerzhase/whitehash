@@ -1,0 +1,35 @@
+{
+  "name": "@whitehash/playground",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Development playground for the whitehash toolkit \u2014 loads and visualizes market index artifacts produced by the archive CLI.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@whitehash/core": "workspace:*",
+    "@whitehash/market": "workspace:*",
+    "@whitehash/react": "workspace:*",
+    "@whitehash/ui": "workspace:*",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "sql.js": "1.13.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.1",
+    "@types/sql.js": "^1.4.11",
+    "@vitejs/plugin-react": "^5.1.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "^7.3.4",
+    "vitest": "3.2.4"
+  }
+}

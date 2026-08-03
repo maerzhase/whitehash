@@ -9,18 +9,18 @@
  * so ownership is derived from `Transfer` logs and confirmed with `ownerOf`.
  */
 import {
+  type Address,
   createPublicClient,
   fallback,
   getAddress,
   http,
   isAddress,
-  zeroAddress,
-  type Address,
   type PublicClient,
+  zeroAddress,
 } from "viem"
 import { genArtAbi, issuerFactoryAbi } from "./abis.js"
-import { EVM_NETWORKS } from "./networks.js"
 import { normalizeMetadata } from "./metadata.js"
+import { EVM_NETWORKS } from "./networks.js"
 import type {
   ChainId,
   ChainReaderConfig,
@@ -42,6 +42,10 @@ export function isEvmAddress(address: string): boolean {
   return isAddress(address)
 }
 
+export function makeEvmPublicClient(chain: EvmChain, config: ChainReaderConfig): PublicClient {
+  return makeClient(chain, config)
+}
+
 function makeClient(chain: EvmChain, config: ChainReaderConfig): PublicClient {
   const rpcs = config.evm?.rpcs?.[chain] ?? EVM_NETWORKS[chain].defaultRpcs
   return createPublicClient({
@@ -54,7 +58,7 @@ function makeClient(chain: EvmChain, config: ChainReaderConfig): PublicClient {
  * halve on RPC error (range-limit / result-size). Owner-filtered result sets
  * are tiny, so wide chunks are usually accepted.
  */
-async function getLogsAdaptive<T>(
+export async function getLogsAdaptive<T>(
   fetchRange: (from: bigint, to: bigint) => Promise<T[]>,
   fromBlock: bigint,
   toBlock: bigint,

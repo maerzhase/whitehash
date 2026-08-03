@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { archiveToken, archiveWallets, verifyArchive, verifyArchiveOnchain } from "./archive.js"
-import { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
+import { resolveFxhashHostedProject, resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
+import { writeMarketIndex } from "./market-index.js"
+import { createProgressReporter } from "./progress.js"
 import { writeProjectIndex } from "./project-index.js"
 import { writeTokenIndex } from "./token-index.js"
 import { parseFxhashTokenUrl, parseRef, type ChainId } from "@whitehash/chain-reader"
@@ -22,6 +24,7 @@ Commands
   save                Archive one token URL or ref; add --json for a portable index
   project             Write one JSON index containing a project and its iterations
   token               Write one JSON index containing a token
+  market              Backfill a project's market history into JSON + SQLite artifacts
   wallet              Download owned artwork into an offline gallery
   verify              Verify an archive offline; add --onchain for a current chain comparison
 
@@ -29,6 +32,7 @@ Learn one command
   whitehash-archive help save
   whitehash-archive help project
   whitehash-archive help token
+  whitehash-archive help market
   whitehash-archive help wallet
   whitehash-archive help verify`
 
@@ -90,6 +94,38 @@ Options
 Tezos KT1 contracts imply Tezos mainnet. For EVM, prefix the contract with
 base: or ethereum:, or pass --chain explicitly.`
 
+const MARKET_HELP = `Backfill one fxhash project's market history
+
+Usage
+  whitehash-archive market <project-id> [options]
+
+Examples
+  whitehash-archive market v2:13944
+  whitehash-archive market base:0x50c04A6B066d659Fe2F66F6388Cf8dD394036632
+  whitehash-archive market v2:13944 --update market-index-v2-13944.json
+  whitehash-archive market blokkendoos --resolver fxhash
+
+Options
+  --out <file>        Output JSON file (default: market-index-<id>.json);
+                      a .sqlite sibling is written next to it
+  --update <file>     Extend an existing market index from its saved cursors
+  --json-only         Skip the SQLite artifact
+  --chain <chain>     Required only for an unprefixed EVM address
+  --source <mode>     EVM discovery: blockscout (default) or rpc. Blockscout
+                      needs no archive access; rpc needs an archive-capable RPC
+  --resolver fxhash   Resolve a project slug through fxhash's hosted service
+
+Progress is reported live on one line in a terminal, and as one line per step
+when the output is piped or redirected.
+
+The index is built entirely from public infrastructure (TzKT, Blockscout,
+public RPCs): listings, offers, sales, mints, and derived statistics (floor,
+median, listed, volumes) following the fxhash stat definitions. On EVM chains
+sales and mints are recovered, but active listings are not: fxhash listings
+there are signed off-chain, so floor, median, and listed count are unavailable.
+Tezos discovery uses the project index; iterations TzKT has not indexed
+metadata for are not covered.`
+
 const WALLET_HELP = `Archive artwork owned by one or more wallets
 
 Usage
@@ -125,6 +161,15 @@ class UsageError extends Error {}
 
 function usage(message: string): never {
   throw new UsageError(message)
+}
+
+/**
+ * Address-shaped, not necessarily valid: this only has to separate an address
+ * from a word so an unknown command is not parsed as a wallet. The wallet
+ * readers reject malformed addresses with their own message.
+ */
+function looksLikeAddress(value: string): boolean {
+  return /^(tz[1-4]|KT1)[0-9A-Za-z]*$/.test(value) || /^0x[0-9a-fA-F]*$/.test(value)
 }
 
 interface ArchiveCommand {
@@ -170,9 +215,22 @@ interface ResolveSaveTokenCommand {
   resolver: "fxhash"
 }
 
+interface MarketIndexCommand {
+  kind: "index-market"
+  project: string
+  chain?: ChainId
+  outFile: string
+  update?: string
+  jsonOnly?: boolean
+  /** EVM discovery source; omitted lets the backfill choose and fall back. */
+  source?: "blockscout" | "rpc"
+  /** Resolve a project slug through fxhash's hosted service before indexing. */
+  resolver?: "fxhash"
+}
+
 interface HelpCommand {
   kind: "help"
-  topic?: "save" | "project" | "token" | "wallet" | "verify"
+  topic?: "save" | "project" | "token" | "market" | "wallet" | "verify"
 }
 
 interface VerifyCommand {
@@ -239,6 +297,7 @@ type Command =
   | ArchiveCommand
   | IndexProjectCommand
   | IndexTokenCommand
+  | MarketIndexCommand
   | SaveTokenCommand
   | ResolveSaveTokenCommand
   | VerifyCommand
@@ -301,6 +360,31 @@ function projectOutput(project: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
   return `project-index-${safe || "project"}.json`
+}
+
+const SLUG_ONLY_PROJECT_ERROR =
+  "This looks like an fxhash project slug, which exists only in fxhash's database. Add --resolver fxhash to resolve it through fxhash's hosted service, or pass the on-chain project ID (for example v2:13944, or base:0x… for EVM)."
+
+/** A bare word or fxhash project URL, as opposed to a ref, ID, or address. */
+function isProjectSlug(value: string): boolean {
+  if (/^(?:whitehash:\/\/)?\/?project\//.test(value)) return false
+  if (/^v[0-3]:\d+$/.test(value)) return false
+  if (/^(base|ethereum|eth):/.test(value)) return false
+  if (/^0x[0-9a-fA-F]{40}$/.test(value)) return false
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const url = new URL(value)
+      const parts = url.pathname.split("/").filter(Boolean)
+      return parts[0] === "project" || (parts[0] === "generative" && parts[1] === "slug")
+    } catch {
+      return false
+    }
+  }
+  return /^[a-z0-9()][a-z0-9()._-]*$/i.test(value)
+}
+
+function marketOutput(project: string): string {
+  return projectOutput(project).replace(/^project-index-/, "market-index-")
 }
 
 function tokenInput(
@@ -538,6 +622,7 @@ export function parseArgs(args: string[]): Command {
       topic !== "save" &&
       topic !== "project" &&
       topic !== "token" &&
+      topic !== "market" &&
       topic !== "wallet" &&
       topic !== "verify"
     ) {
@@ -603,6 +688,74 @@ export function parseArgs(args: string[]): Command {
     }
   }
 
+  if (args[0] === "market") {
+    const marketArgs = args.slice(1)
+    if (marketArgs[0] === "--help" || marketArgs[0] === "-h") {
+      return { kind: "help", topic: "market" }
+    }
+    const rawProject = marketArgs[0]
+    if (!rawProject) {
+      usage('Missing project ID. Try "whitehash-archive market v2:13944".')
+    }
+    let chain: ChainId | undefined
+    let outFile: string | undefined
+    let update: string | undefined
+    let jsonOnly: boolean | undefined
+    let source: "blockscout" | "rpc" | undefined
+    let resolver: "fxhash" | undefined
+    for (let index = 1; index < marketArgs.length; index += 1) {
+      const arg = marketArgs[index]!
+      if (arg === "--resolver") {
+        const value = marketArgs[++index]
+        if (value !== "fxhash") usage('--resolver currently accepts only "fxhash".')
+        resolver = value
+      } else if (arg === "--source") {
+        const value = marketArgs[++index]
+        if (value !== "blockscout" && value !== "rpc") {
+          usage('--source must be either "blockscout" or "rpc".')
+        }
+        source = value
+      } else if (arg === "--out") {
+        const value = marketArgs[++index]
+        if (!value) usage("Expected a filename after --out.")
+        outFile = value
+      } else if (arg === "--update") {
+        const value = marketArgs[++index]
+        if (!value) usage("Expected an existing market index file after --update.")
+        update = value
+      } else if (arg === "--json-only") jsonOnly = true
+      else if (arg === "--chain") chain = chainId(marketArgs[++index])
+      else usage(`Unknown market option "${arg}".`)
+    }
+    if (resolver) {
+      // The slug resolves to a chain and id at run time, so the output name is
+      // only known then; `main` fills it in unless --out was given.
+      return {
+        kind: "index-market",
+        project: rawProject,
+        chain,
+        outFile: outFile ?? "",
+        update,
+        jsonOnly,
+        source,
+        resolver,
+      }
+    }
+    if (isProjectSlug(rawProject)) {
+      usage(SLUG_ONLY_PROJECT_ERROR)
+    }
+    const { project, chain: resolvedChain } = projectInput(rawProject, chain)
+    return {
+      kind: "index-market",
+      project,
+      chain: resolvedChain,
+      outFile: outFile ?? marketOutput(project),
+      update,
+      jsonOnly,
+      source,
+    }
+  }
+
   const canonicalToken = args[0] === "token"
   const aliasedToken = args[0] === "index" && args[1] === "token"
   if (canonicalToken || aliasedToken) {
@@ -657,9 +810,17 @@ export function parseArgs(args: string[]): Command {
   }
 
   const canonicalWallet = args[0] === "archive" && args[1] === "wallet"
+  const explicitWallet = canonicalWallet || args[0] === "wallet"
   const walletArgs = canonicalWallet ? args.slice(2) : args[0] === "wallet" ? args.slice(1) : args
   if (walletArgs[0] === "--help" || walletArgs[0] === "-h") {
     return { kind: "help", topic: "wallet" }
+  }
+  // Wallet archiving is the implicit command for a bare address, which makes it
+  // the catch-all for everything unrecognized. Reject a first argument that
+  // cannot be an address, so a mistyped or unsupported command says so instead
+  // of failing later with "no supported artwork tokens found".
+  if (!explicitWallet && walletArgs[0] !== undefined && !looksLikeAddress(walletArgs[0])) {
+    usage(`Unknown command "${walletArgs[0]}". Run "whitehash-archive --help" to see the commands.`)
   }
   const addresses: string[] = []
   let chains: ChainId[] | undefined
@@ -695,11 +856,13 @@ export async function main(args: string[]): Promise<void> {
           ? SAVE_HELP
           : command.topic === "token"
             ? TOKEN_HELP
-            : command.topic === "wallet"
-              ? WALLET_HELP
-              : command.topic === "verify"
-                ? VERIFY_HELP
-                : HELP,
+            : command.topic === "market"
+              ? MARKET_HELP
+              : command.topic === "wallet"
+                ? WALLET_HELP
+                : command.topic === "verify"
+                  ? VERIFY_HELP
+                  : HELP,
     )
     return
   }
@@ -729,6 +892,53 @@ export async function main(args: string[]): Promise<void> {
       `Wrote ${completeness} index with ${index.iterations.length} iterations to ${command.outFile}`,
     )
     console.log("Next: load the JSON with parseProjectIndex().")
+    return
+  }
+  if (command.kind === "index-market") {
+    let project = command.project
+    let chain = command.chain
+    let outFile = command.outFile
+    if (command.resolver) {
+      const resolved = await resolveFxhashHostedProject({
+        input: command.project,
+        chain: command.chain,
+        onProgress: message => console.log(message),
+      })
+      project = resolved.id
+      chain = resolved.chain
+      console.log(`Resolved to ${resolved.id} on ${resolved.chain}`)
+    }
+    if (!outFile) outFile = marketOutput(project)
+    console.log(`Backfilling market history for ${project}${chain ? ` on ${chain}` : ""}`)
+    const progress = createProgressReporter()
+    const {
+      index,
+      outFile: writtenFile,
+      sqliteFile,
+    } = await writeMarketIndex({
+      project,
+      chain,
+      outFile,
+      update: command.update,
+      jsonOnly: command.jsonOnly,
+      source: command.source,
+      onProgress: message => progress.report(message),
+    }).finally(() => progress.done())
+    const currency = index.project.chain.startsWith("tezos:")
+      ? { symbol: "XTZ", decimals: 6 }
+      : { symbol: "ETH", decimals: 18 }
+    const amount = (baseUnits: string | null) =>
+      baseUnits === null
+        ? "n/a"
+        : `${Number(baseUnits) / 10 ** currency.decimals} ${currency.symbol}`
+    console.log(
+      `Wrote ${index.events.length} events to ${writtenFile}${sqliteFile ? ` and ${sqliteFile}` : ""}`,
+    )
+    console.log(
+      `Stats: floor ${amount(index.stats.floor)} · listed ${index.stats.listed} · ` +
+        `${index.stats.volume.total.all.sales} sales · volume ${amount(index.stats.volume.total.all.volume)}`,
+    )
+    console.log("Next: load the JSON with parseMarketIndex(), or query the SQLite file directly.")
     return
   }
   if (command.kind === "index-token") {
@@ -791,12 +1001,6 @@ if (invokedPath && import.meta.url === pathToFileURL(invokedPath).href) {
   })
 }
 
-export {
-  archiveToken,
-  archiveWallets,
-  verifyArchive,
-  verifyArchiveOnchain,
-} from "./archive.js"
 export type {
   ArchiveTokenOptions,
   OnchainArchiveVerification,
@@ -806,11 +1010,20 @@ export type {
   OnchainVerificationStatus,
   VerifyArchiveOnchainOptions,
 } from "./archive.js"
-export { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
+export {
+  archiveToken,
+  archiveWallets,
+  verifyArchive,
+  verifyArchiveOnchain,
+} from "./archive.js"
+export { extractCar, writeExtractedCar } from "./car.js"
 export type {
   FxhashHostedResolverOptions,
   ResolvedFxhashToken,
 } from "./fxhash-resolver.js"
-export { extractCar, writeExtractedCar } from "./car.js"
+export { resolveFxhashHostedTokenUrl } from "./fxhash-resolver.js"
+export { writeMarketIndex } from "./market-index.js"
 export { writeProjectIndex } from "./project-index.js"
 export { writeTokenIndex } from "./token-index.js"
+export { createProgressReporter } from "./progress.js"
+export type { ProgressReporter, ProgressWriter } from "./progress.js"

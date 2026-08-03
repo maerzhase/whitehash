@@ -20,6 +20,7 @@ export const API_SLUGS = [
   "use-wallet-tokens",
   "use-projects",
   "use-project",
+  "use-market-index",
   "use-gateway-image",
   "use-artwork-frame",
   "button",
@@ -35,6 +36,7 @@ export const API_SLUGS = [
   "skeleton",
   "separator",
   "artwork",
+  "market-stats",
   "token-details",
   "wallet-gallery",
   "project-browser",
@@ -62,6 +64,11 @@ export const GUIDE_SEO: Record<string, PageSeo> = {
     title: "Archive CLI",
     description:
       "Preserve fxhash artwork locally as an offline archive, or index projects and tokens into portable JSON.",
+  },
+  market: {
+    title: "Market history CLI",
+    description:
+      "Backfill a project's listings, offers, sales, and mints from public infrastructure, then render floor, volume, and history.",
   },
   onchfs: {
     title: "Onchfs",
@@ -115,6 +122,9 @@ const API_DESCRIPTIONS: Record<string, string> = {
     "Read and normalize the fxhash tokens owned by a Tezos or EVM wallet address.",
   "use-projects": "Browse fxhash projects across supported Tezos and EVM chains.",
   "use-project": "Read an fxhash project and browse its minted generative-art iterations.",
+  "use-market-index":
+    "Load a validated fxhash market index artifact: floor, volumes, and event history.",
+  "market-stats": "Display fxhash market statistics: floor, volume, charts, and event history.",
   "use-gateway-image": "Load IPFS images with automatic gateway fallback.",
   "use-artwork-frame": "Control secure live-artwork iframe state in React.",
   artwork: "Show an fxhash token preview and its live artwork.",

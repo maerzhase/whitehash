@@ -215,3 +215,125 @@ export async function resolveFxhashHostedTokenUrl(
   }
   return checkedChain(extractToken(html, slug), options.chain)
 }
+
+const FXHASH_PROJECT_API_URL = "https://api.v2.fxhash.xyz/v1/graphql"
+const RESOLVE_PROJECT_QUERY = `query ResolveProject($slug: String!) {
+  onchain {
+    generative_token(where: { slug: { _eq: $slug } }, limit: 2) {
+      id
+      slug
+      chain
+    }
+  }
+}`
+
+export interface ResolvedFxhashProject {
+  chain: ChainId
+  /** A Whitehash project id: `v2:<id>` on Tezos, the collection address on EVM. */
+  id: string
+}
+
+export interface FxhashHostedProjectResolverOptions {
+  /** A project slug, or an fxhash project URL containing one. */
+  input: string
+  chain?: ChainId
+  fetch?: typeof globalThis.fetch
+  onProgress?: (message: string) => void
+}
+
+function projectSlug(value: string): string {
+  const raw = value.trim()
+  let slug = raw
+  if (/^https?:\/\//i.test(raw)) {
+    let url: URL
+    try {
+      url = new URL(raw)
+    } catch {
+      throw new Error(`Invalid fxhash URL: ${raw}`)
+    }
+    if (url.hostname !== "fxhash.xyz" && url.hostname !== "www.fxhash.xyz") {
+      throw new Error("The fxhash hosted resolver only accepts fxhash.xyz URLs.")
+    }
+    if (url.username || url.password) {
+      throw new Error("The fxhash hosted resolver does not accept URLs containing credentials.")
+    }
+    const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent)
+    const candidate =
+      parts[0] === "project" && parts.length === 2
+        ? parts[1]
+        : parts[0] === "generative" && parts[1] === "slug" && parts.length === 3
+          ? parts[2]
+          : undefined
+    if (!candidate) {
+      throw new Error("The fxhash hosted resolver expects a project URL or a bare project slug.")
+    }
+    slug = candidate
+  }
+  if (
+    !slug ||
+    slug === "." ||
+    slug === ".." ||
+    [...slug].some(character => {
+      const code = character.charCodeAt(0)
+      return character === "/" || character === "\\" || code <= 31 || code === 127
+    })
+  ) {
+    throw new Error("The fxhash project slug contains unsafe characters.")
+  }
+  return slug
+}
+
+/**
+ * Resolve an fxhash project slug to an on-chain project identity through
+ * fxhash's currently hosted service.
+ *
+ * A slug exists only in fxhash's own database, so recovering the on-chain
+ * identity behind one cannot be done from public chain data. This is the same
+ * explicit hosted convenience as the iteration resolver: everything after it
+ * reads public infrastructure only.
+ *
+ * Tezos ids are returned as `v2:<id>`. The v2 issuer ledger holds every project
+ * generation, including the earliest ids, so it resolves project metadata for
+ * any Tezos project regardless of which issuer its mints ran on.
+ */
+export async function resolveFxhashHostedProject(
+  options: FxhashHostedProjectResolverOptions,
+): Promise<ResolvedFxhashProject> {
+  const slug = projectSlug(options.input)
+  const fetcher = options.fetch ?? globalThis.fetch
+  options.onProgress?.(`Resolving project "${slug}" through fxhash's hosted service`)
+  const response = await fetcher(FXHASH_PROJECT_API_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify({ query: RESOLVE_PROJECT_QUERY, variables: { slug } }),
+  })
+  if (!response.ok) throw new Error(`fxhash resolver: HTTP ${response.status}`)
+  const payload = (await response.json()) as {
+    data?: { onchain?: { generative_token?: { id?: unknown; slug?: unknown; chain?: unknown }[] } }
+  }
+  const matches = payload.data?.onchain?.generative_token ?? []
+  if (matches.length > 1) {
+    throw new Error(`fxhash returned multiple projects for slug "${slug}".`)
+  }
+  const match = matches[0]
+  if (!match || match.slug !== slug || typeof match.id !== "string") {
+    throw new Error(
+      `fxhash did not resolve project slug "${slug}". Check the slug, or pass the on-chain project ID.`,
+    )
+  }
+  const chain = chainFromPage(String(match.chain))
+  if (!chain) throw new Error(`fxhash reported an unsupported chain for "${slug}".`)
+  if (options.chain && options.chain !== chain) {
+    throw new Error(`fxhash resolved ${chain}, but the caller selected ${options.chain}.`)
+  }
+  if (chain === "tezos:mainnet") {
+    if (!/^\d+$/.test(match.id)) {
+      throw new Error(`fxhash returned an unexpected Tezos project id for "${slug}".`)
+    }
+    return { chain, id: `v2:${match.id}` }
+  }
+  if (!/^0x[0-9a-fA-F]{40}$/.test(match.id)) {
+    throw new Error(`fxhash returned an unexpected EVM collection address for "${slug}".`)
+  }
+  return { chain, id: match.id }
+}

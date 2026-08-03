@@ -27,13 +27,14 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts src/archive.ts src/project-index.ts src/token-index.ts --format esm --dts --clean --platform node",
+    "build": "tsdown src/index.ts src/archive.ts src/market-index.ts src/progress.ts src/project-index.ts src/token-index.ts --format esm --dts --clean --platform node",
     "check-types": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
     "@whitehash/chain-reader": "workspace:*",
     "@whitehash/core": "workspace:*",
+    "@whitehash/market": "workspace:*",
     "@whitehash/onchfs-sw": "workspace:*",
     "@whitehash/resolve": "workspace:*",
     "onchfs": "0.1.0"

@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "@whitehash/ui/theme.css";
+
+/* Scan the design system's sources too, so the classes its components emit are
+ * generated here. Same arrangement as apps/docs. */
+@source "../src/**/*.{ts,tsx}";
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-canvas text-fg font-sans antialiased;
+    margin: 0;
+  }
+}

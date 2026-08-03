@@ -25,7 +25,7 @@ export function isTezosAddress(address: string): boolean {
   return /^(tz1|tz2|tz3|tz4|KT1)[0-9A-Za-z]{33}$/.test(address)
 }
 
-async function tzktFetch<T>(url: string, fetchImpl: typeof fetch): Promise<T> {
+export async function tzktFetch<T>(url: string, fetchImpl: typeof fetch = fetch): Promise<T> {
   let lastError: unknown
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
@@ -52,6 +52,11 @@ function sleep(ms: number): Promise<void> {
 function baseUrl(chain: TezosChain, config: ChainReaderConfig): string {
   const override = config.tzkt?.[chain]
   return (override ?? TEZOS_NETWORKS[chain].defaultTzktBaseUrl).replace(/\/+$/, "")
+}
+
+/** Resolve the TzKT base URL for a chain, honoring `config.tzkt` overrides. */
+export function tzktBaseUrl(chain: TezosChain, config: ChainReaderConfig): string {
+  return baseUrl(chain, config)
 }
 
 /**

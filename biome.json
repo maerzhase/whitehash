@@ -17,6 +17,7 @@
       "!apps/docs/next-env.d.ts",
       "!apps/docs/public/onchfs-sw.js",
       "!apps/docs/public/onchfs.global.js",
+      "!apps/docs/public/market-index-demo.json",
       "!packages/chain-reader/snapshots"
     ]
   },

@@ -81,7 +81,11 @@ export { normalizeCaptureSettings, normalizeMetadata, isAssigned } from "./metad
 export {
   discoverEvmProjectTokenRefsViaRpc,
   getEvmProjectTokensViaRpc,
+  getLogsAdaptive,
+  makeEvmPublicClient,
 } from "./evm.js"
+export { tzktFetch, tzktBaseUrl } from "./tezos.js"
+export { blockscoutBaseUrl, bsFetch } from "./blockscout.js"
 export {
   CURATED_PROJECT_EXAMPLES,
   curatedProjectExample,
@@ -99,6 +103,8 @@ export {
 export {
   PROJECT_INDEX_FORMAT,
   buildProjectIndex,
+  indexedProjectMetadata,
+  isIndexedProjectMetadata,
   parseProjectIndex,
   type IndexedIteration,
   type IndexedProject,
