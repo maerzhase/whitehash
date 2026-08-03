@@ -387,8 +387,9 @@ export async function backfillTezosMarketEvents(
   if (!issuerVersion || !issuerId) {
     throw new Error(`Unsupported Tezos project id (expected "v<N>:<id>"): ${projectId}`)
   }
-  const issuer = TEZOS_NETWORKS[chain].issuerContracts.find(i => i.version === issuerVersion)
-  if (!issuer) throw new Error(`Unknown issuer version ${issuerVersion} on ${chain}`)
+  if (!TEZOS_NETWORKS[chain].issuerContracts.some(i => i.version === issuerVersion)) {
+    throw new Error(`Unknown issuer version ${issuerVersion} on ${chain}`)
+  }
 
   const tokenSet = new Set(target.tokens.map(token => `${token.contract}/${token.tokenId}`))
   const tokensByVersion = new Map<string, string[]>()
@@ -523,23 +524,32 @@ export async function backfillTezosMarketEvents(
     onProgress?.(`marketplace v1: ${events.length} event(s)`)
   }
 
-  // Primary sales: mints on the project's issuer contract. Issuer v1 takes the
-  // bare project id as its parameter; later issuers wrap it in an object.
-  // Ticket-based v3 mints carry no payment here (paid at ticket purchase).
-  const mintQueries =
-    issuerVersion === "v1"
-      ? [`entrypoint=mint&parameter=${issuerId}`]
-      : issuerVersion === "v3"
-        ? [
-            `entrypoint=mint&parameter.issuer_id=${issuerId}`,
-            `entrypoint=mint_with_ticket&parameter.issuer_id=${issuerId}`,
-          ]
-        : [`entrypoint=mint&parameter.issuer_id=${issuerId}`]
-  for (const mintQuery of mintQueries) {
-    onProgress?.(`mints: querying issuer ${issuerVersion} · ${events.length} event(s)`)
+  // Primary sales: mints carrying the project id. The ledger entry a project
+  // resolves through is not necessarily the contract its mints ran on: fxhash
+  // consolidated older projects into the v2 ledger while their mint operations
+  // stayed on the original issuer, so a v2 ref can have v0 mints. Ask every
+  // issuer rather than assuming. Issuer v1 takes the bare project id as its
+  // parameter; the others wrap it in an object. Ticket-based v3 mints carry no
+  // payment here, because it happened when the ticket was bought.
+  const mintQueries = TEZOS_NETWORKS[chain].issuerContracts.flatMap(candidate => {
+    const filters =
+      candidate.version === "v1"
+        ? [`entrypoint=mint&parameter=${issuerId}`]
+        : candidate.version === "v3"
+          ? [
+              `entrypoint=mint&parameter.issuer_id=${issuerId}`,
+              `entrypoint=mint_with_ticket&parameter.issuer_id=${issuerId}`,
+            ]
+          : [`entrypoint=mint&parameter.issuer_id=${issuerId}`]
+    return filters.map(filter => ({ issuer: candidate, filter }))
+  })
+  for (const [index, mintQuery] of mintQueries.entries()) {
+    onProgress?.(
+      `mints: issuer ${mintQuery.issuer.version} (${index + 1}/${mintQueries.length}) · ${events.length} event(s)`,
+    )
     const ops = await fetchOperations(
       base,
-      `target=${issuer.address}&${mintQuery}&${range}`,
+      `target=${mintQuery.issuer.address}&${mintQuery.filter}&${range}`,
       fetchImpl,
     )
     for (const op of ops) events.push(decodeMintOperation(op, ctx))

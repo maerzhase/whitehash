@@ -266,6 +266,7 @@ describe("decodeMintOperation", () => {
 describe("backfillTezosMarketEvents", () => {
   it("collects creations, queries follow-ups by order id, and cursors at head - buffer", async () => {
     const requested: string[] = []
+    const mintTargets: string[] = []
     const respond = (url: string): unknown => {
       requested.push(url)
       if (url.includes("/v1/head")) return { level: 1000 }
@@ -331,7 +332,8 @@ describe("backfillTezosMarketEvents", () => {
           },
         ]
       }
-      if (url.includes("entrypoint=mint")) {
+      if (url.includes("entrypoint=mint&parameter.issuer_id=99")) {
+        mintTargets.push(url.match(/target=(KT1\w+)/)?.[1] ?? "")
         return [
           {
             id: 12,
@@ -362,12 +364,17 @@ describe("backfillTezosMarketEvents", () => {
     expect(result.events.map(event => event.kind)).toEqual(["mint", "listing", "listing_accept"])
     const accept = result.events.find(event => event.kind === "listing_accept")
     expect(accept).toMatchObject({ buyer: "tz1buyer", price: "1000000", saleKind: "secondary" })
-    // The mint query targets the v2 issuer with the object-shaped parameter filter.
+    // Mints are searched on every issuer, not just the one the ref names: an
+    // older project can sit in the v2 ledger with its mints still on v0.
+    expect(mintTargets).toContain("KT1AEVuykWeuuFX7QkEAMNtffzwhe1Z98hJS") // v0
+    expect(mintTargets).toContain("KT1BJC12dG17CVvPKJ1VYaNnaT5mzfnUTwXv") // v2
+    expect(mintTargets).toContain("KT1Xpmp15KfqoePNW9HczFmqaGNHwadV2a3b") // v3
+    // v1 takes the bare parameter form, so it is absent from the object-filter list.
     expect(
       requested.some(
         url =>
-          url.includes("KT1BJC12dG17CVvPKJ1VYaNnaT5mzfnUTwXv") &&
-          url.includes("parameter.issuer_id=99"),
+          url.includes("KT1XCoGnfupWk7Sp8536EfrxcP73LmT68Nyr") &&
+          url.includes("entrypoint=mint&parameter=99"),
       ),
     ).toBe(true)
   })

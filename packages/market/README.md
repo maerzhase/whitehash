@@ -24,7 +24,9 @@ That writes `market-index-v2-13944.json` and `market-index-v2-13944.sqlite`, and
   Order data is decoded from each operation's inline big-map diffs, exactly like the
   fxhash indexer does, so listings, cancels, accepts, offers, collection offers, and
   issuer mints are all recovered. Marketplace v1's on-chain "offers" are normalized to
-  listing events.
+  listing events. Mints are searched across every issuer generation, because fxhash
+  consolidated older projects into the v2 ledger while their mint operations stayed on
+  the contract they originally ran on.
 - **Ethereum / Base** — secondary sales only. fxhash EVM listings are off-chain signed
   Seaport orders, so the active order book cannot be reconstructed from public data;
   fills can. The backfill walks the collection's own ERC-721 transfers (Blockscout by
@@ -53,10 +55,19 @@ pricing-contract price.
 `buildMarketIndex` produces a single `whitehash-market-index@1` JSON document — project
 summary, normalized events ascending by level, derived stats, and per-chain resume
 cursors. `parseMarketIndex` validates untrusted JSON; `updateMarketIndex` merges a fresh
-backfill into an existing index. `buildMarketSqlite`/`readMarketSqlite` convert the same
-index to and from a queryable SQLite file (via sql.js — pure WebAssembly, usable in Node
-and browsers) with relational `events`, `orders`, and `stats` tables plus the full JSON
-embedded for lossless round-trips.
+backfill into an existing index.
+
+`@whitehash/market/sqlite` converts the same index to and from a queryable SQLite file
+with relational `events`, `orders`, and `stats` tables, plus the full JSON embedded for
+lossless round-trips:
+
+```ts
+import { buildMarketSqlite, readMarketSqlite } from "@whitehash/market/sqlite"
+```
+
+It is a separate entry point on purpose. The converter carries a WebAssembly SQLite
+build (sql.js, usable in Node and browsers), which has no business in a bundle that only
+reads stats, so the main entry stays free of it.
 
 ## Programmatic use
 
