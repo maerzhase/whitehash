@@ -503,7 +503,14 @@ export interface MarketEventsProps extends ComponentProps<"div"> {
   limit?: number
 }
 
-/** Newest-first event history. */
+/**
+ * Newest-first event history.
+ *
+ * The party columns are seller and buyer rather than from and to: most events
+ * are order lifecycle, not a transfer. A listing has only a seller, an offer
+ * only a buyer, and a mint only the minter. Labelling them as transfer
+ * endpoints would read backwards for every bid.
+ */
 function Events({ limit = 25, className, ...props }: MarketEventsProps) {
   const { index, currency } = useMarketStatsContext()
   const rows = useMemo<MarketEvent[]>(
@@ -519,7 +526,7 @@ function Events({ limit = 25, className, ...props }: MarketEventsProps) {
       <table className="w-full border-collapse text-[13px]">
         <thead>
           <tr>
-            {["When", "Event", "Token", "Price", "From", "To"].map((head, position) => (
+            {["When", "Event", "Token", "Price", "Seller", "Buyer"].map((head, position) => (
               <th
                 key={head}
                 className={cn(
