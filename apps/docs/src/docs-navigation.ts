@@ -23,11 +23,11 @@ export const DOC_NAV: DocsNavItem[] = [
     "use-projects",
     "use-project",
     "use-market-index",
+    "market-stats",
     "use-gateway-image",
     "use-artwork-frame",
     "whitehash-provider",
     "use-whitehash",
-    "market-stats",
     "token-details",
   ].flatMap(slug => {
     const entry = API_ENTRIES.find(candidate => candidate.slug === slug)

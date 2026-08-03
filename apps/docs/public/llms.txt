@@ -95,6 +95,7 @@ The high-level client is created with `createWhitehashClient(config)`. Its princ
 - [Generative art glossary](/understand/glossary/): mappings between toolkit terms, fxhash concepts, and on-chain records.
 - [Configuration](/guide/configuration/): networks, RPCs, indexers, gateways, caching, and provider options.
 - [Archive CLI](/guide/cli/): complete project/token JSON formats, their shared metadata model, loading indexed data, direct EVM discovery, and offline wallet archives.
+- [Market history CLI](/guide/market/): market-index JSON shape, incremental backfills, supported chain data, and rendering a hosted artifact.
 - [Onchfs](/guide/onchfs/): resolve and render onchfs content with a service worker or self-hosted proxy.
 - [Explore variations](/guide/variations/): reusable generators, alternate seeds, and fx(params).
 - [Capture engine](/guide/capture/): viewport, canvas, and GIF captures; artwork readiness; browser providers; caching; framework adapters; and security.
@@ -105,6 +106,8 @@ The high-level client is created with `createWhitehashClient(config)`. Its princ
 - [useWalletTokens API](/docs/use-wallet-tokens/): cache-first multi-chain wallet discovery.
 - [useProjects API](/docs/use-projects/): paginated project discovery.
 - [useProject API](/docs/use-project/): project metadata and iteration browsing.
+- [useMarketIndex API](/docs/use-market-index/): load and validate a hosted, fetched, or in-memory market index artifact.
+- [MarketStats API](/docs/market-stats/): compose stat tiles, floor and volume charts, and event history from that artifact.
 - [TokenDetails API](/docs/token-details/): complete artwork, provenance, and feature presentation.
 - [Tooltip API](/docs/tooltip/): accessible hover, focus, touch, and collision-aware contextual labels.
 

@@ -125,6 +125,12 @@ export const API_ENTRIES: ApiEntry[] = [
     description: "Load a market index artifact your app hosts, validated before it renders.",
   },
   {
+    slug: "market-stats",
+    name: "MarketStats",
+    group: "Domain",
+    description: "Floor, volume, charts, and event history from one market index.",
+  },
+  {
     slug: "use-project",
     name: "useProject",
     group: "React hooks",
@@ -147,12 +153,6 @@ export const API_ENTRIES: ApiEntry[] = [
     name: "Artwork",
     group: "Domain",
     description: "Show a token’s preview, live artwork, and reveal status.",
-  },
-  {
-    slug: "market-stats",
-    name: "MarketStats",
-    group: "Domain",
-    description: "Floor, volume, charts, and event history from one market index.",
   },
   {
     slug: "token-details",
@@ -371,11 +371,14 @@ function MarketIndexHookDemo() {
   const { index, loading, error } = useMarketIndex(DEMO_MARKET_ARTIFACT)
   if (loading) return <HookValue>loading…</HookValue>
   if (error || !index) return <HookValue>{error ?? "no artifact"}</HookValue>
+  const firstCursor = Object.values(
+    index.cursors as Record<string, { height: number } | undefined>,
+  )[0]
   return (
     <HookValue>
       {`${index.project.name ?? index.project.id} · ${index.events.length} events · floor ${
         index.stats.floor ?? "n/a"
-      } · indexed to height ${Object.values(index.cursors)[0]?.height ?? "?"}`}
+      } · indexed to height ${firstCursor?.height ?? "?"}`}
     </HookValue>
   )
 }
@@ -1130,6 +1133,89 @@ function GuideDetails({ slug }: { slug: string }) {
               to skip SQLite, and <code>--source rpc</code> to force a trustless log scan instead of
               Blockscout, which needs an archive-capable endpoint.
             </p>
+          </div>
+        </DocsSection>
+        <DocsSection title="The JSON artifact">
+          <div className="docs-prose">
+            <p>
+              The JSON file is the portable handoff for an app. The shortened shape below keeps the
+              normalized project, ordered event history, derived statistics, and resume positions in
+              one document. Amounts stay decimal strings in native base units, mutez or wei, so no
+              value is lost to JavaScript number rounding.
+            </p>
+            <p>
+              Your app will usually read <code>stats</code> for a summary and charts, then use
+              <code>events</code> when it needs a transaction timeline. Keep <code>cursors</code>
+              when you plan to refresh the artifact with <code>--update</code>.
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="json"
+            code={`{
+  "format": "whitehash-market-index@1",
+  "generatedAt": "2026-08-03T19:21:24.292Z",
+  "project": {
+    "chain": "tezos:mainnet",
+    "id": "v2:86",
+    "name": "Reading a book",
+    "editions": 1000,
+    "minted": 1000
+  },
+  "cursors": { "tezos:mainnet": { "height": 14345860 } },
+  "events": [{
+    "kind": "listing_accept",
+    "chain": "tezos:mainnet",
+    "marketplace": "fxhash-tezos-v2",
+    "contract": "KT1…",
+    "tokenId": "12345",
+    "orderId": "fxhash-tezos-v2:…",
+    "price": "450000000",
+    "seller": "tz1…",
+    "buyer": "tz1…",
+    "saleKind": "secondary",
+    "timestamp": "2026-08-03T18:00:00Z",
+    "level": 14345860,
+    "opHash": "op…",
+    "sourceId": "123456789"
+  }],
+  "stats": {
+    "asOf": "2026-08-03T19:21:24.292Z",
+    "listingsAvailable": true,
+    "floor": "450000000",
+    "median": "580000000",
+    "listed": 12,
+    "volume": {
+      "primary": { "all": { "sales": 1000, "volume": "10000000000" }, "…": "other spans" },
+      "secondary": { "all": { "sales": 42, "volume": "12000000000" }, "…": "other spans" },
+      "total": { "24h": { "sales": 2, "volume": "900000000" }, "…": "other spans" }
+    },
+    "daily": [{ "date": "2026-08-03", "floor": "450000000", "volume": "900000000", "sales": 2 }]
+  }
+}`}
+          />
+          <div className="mt-5">
+            <Table
+              head={["Field", "What to use it for"]}
+              rows={[
+                [
+                  <code>project</code>,
+                  "The same normalized project metadata used by the other CLI indexes.",
+                ],
+                [
+                  <code>cursors</code>,
+                  "Per-chain resume heights for the next incremental CLI run.",
+                ],
+                [
+                  <code>events</code>,
+                  "Ascending, normalized market activity. Nullable fields represent actions without that value, such as mints without a token ID.",
+                ],
+                [
+                  <code>stats</code>,
+                  "Ready-to-display floor, listing, sales, volume, and daily chart data at generatedAt.",
+                ],
+              ]}
+            />
           </div>
         </DocsSection>
         <DocsSection title="Display it">

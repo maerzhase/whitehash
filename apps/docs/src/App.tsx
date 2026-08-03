@@ -434,9 +434,9 @@ result.triggeredBy // event, console, or delay`}
             <div>
               <div className="section-kicker">Market data</div>
               <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
-                Floor.
+                Market history.
                 <br />
-                <span className="text-muted">From the chain.</span>
+                <span className="text-muted">Ready to render.</span>
               </h2>
               <p className="mt-5 max-w-md leading-7 text-muted">
                 Backfill one project&rsquo;s listings, offers, sales and mints with the CLI, then
