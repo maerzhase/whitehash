@@ -114,7 +114,7 @@ export async function writeMarketIndex(
       },
       {
         config: client.config,
-        sinceLevel: existing?.cursors[ref.chain]?.level,
+        sinceLevel: existing?.cursors[ref.chain]?.height,
         knownOrderIds: existing
           ? [...new Set(existing.events.flatMap(event => (event.orderId ? [event.orderId] : [])))]
           : undefined,
@@ -145,7 +145,7 @@ export async function writeMarketIndex(
       { chain: ref.chain, contract: ref.id as `0x${string}` },
       {
         config: client.config,
-        sinceBlock: existing?.cursors[ref.chain]?.level,
+        sinceBlock: existing?.cursors[ref.chain]?.height,
         source: options.source,
         onProgress,
       },

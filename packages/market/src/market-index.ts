@@ -16,8 +16,8 @@ import { VOLUME_SPANS, computeMarketStats, type MarketStats } from "./stats.js"
 export const MARKET_INDEX_FORMAT = "whitehash-market-index@1" as const
 
 export interface MarketIndexCursor {
-  /** Last fully indexed Tezos level or EVM block number. */
-  level: number
+  /** Last fully indexed chain height: a Tezos level or an EVM block number. */
+  height: number
 }
 
 export interface MarketIndex {
@@ -149,7 +149,7 @@ export function parseMarketIndex(value: unknown): MarketIndex {
     throw new Error("Market index header is invalid")
   }
   for (const [chain, cursor] of Object.entries(index.cursors)) {
-    if (!cursor || typeof (cursor as MarketIndexCursor).level !== "number") {
+    if (!cursor || typeof (cursor as MarketIndexCursor).height !== "number") {
       throw new Error(`Invalid market index cursor for ${chain}`)
     }
   }

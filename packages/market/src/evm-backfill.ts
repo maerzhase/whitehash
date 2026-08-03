@@ -431,7 +431,7 @@ export async function backfillEvmMarketEvents(
   const toBlock = Number(head) - EVM_FINALITY_BUFFER
   const fromBlock = options.sinceBlock !== undefined ? options.sinceBlock + 1 : network.deployBlock
   if (fromBlock > toBlock) {
-    return { events: [], cursor: { level: options.sinceBlock ?? network.deployBlock } }
+    return { events: [], cursor: { height: options.sinceBlock ?? network.deployBlock } }
   }
 
   const scanViaRpc = async () => {
@@ -457,5 +457,5 @@ export async function backfillEvmMarketEvents(
   }
   onProgress?.(`decoded ${events.length} Seaport sale(s)`)
 
-  return { events: mergeMarketEvents(events), cursor: { level: toBlock } }
+  return { events: mergeMarketEvents(events), cursor: { height: toBlock } }
 }

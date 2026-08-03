@@ -15,7 +15,7 @@ const index = buildMarketIndex({
     captureSettings: null,
   },
   events: [],
-  cursors: { "tezos:mainnet": { level: 100 } },
+  cursors: { "tezos:mainnet": { height: 100 } },
   generatedAt: "2026-08-03T00:00:00.000Z",
 })
 

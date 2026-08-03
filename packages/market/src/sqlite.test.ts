@@ -56,7 +56,7 @@ describe("SQLite artifact", () => {
     const index = buildMarketIndex({
       project: PROJECT,
       events: EVENTS,
-      cursors: { "tezos:mainnet": { level: 100 } },
+      cursors: { "tezos:mainnet": { height: 100 } },
       generatedAt: "2024-06-01T00:00:00.000Z",
     })
     const bytes = await buildMarketSqlite(index)

@@ -39,7 +39,7 @@ describe("buildMarketIndex / parseMarketIndex", () => {
     const index = buildMarketIndex({
       project: PROJECT,
       events: [event({ sourceId: "2", level: 20 }), event({ sourceId: "1", level: 10 })],
-      cursors: { "tezos:mainnet": { level: 1000 } },
+      cursors: { "tezos:mainnet": { height: 1000 } },
       generatedAt: "2024-06-01T00:00:00.000Z",
     })
     expect(index.events.map(e => e.sourceId)).toEqual(["1", "2"])
@@ -89,7 +89,7 @@ describe("updateMarketIndex", () => {
     const initial = buildMarketIndex({
       project: PROJECT,
       events: [event({ sourceId: "1", level: 10 })],
-      cursors: { "tezos:mainnet": { level: 100 } },
+      cursors: { "tezos:mainnet": { height: 100 } },
       generatedAt: "2024-06-01T00:00:00.000Z",
     })
     const updated = updateMarketIndex(initial, {
@@ -104,11 +104,11 @@ describe("updateMarketIndex", () => {
           timestamp: "2024-02-01T00:00:00.000Z",
         }),
       ],
-      cursors: { "tezos:mainnet": { level: 200 } },
+      cursors: { "tezos:mainnet": { height: 200 } },
       generatedAt: "2024-06-02T00:00:00.000Z",
     })
     expect(updated.events).toHaveLength(2)
-    expect(updated.cursors["tezos:mainnet"]).toEqual({ level: 200 })
+    expect(updated.cursors["tezos:mainnet"]).toEqual({ height: 200 })
     expect(updated.stats.volume.secondary.all).toEqual({ sales: 1, volume: "1000000" })
     expect(updated.stats.listed).toBe(0) // the only listing sold
     expect(updated.stats.listingsAvailable).toBe(true) // derived from the Tezos chain

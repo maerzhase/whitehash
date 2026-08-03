@@ -360,7 +360,7 @@ describe("backfillTezosMarketEvents", () => {
       { fetchImpl },
     )
 
-    expect(result.cursor).toEqual({ level: 998 })
+    expect(result.cursor).toEqual({ height: 998 })
     expect(result.events.map(event => event.kind)).toEqual(["mint", "listing", "listing_accept"])
     const accept = result.events.find(event => event.kind === "listing_accept")
     expect(accept).toMatchObject({ buyer: "tz1buyer", price: "1000000", saleKind: "secondary" })
@@ -426,6 +426,6 @@ describe("backfillTezosMarketEvents", () => {
       { chain: "tezos:mainnet", projectId: "v2:99", tokens: [] },
       { fetchImpl, sinceLevel: 998 },
     )
-    expect(result).toEqual({ events: [], cursor: { level: 998 } })
+    expect(result).toEqual({ events: [], cursor: { height: 998 } })
   })
 })

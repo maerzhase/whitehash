@@ -380,7 +380,7 @@ export async function backfillTezosMarketEvents(
     `level.le=${maxLevel}` +
     (options.sinceLevel !== undefined ? `&level.gt=${options.sinceLevel}` : "")
   if (options.sinceLevel !== undefined && options.sinceLevel >= maxLevel) {
-    return { events: [], cursor: { level: options.sinceLevel } }
+    return { events: [], cursor: { height: options.sinceLevel } }
   }
 
   const [issuerVersion, issuerId] = target.projectId.split(":")
@@ -556,5 +556,5 @@ export async function backfillTezosMarketEvents(
   }
   onProgress?.(`mints included: ${events.length} event(s) total`)
 
-  return { events: mergeMarketEvents(events), cursor: { level: maxLevel } }
+  return { events: mergeMarketEvents(events), cursor: { height: maxLevel } }
 }
