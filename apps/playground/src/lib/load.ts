@@ -1,4 +1,5 @@
-import { parseMarketIndex, readMarketSqlite, type MarketIndex } from "@whitehash/market"
+import { parseMarketIndex, type MarketIndex } from "@whitehash/market"
+import { readMarketSqlite } from "@whitehash/market/sqlite"
 import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url"
 
 const SQLITE_MAGIC = "SQLite format 3"

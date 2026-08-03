@@ -2,10 +2,22 @@
  * @whitehash/market — on-demand fxhash market history indexing from public
  * chain infrastructure. Backfill a project's listings, offers, and sales
  * (TzKT on Tezos; collection transfers + Seaport fills on EVM), compute
- * fxhash-compatible statistics, and read/write portable JSON and SQLite
- * artifacts.
+ * fxhash-compatible statistics, and read/write portable JSON artifacts.
+ *
+ * The SQLite export lives in `@whitehash/market/sqlite`: it carries a
+ * WebAssembly SQLite build, which has no business in a bundle that only needs
+ * to read stats.
  */
 export { TEZOS_MARKETPLACES, type TezosMarketplaceContracts } from "./contracts.js"
+export {
+  chainCurrency,
+  formatAddress,
+  formatAmount,
+  formatPercent,
+  formatPrice,
+  toDecimal,
+  type ChainCurrency,
+} from "./format.js"
 export {
   MARKET_EVENT_KINDS,
   isMarketEvent,
@@ -47,4 +59,3 @@ export {
   type EvmBackfillResult,
   type EvmBackfillTarget,
 } from "./evm-backfill.js"
-export { buildMarketSqlite, readMarketSqlite, type MarketSqliteOptions } from "./sqlite.js"

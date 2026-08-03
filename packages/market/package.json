@@ -1,7 +1,7 @@
 {
   "name": "@whitehash/market",
   "version": "0.0.0",
-  "description": "On-demand fxhash market history indexing from public chain infrastructure — per-project listings, offers, and sales backfill with portable JSON and SQLite artifacts.",
+  "description": "On-demand fxhash market history indexing from public chain infrastructure \u2014 per-project listings, offers, and sales backfill with portable JSON and SQLite artifacts.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -21,16 +21,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./sqlite": {
+      "types": "./dist/sqlite.d.ts",
+      "import": "./dist/sqlite.js",
+      "default": "./dist/sqlite.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts --format esm --dts --clean",
+    "build": "tsdown src/index.ts src/sqlite.ts --format esm --dts --clean",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
-    "dev": "tsdown src/index.ts --format esm --dts --watch"
+    "dev": "tsdown src/index.ts src/sqlite.ts --format esm --dts --watch"
   },
   "dependencies": {
     "@whitehash/chain-reader": "workspace:*",

@@ -13,11 +13,11 @@ import {
   backfillEvmMarketEvents,
   backfillTezosMarketEvents,
   buildMarketIndex,
-  buildMarketSqlite,
   parseMarketIndex,
   updateMarketIndex,
   type MarketIndex,
 } from "@whitehash/market"
+import { buildMarketSqlite } from "@whitehash/market/sqlite"
 import { DEFAULT_IPFS_GATEWAYS } from "@whitehash/resolve"
 
 export interface WriteMarketIndexOptions {
