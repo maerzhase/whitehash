@@ -35,6 +35,7 @@ import {
 } from "./docs-content"
 import { DOC_NAV } from "./docs-navigation"
 import { UnderstandPage } from "./understand-content"
+import { MarketDemo } from "./market-demo"
 import { Variations } from "./variations-demo"
 
 type Route =
@@ -423,6 +424,45 @@ result.triggeredBy // event, console, or delay`}
             <Link className="docs-text-link mt-6 inline-block" href="/guide/onchfs">
               Choose an onchfs resolver →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section id="market" className="scroll-mt-16 border-t border-line">
+        <div className="mx-auto max-w-[1200px] px-4 py-24 sm:px-6 lg:py-32">
+          <div className="grid items-start gap-12 lg:grid-cols-[.95fr_1.05fr]">
+            <div>
+              <div className="section-kicker">Market data</div>
+              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
+                Floor.
+                <br />
+                <span className="text-muted">From the chain.</span>
+              </h2>
+              <p className="mt-5 max-w-md leading-7 text-muted">
+                Backfill one project&rsquo;s listings, offers, sales and mints with the CLI, then
+                render the result with <code>MarketStats</code>. Floor, median, volume buckets and
+                the daily series follow fxhash&rsquo;s own stat definitions.
+              </p>
+              <p className="mt-4 max-w-md text-sm leading-6 text-faint">
+                The artifact below is a static file this site hosts, indexed from TzKT. On Ethereum
+                and Base only sales are recoverable, because listings there are signed off-chain.
+              </p>
+              <Link className="docs-text-link mt-6 inline-block" href="/guide/cli">
+                Index a project&rsquo;s market history &rarr;
+              </Link>
+              <CodeBlock
+                className="mt-6"
+                language="tsx"
+                code={`const { index } = useMarketIndex("/market-index.json")
+
+<MarketStats.Root index={index}>
+  <MarketStats.Tiles />
+  <MarketStats.FloorChart />
+  <MarketStats.Events limit={6} />
+</MarketStats.Root>`}
+              />
+            </div>
+            <MarketDemo />
           </div>
         </div>
       </section>

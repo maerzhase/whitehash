@@ -17,6 +17,7 @@
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
     "@whitehash/chain-reader": "workspace:*",
+    "@whitehash/market": "workspace:*",
     "@whitehash/onchfs-sw": "workspace:*",
     "@whitehash/react": "workspace:*",
     "@whitehash/resolve": "workspace:*",

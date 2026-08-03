@@ -7,6 +7,7 @@ const config: NextConfig = {
   transpilePackages: [
     "geist",
     "@whitehash/chain-reader",
+    "@whitehash/market",
     "@whitehash/react",
     "@whitehash/resolve",
     "@whitehash/ui",

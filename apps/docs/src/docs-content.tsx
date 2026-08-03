@@ -1371,6 +1371,32 @@ const wallet = useWalletTokens(address, { client })`}
             language="bash"
             code={`npx @whitehash/archive market v2:13944`}
           />
+          <div className="docs-prose mt-4">
+            <p>
+              To display it, <code>useMarketIndex</code> loads and validates an artifact your app
+              hosts, and the <code>MarketStats</code> parts render it. Every part reads base-unit
+              prices and formats them with the index chain&rsquo;s currency, so mutez and wei never
+              reach your code. The homepage renders the same composition from a static artifact.
+            </p>
+          </div>
+          <CodeBlock
+            className="mt-4"
+            language="tsx"
+            code={`import { useMarketIndex } from "@whitehash/react"
+import { MarketStats } from "@whitehash/ui"
+
+const { index, loading, error } = useMarketIndex("/market-index.json")
+if (!index) return null
+
+return (
+  <MarketStats.Root index={index}>
+    <MarketStats.Tiles />
+    <MarketStats.FloorChart />
+    <MarketStats.VolumeChart />
+    <MarketStats.Events limit={25} />
+  </MarketStats.Root>
+)`}
+          />
           <CodeBlock
             className="mt-4"
             language="json"
