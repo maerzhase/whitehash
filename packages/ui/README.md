@@ -36,6 +36,7 @@ Retheme either path by overriding semantic variables such as `--color-primary`,
 | `Spinner`, `Skeleton`, `Separator` | feedback/layout | Loading and structural feedback |
 | `Artwork.*` | compound domain | Resilient still, sandboxed live iframe, play control, status |
 | `TokenDetails` | token domain | Full artwork, provenance, and feature detail view |
+| `MarketStats.*` | compound domain | Floor/volume tiles, floor and volume charts, and event history over a market index |
 | `WalletGallery` | block | Cache-first wallet lookup and token grid (`.Content` accepts loaded state) |
 | `ProjectBrowser`, `ProjectGallery` | blocks | Projects and minted iterations from `{ chain, id }`, with delegated navigation |
 | `AddressSearch`, `WalletSearch` | search | Validated form core and spotlight dialog composition |

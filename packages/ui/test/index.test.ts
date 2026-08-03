@@ -4,6 +4,7 @@ import { buttonVariants } from "../src/components/button.js"
 import { badgeVariants } from "../src/components/badge.js"
 import { isWalletAddress } from "../src/components/address-search.js"
 import { Tooltip } from "../src/components/tooltip.js"
+import { MarketStats, deltaVariants, marketEventLabel } from "../src/components/market-stats.js"
 
 describe("cn", () => {
   it("merges and dedupes conflicting Tailwind classes (last wins)", () => {
@@ -57,5 +58,45 @@ describe("isWalletAddress", () => {
   it("rejects incomplete or unrelated input", () => {
     expect(isWalletAddress("tz1short")).toBe(false)
     expect(isWalletAddress("hello")).toBe(false)
+  })
+})
+
+describe("deltaVariants", () => {
+  it("colors gains, losses and flat changes distinctly", () => {
+    expect(deltaVariants({ direction: "up" })).toContain("text-success")
+    expect(deltaVariants({ direction: "down" })).toContain("text-danger")
+    expect(deltaVariants()).toContain("text-faint")
+  })
+})
+
+describe("marketEventLabel", () => {
+  it("names every event kind, distinguishing the sale flavors", () => {
+    expect(marketEventLabel("listing_accept")).toBe("Sale (listing)")
+    expect(marketEventLabel("collection_offer_accept")).toBe("Sale (collection offer)")
+    expect(marketEventLabel("mint")).toBe("Mint")
+    expect(marketEventLabel("sale")).toBe("Sale")
+  })
+})
+
+describe("MarketStats", () => {
+  it("exposes the composable parts", () => {
+    for (const part of [
+      "Root",
+      "Tile",
+      "Delta",
+      "Tiles",
+      "Floor",
+      "Listed",
+      "Median",
+      "Volume",
+      "Sales",
+      "HighestSale",
+      "LowestSale",
+      "FloorChart",
+      "VolumeChart",
+      "Events",
+    ] as const) {
+      expect(MarketStats[part], part).toBeDefined()
+    }
   })
 })

@@ -47,10 +47,11 @@
     "react-dom": ">=18.3 <20"
   },
   "dependencies": {
+    "@base-ui-components/react": "1.0.0-rc.0",
     "@whitehash/chain-reader": "workspace:*",
     "@whitehash/core": "workspace:*",
+    "@whitehash/market": "workspace:*",
     "@whitehash/react": "workspace:*",
-    "@base-ui-components/react": "1.0.0-rc.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "tailwind-merge": "3.6.0"

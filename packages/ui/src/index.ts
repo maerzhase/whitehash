@@ -16,6 +16,16 @@ export { Dialog, type DialogProps } from "./components/dialog.js"
 export { Tooltip, type TooltipContentProps } from "./components/tooltip.js"
 export { Spinner, Skeleton, Separator } from "./components/feedback.js"
 export {
+  MarketStats,
+  deltaVariants,
+  marketEventLabel,
+  type DeltaProps,
+  type MarketEventsProps,
+  type MarketStatTileProps,
+  type MarketStatsRootProps,
+  type SpanTileProps,
+} from "./components/market-stats.js"
+export {
   Artwork,
   type ArtworkRootProps,
   type ArtworkImageProps,
