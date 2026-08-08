@@ -1,0 +1,29 @@
+{
+  "name": "@whitehash/legacy-snippet-proxy",
+  "version": "0.0.1",
+  "private": true,
+  "description": "",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/app.ts"
+  },
+  "scripts": {
+    "build": "tsdown src/app.ts --format esm --dts --clean",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "tsx watch src/node.ts",
+    "start": "tsx src/node.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "2.0.8",
+    "@whitehash/core": "workspace:*",
+    "hono": "4.12.29"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}
